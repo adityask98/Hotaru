@@ -11,6 +11,8 @@
 		48DF34012AD3E31900F6F215 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF34002AD3E31900F6F215 /* ContentView.swift */; };
 		48DF34032AD3E31A00F6F215 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48DF34022AD3E31A00F6F215 /* Assets.xcassets */; };
 		48DF34062AD3E31A00F6F215 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48DF34052AD3E31A00F6F215 /* Preview Assets.xcassets */; };
+		48DF34102AD3E39B00F6F215 /* UserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF340F2AD3E39B00F6F215 /* UserModel.swift */; };
+		48DF34122AD3E68A00F6F215 /* UserAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF34112AD3E68A00F6F215 /* UserAPIClient.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +22,9 @@
 		48DF34022AD3E31A00F6F215 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		48DF34052AD3E31A00F6F215 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		48DF34072AD3E31A00F6F215 /* Firefly.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Firefly.entitlements; sourceTree = "<group>"; };
+		48DF340F2AD3E39B00F6F215 /* UserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModel.swift; sourceTree = "<group>"; };
+		48DF34112AD3E68A00F6F215 /* UserAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAPIClient.swift; sourceTree = "<group>"; };
+		48DF34132AD3F1EB00F6F215 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +57,8 @@
 		48DF33FD2AD3E31900F6F215 /* Firefly */ = {
 			isa = PBXGroup;
 			children = (
+				48DF34132AD3F1EB00F6F215 /* Info.plist */,
+				48DF340D2AD3E35A00F6F215 /* FireflyAPIClient */,
 				48DF33FE2AD3E31900F6F215 /* FireflyApp.swift */,
 				48DF34002AD3E31900F6F215 /* ContentView.swift */,
 				48DF34022AD3E31A00F6F215 /* Assets.xcassets */,
@@ -67,6 +74,23 @@
 				48DF34052AD3E31A00F6F215 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		48DF340D2AD3E35A00F6F215 /* FireflyAPIClient */ = {
+			isa = PBXGroup;
+			children = (
+				48DF340E2AD3E37D00F6F215 /* About */,
+			);
+			path = FireflyAPIClient;
+			sourceTree = "<group>";
+		};
+		48DF340E2AD3E37D00F6F215 /* About */ = {
+			isa = PBXGroup;
+			children = (
+				48DF340F2AD3E39B00F6F215 /* UserModel.swift */,
+				48DF34112AD3E68A00F6F215 /* UserAPIClient.swift */,
+			);
+			path = About;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -140,6 +164,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				48DF34012AD3E31900F6F215 /* ContentView.swift in Sources */,
+				48DF34102AD3E39B00F6F215 /* UserModel.swift in Sources */,
+				48DF34122AD3E68A00F6F215 /* UserAPIClient.swift in Sources */,
 				48DF33FF2AD3E31900F6F215 /* FireflyApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -279,6 +305,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Firefly/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -287,8 +314,11 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wiseguy.Firefly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -306,6 +336,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Firefly/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -314,8 +345,11 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.wiseguy.Firefly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

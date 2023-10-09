@@ -8,17 +8,30 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject var userAPIClient = UserAPIClient()
     var body: some View {
         VStack {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundStyle(.tint)
             Text("Hello, world!")
+            if let user = userAPIClient.user {
+                Text("User Email: \(user.data.attributes.email)")
+            } else {
+                Text("Loading")
+            }
+            Button("Fetch") {
+                Task {
+                    await userAPIClient.fetchData()
+                }
+            }
         }
         .padding()
     }
 }
 
-#Preview {
-    ContentView()
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }
