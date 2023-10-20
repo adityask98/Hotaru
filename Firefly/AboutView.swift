@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  AboutView.swift
 //  Firefly
 //
 //  Created by Aditya Srinivasa on 2023/10/09.
@@ -7,16 +7,14 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct AboutView: View {
     @StateObject var userAPIClient = UserAPIClient()
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
             Text("Hello, world!")
             if let user = userAPIClient.user {
                 Text("User Email: \(user.data.attributes.email)")
+                Text("ID: \(user.data.id)")
             } else {
                 Text("Loading")
             }
@@ -30,8 +28,8 @@ struct ContentView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct AboutView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        AboutView()
     }
 }

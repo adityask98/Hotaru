@@ -7,24 +7,33 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4839B4132ADE3AD3001A4F8F /* AccountsAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4839B4122ADE3AD3001A4F8F /* AccountsAPIClient.swift */; };
+		4861BF802ADCE82F00FAC64D /* AccountsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4861BF7F2ADCE82F00FAC64D /* AccountsModel.swift */; };
 		48DF33FF2AD3E31900F6F215 /* FireflyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF33FE2AD3E31900F6F215 /* FireflyApp.swift */; };
-		48DF34012AD3E31900F6F215 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF34002AD3E31900F6F215 /* ContentView.swift */; };
+		48DF34012AD3E31900F6F215 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF34002AD3E31900F6F215 /* AboutView.swift */; };
 		48DF34032AD3E31A00F6F215 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48DF34022AD3E31A00F6F215 /* Assets.xcassets */; };
 		48DF34062AD3E31A00F6F215 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48DF34052AD3E31A00F6F215 /* Preview Assets.xcassets */; };
 		48DF34102AD3E39B00F6F215 /* UserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF340F2AD3E39B00F6F215 /* UserModel.swift */; };
 		48DF34122AD3E68A00F6F215 /* UserAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF34112AD3E68A00F6F215 /* UserAPIClient.swift */; };
+		48E919592AE2B5370074B904 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 48E919582AE2B5370074B904 /* Alamofire */; };
+		48E9195B2AE2C1E60074B904 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E9195A2AE2C1E60074B904 /* Constants.swift */; };
+		48E9195D2AE2C7D40074B904 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E9195C2AE2C7D40074B904 /* AccountView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4839B4122ADE3AD3001A4F8F /* AccountsAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsAPIClient.swift; sourceTree = "<group>"; };
+		4861BF7F2ADCE82F00FAC64D /* AccountsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsModel.swift; sourceTree = "<group>"; };
 		48DF33FB2AD3E31900F6F215 /* Firefly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Firefly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		48DF33FE2AD3E31900F6F215 /* FireflyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FireflyApp.swift; sourceTree = "<group>"; };
-		48DF34002AD3E31900F6F215 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		48DF34002AD3E31900F6F215 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		48DF34022AD3E31A00F6F215 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		48DF34052AD3E31A00F6F215 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		48DF34072AD3E31A00F6F215 /* Firefly.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Firefly.entitlements; sourceTree = "<group>"; };
 		48DF340F2AD3E39B00F6F215 /* UserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModel.swift; sourceTree = "<group>"; };
 		48DF34112AD3E68A00F6F215 /* UserAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAPIClient.swift; sourceTree = "<group>"; };
 		48DF34132AD3F1EB00F6F215 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		48E9195A2AE2C1E60074B904 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		48E9195C2AE2C7D40074B904 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,12 +41,22 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				48E919592AE2B5370074B904 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4861BF7E2ADCE80100FAC64D /* Accounts */ = {
+			isa = PBXGroup;
+			children = (
+				4861BF7F2ADCE82F00FAC64D /* AccountsModel.swift */,
+				4839B4122ADE3AD3001A4F8F /* AccountsAPIClient.swift */,
+			);
+			path = Accounts;
+			sourceTree = "<group>";
+		};
 		48DF33F22AD3E31900F6F215 = {
 			isa = PBXGroup;
 			children = (
@@ -60,7 +79,8 @@
 				48DF34132AD3F1EB00F6F215 /* Info.plist */,
 				48DF340D2AD3E35A00F6F215 /* FireflyAPIClient */,
 				48DF33FE2AD3E31900F6F215 /* FireflyApp.swift */,
-				48DF34002AD3E31900F6F215 /* ContentView.swift */,
+				48DF34002AD3E31900F6F215 /* AboutView.swift */,
+				48E9195C2AE2C7D40074B904 /* AccountView.swift */,
 				48DF34022AD3E31A00F6F215 /* Assets.xcassets */,
 				48DF34072AD3E31A00F6F215 /* Firefly.entitlements */,
 				48DF34042AD3E31A00F6F215 /* Preview Content */,
@@ -79,7 +99,9 @@
 		48DF340D2AD3E35A00F6F215 /* FireflyAPIClient */ = {
 			isa = PBXGroup;
 			children = (
+				4861BF7E2ADCE80100FAC64D /* Accounts */,
 				48DF340E2AD3E37D00F6F215 /* About */,
+				48E9195A2AE2C1E60074B904 /* Constants.swift */,
 			);
 			path = FireflyAPIClient;
 			sourceTree = "<group>";
@@ -109,6 +131,9 @@
 			dependencies = (
 			);
 			name = Firefly;
+			packageProductDependencies = (
+				48E919582AE2B5370074B904 /* Alamofire */,
+			);
 			productName = Firefly;
 			productReference = 48DF33FB2AD3E31900F6F215 /* Firefly.app */;
 			productType = "com.apple.product-type.application";
@@ -137,6 +162,9 @@
 				Base,
 			);
 			mainGroup = 48DF33F22AD3E31900F6F215;
+			packageReferences = (
+				48E919572AE2B5370074B904 /* XCRemoteSwiftPackageReference "Alamofire" */,
+			);
 			productRefGroup = 48DF33FC2AD3E31900F6F215 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -163,10 +191,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48DF34012AD3E31900F6F215 /* ContentView.swift in Sources */,
+				48DF34012AD3E31900F6F215 /* AboutView.swift in Sources */,
 				48DF34102AD3E39B00F6F215 /* UserModel.swift in Sources */,
 				48DF34122AD3E68A00F6F215 /* UserAPIClient.swift in Sources */,
 				48DF33FF2AD3E31900F6F215 /* FireflyApp.swift in Sources */,
+				48E9195D2AE2C7D40074B904 /* AccountView.swift in Sources */,
+				48E9195B2AE2C1E60074B904 /* Constants.swift in Sources */,
+				4861BF802ADCE82F00FAC64D /* AccountsModel.swift in Sources */,
+				4839B4132ADE3AD3001A4F8F /* AccountsAPIClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -375,6 +407,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		48E919572AE2B5370074B904 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.8.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		48E919582AE2B5370074B904 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 48E919572AE2B5370074B904 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 48DF33F32AD3E31900F6F215 /* Project object */;
 }

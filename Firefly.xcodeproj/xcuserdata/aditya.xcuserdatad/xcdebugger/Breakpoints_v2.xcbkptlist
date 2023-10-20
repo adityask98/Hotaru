@@ -14,9 +14,9 @@
             filePath = "Firefly/FireflyAPIClient/About/UserAPIClient.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "22"
-            endingLineNumber = "22"
-            landmarkName = "fetchData()"
+            startingLineNumber = "47"
+            endingLineNumber = "47"
+            landmarkName = "oldfetchData()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
