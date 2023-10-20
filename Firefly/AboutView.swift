@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AboutView: View {
     @StateObject var userAPIClient = UserAPIClient()
+    @State private var isDataLoaded = false
     var body: some View {
         VStack {
             Text("Hello, world!")
@@ -25,6 +26,14 @@ struct AboutView: View {
             }
         }
         .padding()
+        .onAppear() {
+            if (!isDataLoaded) {
+                Task {
+                    await userAPIClient.fetchData()
+                    isDataLoaded = true
+                }
+            }
+        }
     }
 }
 
