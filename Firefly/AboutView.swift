@@ -28,10 +28,10 @@ struct AboutView: View {
         .padding()
         .onAppear() {
             if (!isDataLoaded) {
-                Task {
-                    await userAPIClient.fetchData()
-                    isDataLoaded = true
-                }
+//                Task {
+                //                    await userAPIClient.fetchData()
+//                    isDataLoaded = true
+//                }
             }
         }
     }

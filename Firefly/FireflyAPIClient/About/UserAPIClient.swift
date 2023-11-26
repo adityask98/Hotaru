@@ -9,14 +9,7 @@ import Foundation
 import Alamofire
 
 class UserAPIClient: ObservableObject {
-    @Published private(set) var user: UserData?
-    
-    init() {
-        Task.init {
-            await fetchData()
-        }
-    }
-    
+    @Published private(set) var user: UserData?  
     
     func fetchData() async {
         let token = API_TOKEN
