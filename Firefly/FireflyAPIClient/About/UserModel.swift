@@ -54,21 +54,7 @@ enum UserModelError: Error {
 }
 
 func getUser() async throws -> UserModel {
-    let baseURL = UserDefaults.standard.object(forKey: "DefaultURL")
-    let token = UserDefaults.standard.object(forKey: "APIToken")
-    let apiURL = "api/v1/about/user"
-    let headers = [
-        "Authorization": "Bearer \(token as! String)"
-    ]
-
-    let endpoint = baseURL as! String + apiURL
-    guard let url = URL(string: endpoint) else {
-        throw UserModelError.invalidURL
-    }
-
-    var request = URLRequest(url: url)
-    request.httpMethod = "GET"
-    request.allHTTPHeaderFields = headers
+    let request = try RequestBuilder(apiURL: apiPaths.userAbout)
 
     let (data, response) = try await URLSession.shared.data(for: request)
 

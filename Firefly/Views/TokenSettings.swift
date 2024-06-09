@@ -8,21 +8,21 @@
 import SwiftUI
 
 struct TokenSettings: View {
-    @AppStorage("APIToken") private var apiToken = ""
-    @AppStorage("DefaultURL") private var defaultURL = ""
-    
+    @AppStorage(UserDefaultKeys.apiTokenKey) private var apiToken = ""
+    @AppStorage(UserDefaultKeys.baseURLKey) private var defaultURL = ""
+
     var body: some View {
         VStack {
             Text("Enter API Token and Default URL")
                 .font(.title)
                 .padding()
-            
+
             VStack(spacing: 20) {
                 HStack {
                     TextField("Token", text: $apiToken)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding(.leading)
-                    
+
                     Button(action: {
                         // Store the value in AppStorage when the send button is tapped
                         UserDefaults.standard.set(apiToken, forKey: "APIToken")
@@ -32,12 +32,12 @@ struct TokenSettings: View {
                     }
                     .padding(.trailing)
                 }
-                
+
                 HStack {
                     TextField("Default URL", text: $defaultURL)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding(.leading)
-                    
+
                     Button(action: {
                         // Store the value in AppStorage when the send button is tapped
                         UserDefaults.standard.set(defaultURL, forKey: "DefaultURL")

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		480EAAD82C158F2D0038ADF7 /* RequestBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480EAAD72C158F2D0038ADF7 /* RequestBuilder.swift */; };
 		482139282C10652600D8D1C6 /* TokenSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 482139272C10652600D8D1C6 /* TokenSettings.swift */; };
 		4821392B2C10693E00D8D1C6 /* TokenAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4821392A2C10693E00D8D1C6 /* TokenAccess.swift */; };
 		4839B4132ADE3AD3001A4F8F /* AccountsAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4839B4122ADE3AD3001A4F8F /* AccountsAPIClient.swift */; };
@@ -25,6 +26,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		480EAAD72C158F2D0038ADF7 /* RequestBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestBuilder.swift; sourceTree = "<group>"; };
 		482139272C10652600D8D1C6 /* TokenSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenSettings.swift; sourceTree = "<group>"; };
 		4821392A2C10693E00D8D1C6 /* TokenAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenAccess.swift; sourceTree = "<group>"; };
 		4839B4122ADE3AD3001A4F8F /* AccountsAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsAPIClient.swift; sourceTree = "<group>"; };
@@ -60,6 +62,7 @@
 			isa = PBXGroup;
 			children = (
 				4821392A2C10693E00D8D1C6 /* TokenAccess.swift */,
+				480EAAD72C158F2D0038ADF7 /* RequestBuilder.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -222,6 +225,7 @@
 				48DF34012AD3E31900F6F215 /* AboutView.swift in Sources */,
 				48DF34102AD3E39B00F6F215 /* UserModel.swift in Sources */,
 				48DF34122AD3E68A00F6F215 /* UserAPIClient.swift in Sources */,
+				480EAAD82C158F2D0038ADF7 /* RequestBuilder.swift in Sources */,
 				48DF33FF2AD3E31900F6F215 /* FireflyApp.swift in Sources */,
 				48E9195D2AE2C7D40074B904 /* AccountView.swift in Sources */,
 				48E9195B2AE2C1E60074B904 /* Constants.swift in Sources */,
