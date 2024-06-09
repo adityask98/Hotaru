@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct AboutView: View {
-    @StateObject var userAPIClient = UserAPIClient()
-    @State private var isDataLoaded = false
+    @State private var user: UserModel?
+//    @StateObject var userAPIClient = UserAPIClient()
+//    @State private var isDataLoaded = false
     var body: some View {
         NavigationView {
             VStack {
@@ -24,29 +25,39 @@ struct AboutView: View {
                 //                    await userAPIClient.fetchData()
                 //                }
                 //            }
-                List{
-                    HStack{
+                List {
+                    HStack {
                         Text("Email:")
                         Spacer()
-                        if let user = userAPIClient.user {
-                            Text(user.data.attributes.email)
-                        }
+                        Text(user?.data?.attributes?.email ?? "Email Placeholder")
+                    }
+                    NavigationLink(destination: TokenSettings()) {
+                        Text("Token")
                     }
                 }
             }
             .padding()
-            .onAppear() {
-                if (!isDataLoaded) {
-                    //                Task {
-                    //                    await userAPIClient.fetchData()
-                    //                    isDataLoaded = true
-                    //                }
+            //            .onAppear {
+            //                if !isDataLoaded {
+            //                    //                Task {
+            //                    //                    await userAPIClient.fetchData()
+            //                    //                    isDataLoaded = true
+            //                    //                }
+            //                }
+            //            }
+
+            .frame(width: .infinity, height: .infinity)
+            .task {
+                do {
+                    user = try await getUser()
+                } catch {
+                    // Handle the error here
+                    print("Error: \(error)")
                 }
             }
-            .frame(width: .infinity, height: .infinity)
         }
     }
-    
+
 }
 
 struct AboutView_Previews: PreviewProvider {
