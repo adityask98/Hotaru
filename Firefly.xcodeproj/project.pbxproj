@@ -9,7 +9,9 @@
 /* Begin PBXBuildFile section */
 		480EAAD82C158F2D0038ADF7 /* RequestBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480EAAD72C158F2D0038ADF7 /* RequestBuilder.swift */; };
 		482139282C10652600D8D1C6 /* TokenSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 482139272C10652600D8D1C6 /* TokenSettings.swift */; };
-		4821392B2C10693E00D8D1C6 /* TokenAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4821392A2C10693E00D8D1C6 /* TokenAccess.swift */; };
+		4836BEC12C1AFD2E0039D219 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4836BEC02C1AFD2E0039D219 /* Settings.swift */; };
+		4836BEC42C1B10F20039D219 /* AlertToast in Frameworks */ = {isa = PBXBuildFile; productRef = 4836BEC32C1B10F20039D219 /* AlertToast */; };
+		4836BEC62C1B29B90039D219 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4836BEC52C1B29B90039D219 /* KeychainHelper.swift */; };
 		4839B4132ADE3AD3001A4F8F /* AccountsAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4839B4122ADE3AD3001A4F8F /* AccountsAPIClient.swift */; };
 		4843D2372B13844A00D1A131 /* Menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4843D2362B13844A00D1A131 /* Menu.swift */; };
 		4861BF802ADCE82F00FAC64D /* AccountsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4861BF7F2ADCE82F00FAC64D /* AccountsModel.swift */; };
@@ -28,7 +30,8 @@
 /* Begin PBXFileReference section */
 		480EAAD72C158F2D0038ADF7 /* RequestBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestBuilder.swift; sourceTree = "<group>"; };
 		482139272C10652600D8D1C6 /* TokenSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenSettings.swift; sourceTree = "<group>"; };
-		4821392A2C10693E00D8D1C6 /* TokenAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenAccess.swift; sourceTree = "<group>"; };
+		4836BEC02C1AFD2E0039D219 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		4836BEC52C1B29B90039D219 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 		4839B4122ADE3AD3001A4F8F /* AccountsAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsAPIClient.swift; sourceTree = "<group>"; };
 		4843D2362B13844A00D1A131 /* Menu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Menu.swift; sourceTree = "<group>"; };
 		4861BF7F2ADCE82F00FAC64D /* AccountsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsModel.swift; sourceTree = "<group>"; };
@@ -52,6 +55,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				48E919592AE2B5370074B904 /* Alamofire in Frameworks */,
+				4836BEC42C1B10F20039D219 /* AlertToast in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -61,8 +65,8 @@
 		482139292C10692B00D8D1C6 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
-				4821392A2C10693E00D8D1C6 /* TokenAccess.swift */,
 				480EAAD72C158F2D0038ADF7 /* RequestBuilder.swift */,
+				4836BEC52C1B29B90039D219 /* KeychainHelper.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -74,6 +78,7 @@
 				48DF34002AD3E31900F6F215 /* AboutView.swift */,
 				489EB28D2B46EB2800414CCB /* AuthInfo.swift */,
 				482139272C10652600D8D1C6 /* TokenSettings.swift */,
+				4836BEC02C1AFD2E0039D219 /* Settings.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -164,6 +169,7 @@
 			name = Firefly;
 			packageProductDependencies = (
 				48E919582AE2B5370074B904 /* Alamofire */,
+				4836BEC32C1B10F20039D219 /* AlertToast */,
 			);
 			productName = Firefly;
 			productReference = 48DF33FB2AD3E31900F6F215 /* Firefly.app */;
@@ -195,6 +201,7 @@
 			mainGroup = 48DF33F22AD3E31900F6F215;
 			packageReferences = (
 				48E919572AE2B5370074B904 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				4836BEC22C1B10F20039D219 /* XCRemoteSwiftPackageReference "AlertToast" */,
 			);
 			productRefGroup = 48DF33FC2AD3E31900F6F215 /* Products */;
 			projectDirPath = "";
@@ -226,14 +233,15 @@
 				48DF34102AD3E39B00F6F215 /* UserModel.swift in Sources */,
 				48DF34122AD3E68A00F6F215 /* UserAPIClient.swift in Sources */,
 				480EAAD82C158F2D0038ADF7 /* RequestBuilder.swift in Sources */,
+				4836BEC12C1AFD2E0039D219 /* Settings.swift in Sources */,
 				48DF33FF2AD3E31900F6F215 /* FireflyApp.swift in Sources */,
 				48E9195D2AE2C7D40074B904 /* AccountView.swift in Sources */,
 				48E9195B2AE2C1E60074B904 /* Constants.swift in Sources */,
 				4843D2372B13844A00D1A131 /* Menu.swift in Sources */,
-				4821392B2C10693E00D8D1C6 /* TokenAccess.swift in Sources */,
 				489EB28E2B46EB2800414CCB /* AuthInfo.swift in Sources */,
 				482139282C10652600D8D1C6 /* TokenSettings.swift in Sources */,
 				4861BF802ADCE82F00FAC64D /* AccountsModel.swift in Sources */,
+				4836BEC62C1B29B90039D219 /* KeychainHelper.swift in Sources */,
 				4839B4132ADE3AD3001A4F8F /* AccountsAPIClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -445,6 +453,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		4836BEC22C1B10F20039D219 /* XCRemoteSwiftPackageReference "AlertToast" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/elai950/AlertToast.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.9;
+			};
+		};
 		48E919572AE2B5370074B904 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
@@ -456,6 +472,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		4836BEC32C1B10F20039D219 /* AlertToast */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4836BEC22C1B10F20039D219 /* XCRemoteSwiftPackageReference "AlertToast" */;
+			productName = AlertToast;
+		};
 		48E919582AE2B5370074B904 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 48E919572AE2B5370074B904 /* XCRemoteSwiftPackageReference "Alamofire" */;

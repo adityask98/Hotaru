@@ -12,9 +12,16 @@ enum RequestBuilderError: Error {
     case requestError
 }
 
+struct TokenObject: Codable {
+    let accessToken: String
+}
+
 func RequestBuilder(apiURL: String, httpMethod: String = "GET") throws -> URLRequest {
     let baseURL = UserDefaults.standard.object(forKey: UserDefaultKeys.baseURLKey) as! String
-    let token = UserDefaults.standard.object(forKey: UserDefaultKeys.apiTokenKey) as! String
+    //let token = UserDefaults.standard.object(forKey: UserDefaultKeys.apiTokenKey) as! String
+    let token = KeychainHelper.standard.read(
+        service: keychainConsts.accessToken, account: keychainConsts.account,
+        type: TokenObject.self)!.accessToken
 
     let headers = [
         "Authorization": "Bearer \(token)"

@@ -19,3 +19,8 @@ struct UserDefaultKeys {
 struct apiPaths {
     static let userAbout = "api/v1/about/user"
 }
+
+struct keychainConsts {
+    static let account = "swiftFirefly"
+    static let accessToken = "accessToken"
+}

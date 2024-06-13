@@ -6,19 +6,34 @@
 //
 
 import SwiftUI
+import AlertToast
 
 struct Menu: View {
+    
+    @State private var showToast = true
+    
     var body: some View {
-        TabView{
+        TabView {
             AboutView()
                 .tabItem { Image(systemName: "house") }
             AccountView()
                 .tabItem { Image(systemName: "house") }
             AuthInfo()
-                    .tabItem { Image(systemName: "house") }
-       
+                .tabItem {
+                    Label("Counter", systemImage: "number.circle.fill")
+                }
+            Settings()
+                .tabItem {
+                    Label("Settings", systemImage: "gearshape.fill")
+                }
+                
+
+        }
+        .toast(isPresenting: $showToast, tapToDismiss: true) {
+            AlertToast( displayMode: .hud, type: .regular, title: "TEST")
         }
     }
+        
 }
 
 #Preview {
