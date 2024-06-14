@@ -8,28 +8,18 @@
 import SwiftUI
 
 struct AboutView: View {
-    @State private var user: UserModel?
-//    @StateObject var userAPIClient = UserAPIClient()
-//    @State private var isDataLoaded = false
+    @State private var user = UserModel()
+    @State private var transactions = TransactionsViewModel()
+    //    @StateObject var userAPIClient = UserAPIClient()
+    //    @State private var isDataLoaded = false
     var body: some View {
         NavigationView {
             VStack {
-                //            if let user = userAPIClient.user {
-                //                Text("User Email: \(user.data.attributes.email)")
-                //                Text("ID: \(user.data.id)")
-                //            } else {
-                //                Text("Loading")
-                //            }
-                //            Button("Fetch") {
-                //                Task {
-                //                    await userAPIClient.fetchData()
-                //                }
-                //            }
                 List {
                     HStack {
                         Text("Email:")
                         Spacer()
-                        Text(user?.data?.attributes?.email ?? "Email Placeholder")
+                        Text(user.user?.data?.attributes?.email ?? "Email Placeholder")
                     }
                     NavigationLink(destination: TokenSettings()) {
                         Text("Token")
@@ -37,31 +27,28 @@ struct AboutView: View {
                 }
             }
             .padding()
-            //            .onAppear {
-            //                if !isDataLoaded {
-            //                    //                Task {
-            //                    //                    await userAPIClient.fetchData()
-            //                    //                    isDataLoaded = true
-            //                    //                }
-            //                }
-            //            }
-
             .frame(width: .infinity, height: .infinity)
             .task {
                 do {
-                    user = try await getUser()
+                    try await user.getUser()
+
+                    if let userId = user.user?.data?.id {
+                        try await transactions.getTransactions(userId)
+                    } else {
+                        // Handle the case when user.user?.data?.id is nil
+                        print("User ID is missing")
+                    }
                 } catch {
-                    // Handle the error here
-                    print("Error: \(error)")
+                    print(error)
                 }
             }
         }
+
     }
 
-}
-
-struct AboutView_Previews: PreviewProvider {
-    static var previews: some View {
-        AboutView()
+    struct AboutView_Previews: PreviewProvider {
+        static var previews: some View {
+            AboutView()
+        }
     }
 }

@@ -11,6 +11,7 @@ import AlertToast
 struct Menu: View {
     
     @State private var showToast = true
+//    @ObservedObject var toastHandler: ToastHandlerModel
     
     var body: some View {
         TabView {
@@ -36,6 +37,6 @@ struct Menu: View {
         
 }
 
-#Preview {
-    Menu()
-}
+//#Preview {
+//    Menu()
+//}

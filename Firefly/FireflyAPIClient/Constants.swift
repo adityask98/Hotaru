@@ -18,6 +18,9 @@ struct UserDefaultKeys {
 
 struct apiPaths {
     static let userAbout = "api/v1/about/user"
+    static func accountTransactions(id: String) -> String {
+           return "api/v1/accounts/\(id)/transactions"
+       }
 }
 
 struct keychainConsts {

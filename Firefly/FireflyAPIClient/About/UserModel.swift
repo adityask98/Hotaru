@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct UserModel: Codable {
+struct User: Codable {
     let data: DataClass?
 }
 
@@ -53,7 +53,7 @@ enum UserModelError: Error {
     case invalidData
 }
 
-func getUser() async throws -> UserModel {
+func getUser() async throws -> User {
     let request = try RequestBuilder(apiURL: apiPaths.userAbout)
 
     let (data, response) = try await URLSession.shared.data(for: request)
@@ -64,8 +64,37 @@ func getUser() async throws -> UserModel {
 
     do {
         let decoder = JSONDecoder()
-        return try decoder.decode(UserModel.self, from: data)
+        return try decoder.decode(User.self, from: data)
     } catch {
         throw UserModelError.invalidData
     }
+}
+
+final class UserModel: ObservableObject {
+    @Published var user: User?
+
+    init() {
+        Task.init {
+            try await getUser()
+        }
+    }
+
+    func getUser() async throws {
+        let request = try RequestBuilder(apiURL: apiPaths.userAbout)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            throw UserModelError.invalidResponse
+        }
+
+        do {
+            let decoder = JSONDecoder()
+            let result = try decoder.decode(User.self, from: data)
+            self.user = result
+        } catch {
+            throw UserModelError.invalidData
+        }
+    }
+
 }

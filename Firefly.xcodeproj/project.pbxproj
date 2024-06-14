@@ -14,6 +14,9 @@
 		4836BEC62C1B29B90039D219 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4836BEC52C1B29B90039D219 /* KeychainHelper.swift */; };
 		4839B4132ADE3AD3001A4F8F /* AccountsAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4839B4122ADE3AD3001A4F8F /* AccountsAPIClient.swift */; };
 		4843D2372B13844A00D1A131 /* Menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4843D2362B13844A00D1A131 /* Menu.swift */; };
+		48552BA32C1C545E002ED3CF /* ToastHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48552BA22C1C545E002ED3CF /* ToastHandler.swift */; };
+		48552BA62C1C6B20002ED3CF /* Transactions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48552BA52C1C6B20002ED3CF /* Transactions.swift */; };
+		48552BA82C1C6BFE002ED3CF /* TransactionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48552BA72C1C6BFE002ED3CF /* TransactionsViewModel.swift */; };
 		4861BF802ADCE82F00FAC64D /* AccountsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4861BF7F2ADCE82F00FAC64D /* AccountsModel.swift */; };
 		489EB28E2B46EB2800414CCB /* AuthInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489EB28D2B46EB2800414CCB /* AuthInfo.swift */; };
 		48DF33FF2AD3E31900F6F215 /* FireflyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF33FE2AD3E31900F6F215 /* FireflyApp.swift */; };
@@ -34,6 +37,9 @@
 		4836BEC52C1B29B90039D219 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 		4839B4122ADE3AD3001A4F8F /* AccountsAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsAPIClient.swift; sourceTree = "<group>"; };
 		4843D2362B13844A00D1A131 /* Menu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Menu.swift; sourceTree = "<group>"; };
+		48552BA22C1C545E002ED3CF /* ToastHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastHandler.swift; sourceTree = "<group>"; };
+		48552BA52C1C6B20002ED3CF /* Transactions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transactions.swift; sourceTree = "<group>"; };
+		48552BA72C1C6BFE002ED3CF /* TransactionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsViewModel.swift; sourceTree = "<group>"; };
 		4861BF7F2ADCE82F00FAC64D /* AccountsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsModel.swift; sourceTree = "<group>"; };
 		489EB28D2B46EB2800414CCB /* AuthInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthInfo.swift; sourceTree = "<group>"; };
 		48DF33FB2AD3E31900F6F215 /* Firefly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Firefly.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -67,6 +73,7 @@
 			children = (
 				480EAAD72C158F2D0038ADF7 /* RequestBuilder.swift */,
 				4836BEC52C1B29B90039D219 /* KeychainHelper.swift */,
+				48552BA22C1C545E002ED3CF /* ToastHandler.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -81,6 +88,15 @@
 				4836BEC02C1AFD2E0039D219 /* Settings.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		48552BA42C1C6B0F002ED3CF /* Transactions */ = {
+			isa = PBXGroup;
+			children = (
+				48552BA52C1C6B20002ED3CF /* Transactions.swift */,
+				48552BA72C1C6BFE002ED3CF /* TransactionsViewModel.swift */,
+			);
+			path = Transactions;
 			sourceTree = "<group>";
 		};
 		4861BF7E2ADCE80100FAC64D /* Accounts */ = {
@@ -135,6 +151,7 @@
 		48DF340D2AD3E35A00F6F215 /* FireflyAPIClient */ = {
 			isa = PBXGroup;
 			children = (
+				48552BA42C1C6B0F002ED3CF /* Transactions */,
 				4861BF7E2ADCE80100FAC64D /* Accounts */,
 				48DF340E2AD3E37D00F6F215 /* About */,
 				48E9195A2AE2C1E60074B904 /* Constants.swift */,
@@ -233,13 +250,16 @@
 				48DF34102AD3E39B00F6F215 /* UserModel.swift in Sources */,
 				48DF34122AD3E68A00F6F215 /* UserAPIClient.swift in Sources */,
 				480EAAD82C158F2D0038ADF7 /* RequestBuilder.swift in Sources */,
+				48552BA32C1C545E002ED3CF /* ToastHandler.swift in Sources */,
 				4836BEC12C1AFD2E0039D219 /* Settings.swift in Sources */,
 				48DF33FF2AD3E31900F6F215 /* FireflyApp.swift in Sources */,
+				48552BA82C1C6BFE002ED3CF /* TransactionsViewModel.swift in Sources */,
 				48E9195D2AE2C7D40074B904 /* AccountView.swift in Sources */,
 				48E9195B2AE2C1E60074B904 /* Constants.swift in Sources */,
 				4843D2372B13844A00D1A131 /* Menu.swift in Sources */,
 				489EB28E2B46EB2800414CCB /* AuthInfo.swift in Sources */,
 				482139282C10652600D8D1C6 /* TokenSettings.swift in Sources */,
+				48552BA62C1C6B20002ED3CF /* Transactions.swift in Sources */,
 				4861BF802ADCE82F00FAC64D /* AccountsModel.swift in Sources */,
 				4836BEC62C1B29B90039D219 /* KeychainHelper.swift in Sources */,
 				4839B4132ADE3AD3001A4F8F /* AccountsAPIClient.swift in Sources */,
