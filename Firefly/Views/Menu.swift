@@ -17,8 +17,8 @@ struct Menu: View {
         TabView {
             AboutView()
                 .tabItem { Image(systemName: "house") }
-            AccountView()
-                .tabItem { Image(systemName: "house") }
+            TransactionsView()
+                .tabItem { Label("Transactions", systemImage: "list.bullet.circle.fill") }
             AuthInfo()
                 .tabItem {
                     Label("Counter", systemImage: "number.circle.fill")

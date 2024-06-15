@@ -18,7 +18,7 @@ final class TransactionsViewModel: ObservableObject {
         }
     }
 
-    private func fetchTransactions() async {
+    func fetchTransactions() async {
         do {
             try await user.getUser()
             if let userId = user.user?.data?.id {
