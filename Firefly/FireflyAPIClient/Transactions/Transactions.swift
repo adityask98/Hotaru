@@ -42,7 +42,7 @@ struct TransactionsTransaction: Codable {
     let description, sourceID, sourceName: String?
     let sourceIban: JSONNull?
     let sourceType, destinationID, destinationName: String?
-    let destinationIban: JSONNull?
+    let destinationIban: String?
     let destinationType: String?
     let budgetID, budgetName: JSONNull?
     let categoryID, categoryName: String?

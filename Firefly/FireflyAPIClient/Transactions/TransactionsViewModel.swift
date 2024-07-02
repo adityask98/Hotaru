@@ -35,13 +35,13 @@ final class TransactionsViewModel: ObservableObject {
     }
 
     func getTransactions(
-        _ id: String, limit: Int = 50, type: String = "expense",
+        _ id: String, limit: Int = 20, type: String = "expense",
         end: String = formatDateToYYYYMMDD()
     ) async throws {
         var request = try RequestBuilder(apiURL: apiPaths.accountTransactions())
         print(id)
         request.url?.append(queryItems: [
-            URLQueryItem(name: "type", value: type),
+            //URLQueryItem(name: "type", value: type),
             URLQueryItem(name: "limit", value: String(limit)),
             //            URLQueryItem(name: "start", value: "2024-07-01"),
             //URLQueryItem(name: "end", value: end),

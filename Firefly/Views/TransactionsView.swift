@@ -11,17 +11,32 @@ struct TransactionsView: View {
     @StateObject private var transactions = TransactionsViewModel()
 
     var body: some View {
-        List {
-            ForEach(transactions.transactions?.data ?? [], id: \.id) { transactionData in
-                if let transaction = transactionData.attributes?.transactions?.first {
-                    TransactionsRow(transaction: transaction)
+        VStack {
+            if transactions.isLoading {
+                Text("Loading")
+            } else {
+                List {
+                    ForEach(transactions.transactions?.data ?? [], id: \.id) { transactionData in
+                        if let transaction = transactionData.attributes?.transactions?.first {
+                            TransactionsRow(transaction: transaction)
+                        }
+                    }
+                }
+            }
+
+        }
+        .onAppear {
+            if transactions.transactions == nil {
+                Task {
+                    await transactions.fetchTransactions()
                 }
             }
         }
-        .task {
+        .refreshable {
             await transactions.fetchTransactions()
         }
     }
+    
 }
 
 struct TransactionsRow: View {
@@ -43,7 +58,7 @@ struct TransactionsRow: View {
                 VStack {
                     Text(formatAmount(transaction.amount, symbol: transaction.currencySymbol))
                         .font(.headline)
-                    if (transaction.sourceName != nil) {
+                    if transaction.sourceName != nil {
                         Text(transaction.sourceName ?? "Source Error")
                             .font(.subheadline)
                             .foregroundStyle(.gray)
