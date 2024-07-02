@@ -9,6 +9,7 @@ import Foundation
 
 final class TransactionsViewModel: ObservableObject {
     @Published var transactions: Transactions?
+    @Published var isLoading: Bool = false
     private let user: UserModel
 
     init() {
@@ -19,6 +20,7 @@ final class TransactionsViewModel: ObservableObject {
     }
 
     func fetchTransactions() async {
+        isLoading = true
         do {
             try await user.getUser()
             if let userId = user.user?.data?.id {
@@ -29,11 +31,21 @@ final class TransactionsViewModel: ObservableObject {
         } catch {
             print("Error fetching transactions: \(error)")
         }
+        isLoading = false
     }
 
-    func getTransactions(_ id: String) async throws {
-        let request = try RequestBuilder(apiURL: apiPaths.accountTransactions(id: id))
+    func getTransactions(
+        _ id: String, limit: Int = 50, type: String = "expense",
+        end: String = formatDateToYYYYMMDD()
+    ) async throws {
+        var request = try RequestBuilder(apiURL: apiPaths.accountTransactions())
         print(id)
+        request.url?.append(queryItems: [
+            URLQueryItem(name: "type", value: type),
+            URLQueryItem(name: "limit", value: String(limit)),
+            //            URLQueryItem(name: "start", value: "2024-07-01"),
+            //URLQueryItem(name: "end", value: end),
+        ])
 
         let (data, response) = try await URLSession.shared.data(for: request)
 
@@ -54,7 +66,3 @@ final class TransactionsViewModel: ObservableObject {
         }
     }
 }
-
-
-//typeMismatch(Swift.Double, Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "data", intValue: nil), _JSONKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "attributes", intValue: nil), CodingKeys(stringValue: "created_at", intValue: nil)], debugDescription: "Expected to decode Double but found a string instead.", underlyingError: nil))
-//typeMismatch(Swift.Double, Swift.DecodingError.Context(codingPath: [CodingKeys(stringValue: "data", intValue: nil), _JSONKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "attributes", intValue: nil), CodingKeys(stringValue: "created_at", intValue: nil)], debugDescription: "Expected to decode Double but found a string instead.", underlyingError: nil))

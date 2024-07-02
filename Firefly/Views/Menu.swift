@@ -14,11 +14,13 @@ struct Menu: View {
 //    @ObservedObject var toastHandler: ToastHandlerModel
     
     var body: some View {
-        TabView {
+        TabView(selection: .constant(2)) {
             AboutView()
                 .tabItem { Image(systemName: "house") }
+                .tag(1)
             TransactionsView()
                 .tabItem { Label("Transactions", systemImage: "list.bullet.circle.fill") }
+                .tag(2)
             AuthInfo()
                 .tabItem {
                     Label("Counter", systemImage: "number.circle.fill")

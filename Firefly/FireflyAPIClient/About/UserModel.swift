@@ -70,16 +70,14 @@ func getUser() async throws -> User {
     }
 }
 
+
 final class UserModel: ObservableObject {
     @Published var user: User?
-
-    init() {
-        Task.init {
-            try await getUser()
-        }
-    }
+    @Published var isLoading: Bool = false
+    //@Published var errorMessage: String
 
     func getUser() async throws {
+        isLoading = true
         let request = try RequestBuilder(apiURL: apiPaths.userAbout)
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -95,6 +93,7 @@ final class UserModel: ObservableObject {
         } catch {
             throw UserModelError.invalidData
         }
+        isLoading = false
     }
 
 }

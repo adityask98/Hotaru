@@ -46,13 +46,14 @@ struct TransactionsTransaction: Codable {
     let destinationType: String?
     let budgetID, budgetName: JSONNull?
     let categoryID, categoryName: String?
-    let billID, billName: JSONNull?
+    let billID, billName: String?
     let reconciled: Bool?
-    let notes: JSONNull?
+    let notes: String?
     let tags: [JSONAny]?
     let internalReference, externalID: JSONNull?
     let originalSource: String?
-    let recurrenceID, recurrenceTotal, recurrenceCount, bunqPaymentID: JSONNull?
+    let recurrenceID: String?
+    let recurrenceTotal, recurrenceCount, bunqPaymentID: Int?
     let externalURL: JSONNull?
     let importHashV2: String?
     let sepaCc, sepaCTOp, sepaCTID, sepaDB: JSONNull?

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AboutView: View {
-    @State private var user = UserModel()
+    @ObservedObject private var user = UserModel()
     @State private var transactions = TransactionsViewModel()
     //    @StateObject var userAPIClient = UserAPIClient()
     //    @State private var isDataLoaded = false
@@ -25,6 +25,15 @@ struct AboutView: View {
                         Text("Token")
                     }
                 }
+                .refreshable {
+                    do {
+                        print("Refreshing")
+                        print(user.user?.data?.attributes?.email ?? "Nothing")
+                        try await user.getUser()
+                    } catch {
+                        print(error)
+                    }
+                }
             }
             .padding()
             .frame(width: .infinity, height: .infinity)
@@ -32,12 +41,12 @@ struct AboutView: View {
                 do {
                     try await user.getUser()
 
-                    if let userId = user.user?.data?.id {
-                        try await transactions.getTransactions(userId)
-                    } else {
-                        // Handle the case when user.user?.data?.id is nil
-                        print("User ID is missing")
-                    }
+//                    if let userId = user.user?.data?.id {
+//                        try await transactions.getTransactions(userId)
+//                    } else {
+//                        // Handle the case when user.user?.data?.id is nil
+//                        print("User ID is missing")
+//                    }
                 } catch {
                     print(error)
                 }
