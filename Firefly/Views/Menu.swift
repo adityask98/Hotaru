@@ -33,14 +33,15 @@ struct Menu: View {
     var body: some View {
         TabView(selection: .constant(2)) {
             AboutView()
+                .ignoresSafeArea(.all)
                 .tabItem { Image(systemName: "house") }
                 .tag(1)
             TransactionsView()
                 .tabItem { Label("Transactions", systemImage: "list.bullet.circle.fill") }
                 .tag(2)
-            AuthInfo()
+            AccountsView()
                 .tabItem {
-                    Label("Counter", systemImage: "number.circle.fill")
+                    Label("Accounts", systemImage: "banknote.fill")
                 }
             Settings()
                 .tabItem {
@@ -48,6 +49,7 @@ struct Menu: View {
                 }
 
         }
+        .transition(.opacity)
         .ignoresSafeArea(.all)
         .toast(isPresenting: $showToast, tapToDismiss: true) {
             AlertToast(displayMode: .hud, type: .regular, title: "TEST")

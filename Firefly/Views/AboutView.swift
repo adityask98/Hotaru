@@ -10,8 +10,6 @@ import SwiftUI
 struct AboutView: View {
     @ObservedObject private var user = UserModel()
     @State private var transactions = TransactionsViewModel()
-    //    @StateObject var userAPIClient = UserAPIClient()
-    //    @State private var isDataLoaded = false
     var body: some View {
         NavigationView {
             VStack {
@@ -35,22 +33,26 @@ struct AboutView: View {
                     }
                 }
             }
-            .padding()
             .frame(width: .infinity, height: .infinity)
             .task {
                 do {
                     try await user.getUser()
-
-//                    if let userId = user.user?.data?.id {
-//                        try await transactions.getTransactions(userId)
-//                    } else {
-//                        // Handle the case when user.user?.data?.id is nil
-//                        print("User ID is missing")
-//                    }
                 } catch {
                     print(error)
                 }
             }
+            //            .toolbar {
+            //                ToolbarItem(placement: .topBarLeading) {
+            //                    VStack {
+            //                        Text("Title")
+            //                        Text("Subtitle")
+            //                    }
+            //                }
+            //            }
+            .navigationTitle("Subtitle")
+            .navigationBarItems(leading: Text("Analytics").font(.subheadline))
+            //            .navigationTitle("Home")
+            //            .navigationBarTitleDisplayMode(.large)
         }
 
     }

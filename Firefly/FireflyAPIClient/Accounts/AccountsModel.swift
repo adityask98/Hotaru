@@ -7,35 +7,38 @@
 
 import Foundation 
 
-struct AccountData: Codable {
-    let data: AccountsDataClass
+// MARK: - Accounts
+struct Accounts: Codable {
+    let data: [AccountsDatum]?
+    let meta: AccountsMeta?
+    let links: AccountsLinks?
 }
 
-struct AccountsDataClass: Codable {
-    let type, id: String
-    let attributes: AccountsAttributes
+// MARK: - AccountsDatum
+struct AccountsDatum: Codable {
+    let type, id: String?
+    let attributes: AccountsAttributes?
+    let links: AccountsDatumLinks?
 }
 
+// MARK: - AccountsAttributes
 struct AccountsAttributes: Codable {
-    let createdAt, updatedAt: Date
-    let active: Bool
-    let order: Int
-    let name, type, accountRole, currencyID: String
-    let currencyCode, currencySymbol: String
-    let currencyDecimalPlaces: Int
-    let currentBalance: String
-    let currentBalanceDate: Date
-    let iban, bic, accountNumber, openingBalance: String
-    let currentDebt: String
-    let openingBalanceDate: Date
-    let virtualBalance: String
-    let includeNetWorth: Bool
-    let creditCardType: String
-    let monthlyPaymentDate: Date
-    let liabilityType, liabilityDirection, interest, interestPeriod: String
-    let notes: String
-    let latitude, longitude: Double
-    let zoomLevel: Int
+    let createdAt, updatedAt: String?
+    let active: Bool?
+    let order: Int?
+    let name, type: String?
+    let accountRole: String?
+    let currencyID, currencyCode, currencySymbol: String?
+    let currencyDecimalPlaces: Int?
+    let currentBalance, currentBalanceDate: String?
+    let notes, monthlyPaymentDate, creditCardType, accountNumber: String?
+    let iban, bic: String?
+    let virtualBalance, openingBalance: String?
+    let openingBalanceDate, liabilityType, liabilityDirection, interest: String?
+    let interestPeriod, currentDebt: String?
+    let includeNetWorth: Bool?
+    let longitude, latitude: Double?
+    let zoomLevel: Int?
 
     enum CodingKeys: String, CodingKey {
         case createdAt = "created_at"
@@ -48,37 +51,65 @@ struct AccountsAttributes: Codable {
         case currencyDecimalPlaces = "currency_decimal_places"
         case currentBalance = "current_balance"
         case currentBalanceDate = "current_balance_date"
-        case iban, bic
-        case accountNumber = "account_number"
-        case openingBalance = "opening_balance"
-        case currentDebt = "current_debt"
-        case openingBalanceDate = "opening_balance_date"
-        case virtualBalance = "virtual_balance"
-        case includeNetWorth = "include_net_worth"
-        case creditCardType = "credit_card_type"
+        case notes
         case monthlyPaymentDate = "monthly_payment_date"
+        case creditCardType = "credit_card_type"
+        case accountNumber = "account_number"
+        case iban, bic
+        case virtualBalance = "virtual_balance"
+        case openingBalance = "opening_balance"
+        case openingBalanceDate = "opening_balance_date"
         case liabilityType = "liability_type"
         case liabilityDirection = "liability_direction"
         case interest
         case interestPeriod = "interest_period"
-        case notes, latitude, longitude
+        case currentDebt = "current_debt"
+        case includeNetWorth = "include_net_worth"
+        case longitude, latitude
         case zoomLevel = "zoom_level"
     }
 }
 
+// MARK: - AccountsDatumLinks
+struct AccountsDatumLinks: Codable {
+    let the0: AccountsThe0?
+    let linksSelf: String?
+
+    enum CodingKeys: String, CodingKey {
+        case the0 = "0"
+        case linksSelf = "self"
+    }
+}
+
+// MARK: - AccountsThe0
+struct AccountsThe0: Codable {
+    let rel, uri: String?
+}
+
+// MARK: - AccountsLinks
+struct AccountsLinks: Codable {
+    let linksSelf, first, last: String?
+
+    enum CodingKeys: String, CodingKey {
+        case linksSelf = "self"
+        case first, last
+    }
+}
+
+// MARK: - AccountsMeta
 struct AccountsMeta: Codable {
-    let  pagination: AccountsPagination
+    let pagination: AccountsPagination?
 }
 
+// MARK: - AccountsPagination
 struct AccountsPagination: Codable {
-    let total, count, perPage, currentPage: Int
-        let totalPages: Int
+    let total, count, perPage, currentPage: Int?
+    let totalPages: Int?
 
-        enum CodingKeys: String, CodingKey {
-            case total, count
-            case perPage = "per_page"
-            case currentPage = "current_page"
-            case totalPages = "total_pages"
-        }
+    enum CodingKeys: String, CodingKey {
+        case total, count
+        case perPage = "per_page"
+        case currentPage = "current_page"
+        case totalPages = "total_pages"
+    }
 }
-

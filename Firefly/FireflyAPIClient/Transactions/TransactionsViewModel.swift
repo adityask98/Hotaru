@@ -10,6 +10,8 @@ import Foundation
 final class TransactionsViewModel: ObservableObject {
     @Published var transactions: Transactions?
     @Published var isLoading: Bool = false
+    @Published var currentPage: Int = 1
+    @Published var hasMorePages: Bool = true
     private let user: UserModel
 
     init() {
@@ -19,30 +21,47 @@ final class TransactionsViewModel: ObservableObject {
         }
     }
 
-    func fetchTransactions() async {
-        isLoading = true
+    func fetchTransactions(loadMore: Bool = false) async {
+        if loadMore {
+            currentPage += 1
+        } else {
+            currentPage = 1
+        }
+        if !loadMore {
+            isLoading = true
+        }
+
         do {
-            try await user.getUser()
-            if let userId = user.user?.data?.id {
-                try await getTransactions(userId)
+            let newTransactions = try await getTransactions(page: currentPage)
+
+            if loadMore {
+                self.transactions?.data?.append(contentsOf: newTransactions.data ?? [])
             } else {
-                print("User ID is missing")
+                self.transactions = newTransactions
+            }
+
+            if newTransactions.meta?.pagination?.currentPage
+                == newTransactions.meta?.pagination?.totalPages
+            {
+                hasMorePages = false
             }
         } catch {
             print("Error fetching transactions: \(error)")
         }
-        isLoading = false
+        if !loadMore {
+            isLoading = false
+        }
     }
 
     func getTransactions(
-        _ id: String, limit: Int = 20, type: String = "expense",
-        end: String = formatDateToYYYYMMDD()
-    ) async throws {
+        limit: Int = 20, type: String = "expense",
+        end: String = formatDateToYYYYMMDD(), page: Int
+    ) async throws -> Transactions {
         var request = try RequestBuilder(apiURL: apiPaths.accountTransactions())
-        print(id)
         request.url?.append(queryItems: [
             //URLQueryItem(name: "type", value: type),
             URLQueryItem(name: "limit", value: String(limit)),
+            URLQueryItem(name: "page", value: String(page)),
             //            URLQueryItem(name: "start", value: "2024-07-01"),
             //URLQueryItem(name: "end", value: end),
         ])
@@ -55,14 +74,142 @@ final class TransactionsViewModel: ObservableObject {
 
         do {
             let decoder = JSONDecoder()
-            print("DECODING")
             let result = try decoder.decode(Transactions.self, from: data)
-            print(result)
 
-            self.transactions = result
+            return result
         } catch {
             print(error)
             throw UserModelError.invalidData
         }
+    }
+
+}
+
+extension TransactionsViewModel {
+    static func mock() -> TransactionsViewModel {
+        let viewModel = TransactionsViewModel()
+
+        let mockTransactions = Transactions(
+            data: [
+                createMockTransaction(
+                    id: "95", amount: "500", description: "Transit", category: "Transit",
+                    date: "2024-07-02T22:01:00+02:00"),
+                createMockTransaction(
+                    id: "94", amount: "888", description: "Conbini", category: "Eating out",
+                    date: "2024-07-02T13:08:00+02:00"),
+                createMockTransaction(
+                    id: "93", amount: "2185", description: "Groceries", category: "Groceries",
+                    date: "2024-07-01T13:18:55+02:00"),
+                createMockTransaction(
+                    id: "91", amount: "523", description: "Conbini", category: "Eating out",
+                    date: "2024-06-30T21:58:00+02:00"),
+                createMockTransaction(
+                    id: "90", amount: "1270", description: "McDonald's", category: "Eating out",
+                    date: "2024-06-29T23:10:00+02:00"),
+            ],
+            meta: TransactionsMeta(
+                pagination: TransactionsPagination(
+                    total: 92,
+                    count: 15,
+                    perPage: 15,
+                    currentPage: 1,
+                    totalPages: 7
+                )),
+            links: TransactionsLinks(
+                linksSelf:
+                    "http://100.96.204.49:8888/api/v1/transactions?limit=15&type=default&page=1",
+                first: "http://100.96.204.49:8888/api/v1/transactions?limit=15&type=default&page=1",
+                last: "http://100.96.204.49:8888/api/v1/transactions?limit=15&type=default&page=7"
+            )
+        )
+
+        viewModel.transactions = mockTransactions
+        viewModel.isLoading = false
+
+        return viewModel
+    }
+
+    private static func createMockTransaction(
+        id: String, amount: String, description: String, category: String, date: String
+    ) -> TransactionsDatum {
+        let transaction = TransactionsTransaction(
+            user: "1",
+            transactionJournalID: id,
+            type: "withdrawal",
+            date: date,
+            order: 0,
+            currencyID: "18",
+            currencyCode: "JPY",
+            currencyName: "Japanese yen",
+            currencySymbol: "¥",
+            currencyDecimalPlaces: 0,
+            foreignCurrencyID: nil,
+            foreignCurrencyCode: nil,
+            foreignCurrencySymbol: nil,
+            foreignCurrencyDecimalPlaces: 0,
+            amount: amount,
+            foreignAmount: nil,
+            description: description,
+            sourceID: "5",
+            sourceName: "SMBC",
+            sourceIban: nil,
+            sourceType: "Asset account",
+            destinationID: "7",
+            destinationName: "Cash account",
+            destinationIban: nil,
+            destinationType: "Cash account",
+            budgetID: nil,
+            budgetName: nil,
+            categoryID: "1",
+            categoryName: category,
+            billID: nil,
+            billName: nil,
+            reconciled: false,
+            notes: nil,
+            tags: [],
+            internalReference: nil,
+            externalID: nil,
+            originalSource: "ff3-v6.1.15|api-v2.0.14",
+            recurrenceID: nil,
+            recurrenceTotal: nil,
+            recurrenceCount: nil,
+            bunqPaymentID: nil,
+            externalURL: nil,
+            importHashV2: "hash",
+            sepaCc: nil,
+            sepaCTOp: nil,
+            sepaCTID: nil,
+            sepaDB: nil,
+            sepaCountry: nil,
+            sepaEp: nil,
+            sepaCi: nil,
+            sepaBatchID: nil,
+            interestDate: nil,
+            bookDate: nil,
+            processDate: nil,
+            dueDate: nil,
+            paymentDate: nil,
+            invoiceDate: nil,
+            longitude: nil,
+            latitude: nil,
+            zoomLevel: nil,
+            hasAttachments: false
+        )
+
+        return TransactionsDatum(
+            type: "transactions",
+            id: id,
+            attributes: TransactionsAttributes(
+                createdAt: "2024-07-02T15:01:51+02:00",
+                updatedAt: "2024-07-02T15:01:51+02:00",
+                user: "1",
+                groupTitle: nil,
+                transactions: [transaction]
+            ),
+            links: TransactionsDatumLinks(
+                the0: TransactionsThe0(rel: "self", uri: "/transactions/\(id)"),
+                linksSelf: "http://100.96.204.49:8888/api/v1/transactions/\(id)"
+            )
+        )
     }
 }

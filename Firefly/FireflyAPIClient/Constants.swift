@@ -21,6 +21,7 @@ struct apiPaths {
     static func accountTransactions() -> String {
         return "api/v1/transactions"
     }
+    static let accounts = "api/v1/accounts"
 }
 
 struct keychainConsts {

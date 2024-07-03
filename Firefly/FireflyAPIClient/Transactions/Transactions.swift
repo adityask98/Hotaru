@@ -2,9 +2,9 @@ import Foundation
 
 // MARK: - Transactions
 struct Transactions: Codable {
-    let data: [TransactionsDatum]?
-    let meta: TransactionsMeta?
-    let links: TransactionsLinks?
+    var data: [TransactionsDatum]?
+    var meta: TransactionsMeta?
+    var links: TransactionsLinks?
 }
 
 // MARK: - TransactionsDatum
