@@ -7,19 +7,21 @@
 
 import Foundation
 
+enum TransactionsModelError: Error {
+    case invalidURL
+    case invalidResponse
+    case invalidData
+}
+
+@MainActor
 final class TransactionsViewModel: ObservableObject {
     @Published var transactions: Transactions?
     @Published var isLoading: Bool = false
     @Published var currentPage: Int = 1
     @Published var hasMorePages: Bool = true
-    private let user: UserModel
-
-    init() {
-        self.user = UserModel()
-        Task {
-            await fetchTransactions()
-        }
-    }
+    @Published var startDate: Date = Calendar.current.date(
+        byAdding: .month, value: -1, to: Date.now)!
+    @Published var endDate: Date = Date.now
 
     func fetchTransactions(loadMore: Bool = false) async {
         if loadMore {
@@ -32,16 +34,24 @@ final class TransactionsViewModel: ObservableObject {
         }
 
         do {
-            let newTransactions = try await getTransactions(page: currentPage)
+            //let newTransactions = try await getTransactions(page: currentPage)
+            let newTransactions: Transactions
 
             if loadMore {
-                self.transactions?.data?.append(contentsOf: newTransactions.data ?? [])
+                print(self.transactions?.links)
+                if (self.transactions?.links?.next) != nil {
+                    newTransactions = try await getTransactionsFromURL(
+                        (self.transactions?.links?.next)!)
+                    self.transactions?.data?.append(contentsOf: newTransactions.data ?? [])
+                    self.transactions?.links = newTransactions.links
+                    self.transactions?.meta = newTransactions.meta
+                }
             } else {
-                self.transactions = newTransactions
+                self.transactions = try await getTransactions(page: 1)
             }
 
-            if newTransactions.meta?.pagination?.currentPage
-                == newTransactions.meta?.pagination?.totalPages
+            if self.transactions?.meta?.pagination?.currentPage
+                == self.transactions?.meta?.pagination?.totalPages
             {
                 hasMorePages = false
             }
@@ -83,6 +93,27 @@ final class TransactionsViewModel: ObservableObject {
         }
     }
 
+    func getTransactionsFromURL(_ urlString: String) async throws -> Transactions {
+        var request = try RequestBuilder(apiURL: urlString, ignoreBaseURL: true)
+
+        return try await performRequest(request)
+    }
+
+    private func performRequest(_ request: URLRequest) async throws -> Transactions {
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            throw TransactionsModelError.invalidResponse
+        }
+
+        do {
+            let decoder = JSONDecoder()
+            let result = try decoder.decode(Transactions.self, from: data)
+            return result
+        } catch {
+            print(error)
+            throw TransactionsModelError.invalidData
+        }
+    }
 }
 
 extension TransactionsViewModel {
@@ -119,6 +150,7 @@ extension TransactionsViewModel {
                 linksSelf:
                     "http://100.96.204.49:8888/api/v1/transactions?limit=15&type=default&page=1",
                 first: "http://100.96.204.49:8888/api/v1/transactions?limit=15&type=default&page=1",
+                next: "http://100.96.204.49:8888/api/v1/transactions?limit=15&type=default&page=2",
                 last: "http://100.96.204.49:8888/api/v1/transactions?limit=15&type=default&page=7"
             )
         )

@@ -70,6 +70,7 @@ func getUser() async throws -> User {
     }
 }
 
+@MainActor
 final class UserModel: ObservableObject {
     @Published var user: User?
     @Published var isLoading: Bool = false

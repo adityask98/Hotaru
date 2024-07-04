@@ -7,20 +7,34 @@
 
 import SwiftUI
 
+enum TransactionsFilterType: String {
+    case all = "All"
+    case withdrawal = "Withdrawal"
+    case deposit = "Deposit"
+    case expense = "Expense"
+    case transfer = "Transfer"
+}
+
+@MainActor
 struct TransactionsView: View {
     @StateObject private var transactions = TransactionsViewModel()
+    @State private var filterType: TransactionsFilterType = .all
     @State var addSheetShown = false
+    @State private var filterExpanded = false
+    @State private var startDate = Date()
+    @State private var endDate = Date()
 
     //used for preview args
-    init(transactions: TransactionsViewModel = TransactionsViewModel()) {
-        _transactions = StateObject(wrappedValue: transactions)
-    }
+    //    init(transactions: TransactionsViewModel = TransactionsViewModel()) {
+    //        _transactions = StateObject(wrappedValue: transactions)
+    //    }
 
     var body: some View {
         NavigationStack {
+            filterSection
             VStack {
                 if transactions.isLoading {
-                    Text("Loading")
+                    ProgressView()
                 } else {
                     List {
                         ForEach(transactions.transactions?.data ?? [], id: \.id) {
@@ -32,16 +46,25 @@ struct TransactionsView: View {
                             }
                         }
                         if transactions.hasMorePages {
-                            HStack {
-                                Spacer()
-                                ProgressView()
-                                Spacer()
-                            }
-                            .onAppear {
-                                Task {
-                                    await transactions.fetchTransactions(loadMore: true)
-                                }
-                            }
+                            Button(
+                                action: {
+                                    Task {
+                                        await transactions.fetchTransactions(loadMore: true)
+                                    }
+                                },
+                                label: {
+                                    Text("LoadMore")
+                                })
+                            //                            HStack {
+                            //                                Spacer()
+                            //                                ProgressView()
+                            //                                Spacer()
+                            //                            }
+                            //                            .onAppear {
+                            //                                Task {
+                            //                                    await transactions.fetchTransactions(loadMore: true)
+                            //                                }
+                            //                            }
                         }
                     }
 
@@ -76,7 +99,53 @@ struct TransactionsView: View {
             isPresented: $addSheetShown,
             content: {
                 Text("Add transaction")
-            })
+            }
+        )
+        .background(Color.clear)
+    }
+
+    private var filterSection: some View {
+        VStack {
+            HStack {
+                Text("Filter")
+                    .font(.subheadline)
+                Spacer()
+                Button(action: {
+                    withAnimation {
+                        filterExpanded.toggle()
+                    }
+                }) {
+                    Image(systemName: filterExpanded ? "chevron.up" : "chevron.down")
+                }
+            }
+            if filterExpanded {
+                VStack(alignment: .leading, spacing: 10) {
+                    DatePicker(
+                        "Start Date", selection: $transactions.startDate, displayedComponents: .date
+                    )
+                    .datePickerStyle(CompactDatePickerStyle())
+                    DatePicker(
+                        "End Date", selection: $transactions.endDate, displayedComponents: .date
+                    )
+                    .datePickerStyle(CompactDatePickerStyle())
+                    Button("Apply Filter") {
+                        applyDateFilter()
+                    }
+                    .padding(.top)
+                }
+                .padding(.top)
+            }
+        }
+        .padding()
+        .background(.ultraThinMaterial)
+        .cornerRadius(10)
+        .animation(.easeInOut, value: filterExpanded)  // Animate changes in filterExpanded
+    }
+    private func applyDateFilter() {
+        Task {
+            //await transactions.fetchTransactions(start: startDate, end: endDate)
+        }
+        filterExpanded = false
     }
 
 }
@@ -94,9 +163,6 @@ struct TransactionsRow: View {
                 VStack(alignment: .leading) {
                     Text(transaction.description ?? "Unkown Description")
                         .font(.headline)
-                    //                    Text(formatDate(transaction.date))
-                    //                        .font(.largeTitle)
-                    //                        //.foregroundStyle(.gray)
                     Text(formatAmount(transaction.amount, symbol: transaction.currencySymbol))
                         .font(.largeTitle)
                 }
@@ -108,9 +174,6 @@ struct TransactionsRow: View {
                             .font(.subheadline)
                             .foregroundStyle(.gray)
                     }
-
-                    //                    Text(formatAmount(transaction.amount, symbol: transaction.currencySymbol))
-                    //                        .font(.headline)
                     Text(formatDate(transaction.date))
                         .foregroundStyle(.gray)
                 }
@@ -118,12 +181,8 @@ struct TransactionsRow: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 8)  // Add padding inside the HStack
         }
-        .background(Color.white)  // Add a background color if needed
+        .background(.ultraThinMaterial)  // Add a background color if needed
         .cornerRadius(16)  // Round the corners
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.gray, lineWidth: 1)  // Add a border
-        )
         .padding(.horizontal)  // Add horizontal padding to the entire row
         .padding(.vertical, 8)
     }
@@ -193,8 +252,8 @@ struct TransactionsRow: View {
     }
 }
 
-struct TransactionsView_Previews: PreviewProvider {
-    static var previews: some View {
-        TransactionsView(transactions: TransactionsViewModel.mock())
-    }
-}
+//struct TransactionsView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        TransactionsView(transactions: TransactionsViewModel.mock())
+//    }
+//}

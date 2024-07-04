@@ -27,14 +27,15 @@ class AccountsViewModel: ObservableObject {
         guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
             throw AccountsModelError.invalidResponse
         }
-
-        do {
-            let decoder = JSONDecoder()
-            let result = try decoder.decode(Accounts.self, from: data)
-            print(result)
-            self.accounts = result
-        } catch {
-            throw AccountsModelError.invalidData
+        try await MainActor.run {
+            do {
+                let decoder = JSONDecoder()
+                let result = try decoder.decode(Accounts.self, from: data)
+                print(result)
+                self.accounts = result
+            } catch {
+                throw AccountsModelError.invalidData
+            }
         }
         isLoading = false
     }
@@ -42,7 +43,7 @@ class AccountsViewModel: ObservableObject {
 //extension AccountsViewModel {
 //    static func mock() -> AccountsViewModel {
 //        let viewModel = AccountsViewModel()
-//        
+//
 //        let mockAccounts = Accounts(data: [
 //        createMockAccou
 //        ], meta: <#T##AccountsMeta?#>, links: <#T##AccountsLinks?#>)

@@ -16,7 +16,9 @@ struct TokenObject: Codable {
     let accessToken: String
 }
 
-func RequestBuilder(apiURL: String, httpMethod: String = "GET") throws -> URLRequest {
+func RequestBuilder(apiURL: String, httpMethod: String = "GET", ignoreBaseURL: Bool = false) throws
+    -> URLRequest
+{
     let baseURL: String
     if let savedBaseURL = UserDefaults.standard.string(forKey: UserDefaultKeys.baseURLKey) {
         baseURL = savedBaseURL
@@ -50,8 +52,10 @@ func RequestBuilder(apiURL: String, httpMethod: String = "GET") throws -> URLReq
         "Authorization": "Bearer \(token)"
     ]
 
-    let endpoint = baseURL + apiURL
-
+    var endpoint = baseURL + apiURL
+    if ignoreBaseURL {
+        endpoint = apiURL
+    }
     guard let url = URL(string: endpoint) else {
         throw RequestBuilderError.urlError
     }

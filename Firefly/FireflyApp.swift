@@ -12,6 +12,7 @@ struct FireflyApp: App {
     var body: some Scene {
         WindowGroup {
             Menu()
+                .preferredColorScheme(.dark)
         }
     }
 }

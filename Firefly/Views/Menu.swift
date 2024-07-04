@@ -31,7 +31,9 @@ struct Menu: View {
     //    @ObservedObject var toastHandler: ToastHandlerModel
 
     var body: some View {
-        TabView(selection: .constant(2)) {
+        TabView(
+            //selection: .constant(2)
+        ) {
             AboutView()
                 .ignoresSafeArea(.all)
                 .tabItem { Image(systemName: "house") }

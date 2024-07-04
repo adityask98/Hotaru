@@ -9,10 +9,7 @@ import SwiftUI
 
 struct TokenSettings: View {
 
-    let auth = TokenObject(accessToken: "")
-    //@AppStorage(UserDefaultKeys.apiTokenKey) private var apiToken = ""
-    @AppStorage(UserDefaultKeys.baseURLKey) private var defaultURL = ""
-    @State private var apiToken = ""
+    @StateObject private var tokenSettingsValues = TokenSettingsViewModel()
 
     var body: some View {
         ScrollView {
@@ -21,96 +18,122 @@ struct TokenSettings: View {
                     .font(.title)
                     .padding()
 
-                Link(
-                    destination: URL(
-                        string: "https://docs.firefly-iii.org/how-to/firefly-iii/features/api/")!
-                ) {
-                    HStack(spacing: 0) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "book.closed.fill")
-                            Text("Instructions")
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .imageScale(.small)
-                                .opacity(0.35)
-                        }
-                        .padding(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(Rectangle())
-                    }
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(.gray))
-                    .padding()
+                instructionsLink
+
+                credentialsForm
+
+                TokenSettingsAsyncButton(action: tokenSettingsValues.saveCredentials) {
+                    Text("Save")
+                        .frame(maxWidth: .infinity)
                 }
-
-                VStack {
-
-                    HStack {
-                        TextField("Token", text: $apiToken)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.leading)
-                            .autocorrectionDisabled()
-
-                        //                        Button(action: {
-                        //                            // Store the value in AppStorage when the send button is tapped
-                        //                            UserDefaults.standard.set(apiToken, forKey: "APIToken")
-                        //                        }) {
-                        //                            Image(systemName: "paperplane")
-                        //                                .foregroundColor(.blue)
-                        //                        }
-                        //                        .padding(.trailing)
-                    }
-
-                    HStack {
-                        TextField("Default URL", text: $defaultURL)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.leading)
-
-                        //                        Button(action: {
-                        //                            // Store the value in AppStorage when the send button is tapped
-                        //                            UserDefaults.standard.set(defaultURL, forKey: "DefaultURL")
-                        //                        }) {
-                        //                            Image(systemName: "paperplane")
-                        //                                .foregroundColor(.blue)
-                        //                        }
-                        //                        .padding(.trailing)
-                    }
-                    Spacer()
-                    Button("Save") {
-                        Task {
-                            let keychainData = TokenObject(accessToken: apiToken)
-                            print(keychainData)
-                            KeychainHelper.standard.save(
-                                keychainData, service: keychainConsts.accessToken,
-                                account: keychainConsts.account)
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-                .padding()
-                .background(Color.white)
-                .cornerRadius(10)
-                .shadow(color: Color.gray.opacity(0.3), radius: 5, x: 0, y: 2)
+                .buttonStyle(.borderedProminent)
+                .disabled(!tokenSettingsValues.isFormValid)
                 .padding()
             }
         }
-        .task {
-            let result = KeychainHelper.standard.read(
-                service: keychainConsts.accessToken, account: keychainConsts.account,
-                type: TokenObject.self)!
-            apiToken = result.accessToken
-
-            UserDefaults.standard.set(defaultURL, forKey: "DefaultURL")
-
-            print(result.accessToken)
+        .onAppear(perform: tokenSettingsValues.loadCredentials)
+    }
+    private var instructionsLink: some View {
+        Link(
+            destination: URL(
+                string: "https://docs.firefly-iii.org/how-to/firefly-iii/features/api/")!
+        ) {
+            HStack {
+                Image(systemName: "book.closed.fill")
+                Text("Instructions")
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .imageScale(.small)
+                    .opacity(0.35)
+            }
+            .padding()
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(.gray))
         }
     }
-
-}
-
-struct TokenSettings_Previews: PreviewProvider {
-    static var previews: some View {
-        TokenSettings()
+    private var credentialsForm: some View {
+        VStack {
+            TokenSettingsCustomTextField(placeholder: "API Token", text: $tokenSettingsValues.apiToken)
+            TokenSettingsCustomTextField(placeholder: "Default URL", text: $tokenSettingsValues.defaultURL)
+        }
+        .padding()
+        .background(.ultraThinMaterial)
+        .cornerRadius(10)
+        .shadow(color: Color.gray.opacity(0.3), radius: 5, x: 0, y: 2)
     }
 }
+
+struct TokenSettingsCustomTextField: View {
+    let placeholder: String
+    @Binding var text: String
+    var body: some View {
+        TextField(placeholder, text: $text)
+            .textFieldStyle(RoundedBorderTextFieldStyle())
+            .padding(.horizontal)
+            .autocapitalization(.none)
+            .disableAutocorrection(true)
+    }
+}
+
+struct TokenSettingsAsyncButton<Label: View>: View {
+    var action: () async -> Void
+    @ViewBuilder var label: () -> Label
+
+    @State private var isPerformingTask = false
+
+    var body: some View {
+        Button(action: {
+            isPerformingTask = true
+            Task {
+                await action()
+                isPerformingTask = false
+            }
+        }) {
+            ZStack {
+                label().opacity(isPerformingTask ? 0 : 1)
+
+                if isPerformingTask {
+                    ProgressView()
+                }
+            }
+        }
+        .disabled(isPerformingTask)
+    }
+}
+
+class TokenSettingsViewModel: ObservableObject {
+    @Published var apiToken: String = ""
+    @Published var defaultURL: String = ""
+
+    func saveCredentials() {
+        let keychainData = TokenObject(accessToken: apiToken)
+        KeychainHelper.standard.save(
+            keychainData, service: keychainConsts.accessToken,
+            account: keychainConsts.account)
+        UserDefaults.standard.set(defaultURL, forKey: UserDefaultKeys.baseURLKey)
+    }
+
+    func loadCredentials() {
+        if let result = KeychainHelper.standard.read(
+            service: keychainConsts.accessToken,
+            account: keychainConsts.account,
+            type: TokenObject.self
+        ) {
+            apiToken = result.accessToken
+        }
+        defaultURL = UserDefaults.standard.string(forKey: UserDefaultKeys.baseURLKey) ?? ""
+    }
+}
+
+extension TokenSettingsViewModel {
+    var isFormValid: Bool {
+        !apiToken.isEmpty && !defaultURL.isEmpty
+    }
+}
+
+//struct TokenSettings_Previews: PreviewProvider {
+//    static var previews: some View {
+//        TokenSettings()
+//    }
+//}

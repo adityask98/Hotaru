@@ -33,7 +33,8 @@ struct AboutView: View {
                     }
                 }
             }
-            .frame(width: .infinity, height: .infinity)
+
+            //.frame(width: .infinity, height: .infinity)
             .task {
                 do {
                     try await user.getUser()
@@ -54,12 +55,13 @@ struct AboutView: View {
             //            .navigationTitle("Home")
             //            .navigationBarTitleDisplayMode(.large)
         }
-
+        .background(.ultraThinMaterial)
     }
+        
 
-    struct AboutView_Previews: PreviewProvider {
-        static var previews: some View {
-            AboutView()
-        }
+}
+struct AboutView_Previews: PreviewProvider {
+    static var previews: some View {
+        AboutView()
     }
 }

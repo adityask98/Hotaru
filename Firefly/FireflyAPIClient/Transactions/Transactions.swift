@@ -141,11 +141,11 @@ struct TransactionsThe0: Codable {
 
 // MARK: - TransactionsLinks
 struct TransactionsLinks: Codable {
-    let linksSelf, first, last: String?
+    let linksSelf, first, next, last: String?
 
     enum CodingKeys: String, CodingKey {
         case linksSelf = "self"
-        case first, last
+        case first, next, last
     }
 }
 
