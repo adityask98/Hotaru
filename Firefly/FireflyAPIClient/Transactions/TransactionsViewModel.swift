@@ -38,7 +38,6 @@ final class TransactionsViewModel: ObservableObject {
             let newTransactions: Transactions
 
             if loadMore {
-                print(self.transactions?.links)
                 if (self.transactions?.links?.next) != nil {
                     newTransactions = try await getTransactionsFromURL(
                         (self.transactions?.links?.next)!)
@@ -47,7 +46,10 @@ final class TransactionsViewModel: ObservableObject {
                     self.transactions?.meta = newTransactions.meta
                 }
             } else {
-                self.transactions = try await getTransactions(page: 1)
+                self.transactions = try await getTransactions(
+                    startDate: formatDateToYYYYMMDD(self.startDate),
+                    endDate: formatDateToYYYYMMDD(self.endDate),
+                    page: 1)
             }
 
             if self.transactions?.meta?.pagination?.currentPage
@@ -64,16 +66,19 @@ final class TransactionsViewModel: ObservableObject {
     }
 
     func getTransactions(
-        limit: Int = 20, type: String = "expense",
-        end: String = formatDateToYYYYMMDD(), page: Int
+        limit: Int = 20,
+        type: String = "expense",
+        startDate: String,
+        endDate: String,
+        page: Int
     ) async throws -> Transactions {
         var request = try RequestBuilder(apiURL: apiPaths.accountTransactions())
         request.url?.append(queryItems: [
             //URLQueryItem(name: "type", value: type),
             URLQueryItem(name: "limit", value: String(limit)),
             URLQueryItem(name: "page", value: String(page)),
-            //            URLQueryItem(name: "start", value: "2024-07-01"),
-            //URLQueryItem(name: "end", value: end),
+            URLQueryItem(name: "start", value: startDate),
+            URLQueryItem(name: "end", value: endDate),
         ])
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -113,6 +118,12 @@ final class TransactionsViewModel: ObservableObject {
             print(error)
             throw TransactionsModelError.invalidData
         }
+    }
+
+    func resetDates() {
+        self.startDate = Calendar.current.date(
+            byAdding: .month, value: -1, to: Date.now)!
+        self.endDate = Date.now
     }
 }
 

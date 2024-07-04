@@ -21,20 +21,21 @@ struct TransactionsView: View {
     @State private var filterType: TransactionsFilterType = .all
     @State var addSheetShown = false
     @State private var filterExpanded = false
-    @State private var startDate = Date()
-    @State private var endDate = Date()
-
-    //used for preview args
-    //    init(transactions: TransactionsViewModel = TransactionsViewModel()) {
-    //        _transactions = StateObject(wrappedValue: transactions)
-    //    }
 
     var body: some View {
         NavigationStack {
-            filterSection
-            VStack {
+            VStack(alignment: .leading, spacing: 0) {
+                filterSection
+                    .padding()
+
                 if transactions.isLoading {
-                    ProgressView()
+                    Spacer()
+                    HStack(alignment: .center) {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
+                    }
+                    Spacer()
                 } else {
                     List {
                         ForEach(transactions.transactions?.data ?? [], id: \.id) {
@@ -45,34 +46,25 @@ struct TransactionsView: View {
                                     .listRowSeparator(.hidden)
                             }
                         }
+
                         if transactions.hasMorePages {
-                            Button(
-                                action: {
-                                    Task {
-                                        await transactions.fetchTransactions(loadMore: true)
-                                    }
-                                },
-                                label: {
-                                    Text("LoadMore")
-                                })
-                            //                            HStack {
-                            //                                Spacer()
-                            //                                ProgressView()
-                            //                                Spacer()
-                            //                            }
-                            //                            .onAppear {
-                            //                                Task {
-                            //                                    await transactions.fetchTransactions(loadMore: true)
-                            //                                }
-                            //                            }
+                            Button(action: {
+                                Task {
+                                    await transactions.fetchTransactions(loadMore: true)
+                                }
+                            }) {
+                                Text("Load More")
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                            }
+                            .listRowSeparator(.hidden)
+                            .buttonStyle(PlainButtonStyle())
                         }
                     }
-
                     .listStyle(PlainListStyle())
                     .background(Color.clear)
-
                 }
             }
+            .background(Color.clear)
             .onAppear {
                 if transactions.transactions == nil {
                     Task {
@@ -93,15 +85,10 @@ struct TransactionsView: View {
                         .fontWeight(.heavy)
                 }
             }
-
         }
-        .sheet(
-            isPresented: $addSheetShown,
-            content: {
-                Text("Add transaction")
-            }
-        )
-        .background(Color.clear)
+        .sheet(isPresented: $addSheetShown) {
+            Text("Add transaction")
+        }
     }
 
     private var filterSection: some View {
@@ -128,10 +115,16 @@ struct TransactionsView: View {
                         "End Date", selection: $transactions.endDate, displayedComponents: .date
                     )
                     .datePickerStyle(CompactDatePickerStyle())
-                    Button("Apply Filter") {
-                        applyDateFilter()
+                    HStack {
+                        Button("Apply Filter") {
+                            applyDateFilter()
+                        }
+                        Spacer()
+                        Button("Reset") {
+                            transactions.resetDates()
+                            applyDateFilter()
+                        }
                     }
-                    .padding(.top)
                 }
                 .padding(.top)
             }
@@ -139,15 +132,14 @@ struct TransactionsView: View {
         .padding()
         .background(.ultraThinMaterial)
         .cornerRadius(10)
-        .animation(.easeInOut, value: filterExpanded)  // Animate changes in filterExpanded
     }
+
     private func applyDateFilter() {
         Task {
-            //await transactions.fetchTransactions(start: startDate, end: endDate)
+            await transactions.fetchTransactions()
         }
         filterExpanded = false
     }
-
 }
 
 struct TransactionsRow: View {
