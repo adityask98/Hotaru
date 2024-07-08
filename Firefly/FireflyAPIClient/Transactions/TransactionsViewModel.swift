@@ -30,7 +30,7 @@ final class TransactionsViewModel: ObservableObject {
             currentPage = 1
         }
         if !loadMore {
-            isLoading = true
+            self.isLoading = true
         }
 
         do {
@@ -55,13 +55,13 @@ final class TransactionsViewModel: ObservableObject {
             if self.transactions?.meta?.pagination?.currentPage
                 == self.transactions?.meta?.pagination?.totalPages
             {
-                hasMorePages = false
+                self.hasMorePages = false
             }
         } catch {
             print("Error fetching transactions: \(error)")
         }
         if !loadMore {
-            isLoading = false
+            self.isLoading = false
         }
     }
 
@@ -99,7 +99,7 @@ final class TransactionsViewModel: ObservableObject {
     }
 
     func getTransactionsFromURL(_ urlString: String) async throws -> Transactions {
-        var request = try RequestBuilder(apiURL: urlString, ignoreBaseURL: true)
+        let request = try RequestBuilder(apiURL: urlString, ignoreBaseURL: true)
 
         return try await performRequest(request)
     }

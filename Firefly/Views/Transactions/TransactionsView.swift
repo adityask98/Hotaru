@@ -87,7 +87,7 @@ struct TransactionsView: View {
             }
         }
         .sheet(isPresented: $addSheetShown) {
-            Text("Add transaction")
+            TransactionCreate().presentationDetents([.fraction(0.9)]).background(.ultraThinMaterial)
         }
     }
 
@@ -138,7 +138,9 @@ struct TransactionsView: View {
         Task {
             await transactions.fetchTransactions()
         }
-        filterExpanded = false
+        withAnimation {
+            filterExpanded = false
+        }
     }
 }
 

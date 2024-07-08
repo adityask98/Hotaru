@@ -5,13 +5,13 @@
 //  Created by Aditya Srinivasa on 2023/10/16.
 //
 
-import Foundation 
+import Foundation
 
 // MARK: - Accounts
 struct Accounts: Codable {
-    let data: [AccountsDatum]?
-    let meta: AccountsMeta?
-    let links: AccountsLinks?
+    var data: [AccountsDatum]?
+    var meta: AccountsMeta?
+    var links: AccountsLinks?
 }
 
 // MARK: - AccountsDatum
@@ -88,11 +88,11 @@ struct AccountsThe0: Codable {
 
 // MARK: - AccountsLinks
 struct AccountsLinks: Codable {
-    let linksSelf, first, last: String?
+    let linksSelf, first, next, last: String?
 
     enum CodingKeys: String, CodingKey {
         case linksSelf = "self"
-        case first, last
+        case first, next, last
     }
 }
 

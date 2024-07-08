@@ -18,9 +18,6 @@ struct Settings: View {
                     Group {
                         Section {
                             NavigationLink(destination: TokenSettings()) {
-                                Text("Token")
-                            }
-                            NavigationLink(destination: TokenSettings()) {
                                 HStack {
                                     Image(systemName: "gear")
                                     Text("Credentials")

@@ -36,17 +36,17 @@ struct AccountsView: View {
             .background(Color.clear)
 
         }
-        .task {
-            do {
-                try await accounts.getAccounts()
-            } catch {
-                print(error)
+        .onAppear {
+            if accounts.accounts == nil {
+                Task {
+                    await accounts.fetchAccounts()
+                }
             }
         }
     }
 
 }
 
-#Preview {
-    AccountsView()
-}
+//#Preview {
+//    AccountsView()
+//}

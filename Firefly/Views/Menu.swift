@@ -28,12 +28,13 @@ struct Menu: View {
     }
 
     @State private var showToast = false
+    @StateObject private var tokenSettingsValue = TokenSettingsViewModel()
     //    @ObservedObject var toastHandler: ToastHandlerModel
+    @State private var tokenSheetShown = false
+    @State private var hasCheckedToken = false
 
     var body: some View {
-        TabView(
-            //selection: .constant(2)
-        ) {
+        TabView {
             AboutView()
                 .ignoresSafeArea(.all)
                 .tabItem { Image(systemName: "house") }
@@ -51,13 +52,31 @@ struct Menu: View {
                 }
 
         }
-        .transition(.opacity)
+        .sheet(isPresented: $tokenSheetShown) {
+            TokenSettings()
+        }
+        .task {
+            if !hasCheckedToken {
+                do {
+                    try await checkToken()
+                } catch {
+                    tokenSheetShown = true
+                }
+            }
+        }.transition(.opacity)
         .ignoresSafeArea(.all)
+
         .toast(isPresenting: $showToast, tapToDismiss: true) {
             AlertToast(displayMode: .hud, type: .regular, title: "TEST")
         }
     }
-
+    private func checkToken() async throws {
+        do {
+            try await tokenSettingsValue.testUserAccessInfo()
+        } catch CredentialSaveError.accessError {
+            tokenSheetShown = true
+        }
+    }
 }
 
 //#Preview {

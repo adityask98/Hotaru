@@ -24,6 +24,10 @@ struct apiPaths {
     static let accounts = "api/v1/accounts"
 }
 
+struct autocompleteApiPaths {
+    static let categories = "api/v1/autocomplete/categories"
+}
+
 struct keychainConsts {
     static let account = "swiftFirefly"
     static let accessToken = "accessToken"

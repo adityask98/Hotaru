@@ -14,6 +14,9 @@
 		4836BEC62C1B29B90039D219 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4836BEC52C1B29B90039D219 /* KeychainHelper.swift */; };
 		4839B4132ADE3AD3001A4F8F /* AccountsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4839B4122ADE3AD3001A4F8F /* AccountsViewModel.swift */; };
 		4843D2372B13844A00D1A131 /* Menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4843D2362B13844A00D1A131 /* Menu.swift */; };
+		485467A92C37C3AF00C40E92 /* TransactionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485467A82C37C3AF00C40E92 /* TransactionDetailView.swift */; };
+		485467AC2C37C8CB00C40E92 /* TransactionCreate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485467AB2C37C8CB00C40E92 /* TransactionCreate.swift */; };
+		485467B02C37FBC400C40E92 /* Autocomplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485467AF2C37FBC400C40E92 /* Autocomplete.swift */; };
 		48552BA32C1C545E002ED3CF /* ToastHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48552BA22C1C545E002ED3CF /* ToastHandler.swift */; };
 		48552BA62C1C6B20002ED3CF /* Transactions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48552BA52C1C6B20002ED3CF /* Transactions.swift */; };
 		48552BA82C1C6BFE002ED3CF /* TransactionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48552BA72C1C6BFE002ED3CF /* TransactionsViewModel.swift */; };
@@ -31,7 +34,6 @@
 		48DF34062AD3E31A00F6F215 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48DF34052AD3E31A00F6F215 /* Preview Assets.xcassets */; };
 		48DF34102AD3E39B00F6F215 /* UserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF340F2AD3E39B00F6F215 /* UserModel.swift */; };
 		48DF34122AD3E68A00F6F215 /* UserAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF34112AD3E68A00F6F215 /* UserAPIClient.swift */; };
-		48E919592AE2B5370074B904 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 48E919582AE2B5370074B904 /* Alamofire */; };
 		48E9195B2AE2C1E60074B904 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E9195A2AE2C1E60074B904 /* Constants.swift */; };
 /* End PBXBuildFile section */
 
@@ -42,6 +44,9 @@
 		4836BEC52C1B29B90039D219 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 		4839B4122ADE3AD3001A4F8F /* AccountsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsViewModel.swift; sourceTree = "<group>"; };
 		4843D2362B13844A00D1A131 /* Menu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Menu.swift; sourceTree = "<group>"; };
+		485467A82C37C3AF00C40E92 /* TransactionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDetailView.swift; sourceTree = "<group>"; };
+		485467AB2C37C8CB00C40E92 /* TransactionCreate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCreate.swift; sourceTree = "<group>"; };
+		485467AF2C37FBC400C40E92 /* Autocomplete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Autocomplete.swift; sourceTree = "<group>"; };
 		48552BA22C1C545E002ED3CF /* ToastHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastHandler.swift; sourceTree = "<group>"; };
 		48552BA52C1C6B20002ED3CF /* Transactions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transactions.swift; sourceTree = "<group>"; };
 		48552BA72C1C6BFE002ED3CF /* TransactionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsViewModel.swift; sourceTree = "<group>"; };
@@ -70,7 +75,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48E919592AE2B5370074B904 /* Alamofire in Frameworks */,
 				4836BEC42C1B10F20039D219 /* AlertToast in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -95,15 +99,40 @@
 		4843D2352B13843C00D1A131 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				485467AA2C37C89B00C40E92 /* Transactions */,
 				486E1D7E2C354A170038BB4F /* Shared */,
 				4843D2362B13844A00D1A131 /* Menu.swift */,
 				48DF34002AD3E31900F6F215 /* AboutView.swift */,
 				489EB28D2B46EB2800414CCB /* AccountsView.swift */,
 				482139272C10652600D8D1C6 /* TokenSettings.swift */,
 				4836BEC02C1AFD2E0039D219 /* Settings.swift */,
-				48552BA92C1D2D12002ED3CF /* TransactionsView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		485467AA2C37C89B00C40E92 /* Transactions */ = {
+			isa = PBXGroup;
+			children = (
+				48552BA92C1D2D12002ED3CF /* TransactionsView.swift */,
+				485467A82C37C3AF00C40E92 /* TransactionDetailView.swift */,
+				485467AB2C37C8CB00C40E92 /* TransactionCreate.swift */,
+			);
+			path = Transactions;
+			sourceTree = "<group>";
+		};
+		485467AD2C37FB0600C40E92 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Categories;
+			sourceTree = "<group>";
+		};
+		485467AE2C37FB3500C40E92 /* Autocomplete */ = {
+			isa = PBXGroup;
+			children = (
+				485467AF2C37FBC400C40E92 /* Autocomplete.swift */,
+			);
+			path = Autocomplete;
 			sourceTree = "<group>";
 		};
 		48552BA42C1C6B0F002ED3CF /* Transactions */ = {
@@ -174,6 +203,8 @@
 		48DF340D2AD3E35A00F6F215 /* FireflyAPIClient */ = {
 			isa = PBXGroup;
 			children = (
+				485467AE2C37FB3500C40E92 /* Autocomplete */,
+				485467AD2C37FB0600C40E92 /* Categories */,
 				48552BA42C1C6B0F002ED3CF /* Transactions */,
 				4861BF7E2ADCE80100FAC64D /* Accounts */,
 				48DF340E2AD3E37D00F6F215 /* About */,
@@ -208,7 +239,6 @@
 			);
 			name = Firefly;
 			packageProductDependencies = (
-				48E919582AE2B5370074B904 /* Alamofire */,
 				4836BEC32C1B10F20039D219 /* AlertToast */,
 			);
 			productName = Firefly;
@@ -240,7 +270,6 @@
 			);
 			mainGroup = 48DF33F22AD3E31900F6F215;
 			packageReferences = (
-				48E919572AE2B5370074B904 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				4836BEC22C1B10F20039D219 /* XCRemoteSwiftPackageReference "AlertToast" */,
 			);
 			productRefGroup = 48DF33FC2AD3E31900F6F215 /* Products */;
@@ -288,9 +317,12 @@
 				486E1D842C359BFB0038BB4F /* GrainGradient.metal in Sources */,
 				486E1D7D2C33DAE60038BB4F /* DateHelpers.swift in Sources */,
 				4861BF802ADCE82F00FAC64D /* AccountsModel.swift in Sources */,
+				485467A92C37C3AF00C40E92 /* TransactionDetailView.swift in Sources */,
+				485467AC2C37C8CB00C40E92 /* TransactionCreate.swift in Sources */,
 				4836BEC62C1B29B90039D219 /* KeychainHelper.swift in Sources */,
 				4839B4132ADE3AD3001A4F8F /* AccountsViewModel.swift in Sources */,
 				486E1D802C354A2F0038BB4F /* SearchOption.swift in Sources */,
+				485467B02C37FBC400C40E92 /* Autocomplete.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -434,6 +466,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Firefly/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -466,6 +500,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Firefly/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -513,14 +549,6 @@
 				minimumVersion = 1.3.9;
 			};
 		};
-		48E919572AE2B5370074B904 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.8.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -528,11 +556,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4836BEC22C1B10F20039D219 /* XCRemoteSwiftPackageReference "AlertToast" */;
 			productName = AlertToast;
-		};
-		48E919582AE2B5370074B904 /* Alamofire */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 48E919572AE2B5370074B904 /* XCRemoteSwiftPackageReference "Alamofire" */;
-			productName = Alamofire;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

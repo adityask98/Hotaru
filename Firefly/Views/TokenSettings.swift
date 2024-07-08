@@ -5,11 +5,16 @@
 //  Created by Aditya Srinivasa on 2024/06/05.
 //
 
+import AlertToast
 import SwiftUI
 
+@MainActor
 struct TokenSettings: View {
 
+    @Environment(\.dismiss) var dismiss
     @StateObject private var tokenSettingsValues = TokenSettingsViewModel()
+    @State private var showToast = false
+    @State private var toastParams: AlertToast = AlertToast(displayMode: .alert, type: .regular)
 
     var body: some View {
         ScrollView {
@@ -22,7 +27,7 @@ struct TokenSettings: View {
 
                 credentialsForm
 
-                TokenSettingsAsyncButton(action: tokenSettingsValues.saveCredentials) {
+                TokenSettingsAsyncButton(action: saveCredentials) {
                     Text("Save")
                         .frame(maxWidth: .infinity)
                 }
@@ -32,6 +37,10 @@ struct TokenSettings: View {
             }
         }
         .onAppear(perform: tokenSettingsValues.loadCredentials)
+        .interactiveDismissDisabled()
+        .toast(isPresenting: $showToast, tapToDismiss: false) {
+            toastParams
+        }
     }
     private var instructionsLink: some View {
         Link(
@@ -54,13 +63,45 @@ struct TokenSettings: View {
     }
     private var credentialsForm: some View {
         VStack {
-            TokenSettingsCustomTextField(placeholder: "API Token", text: $tokenSettingsValues.apiToken)
-            TokenSettingsCustomTextField(placeholder: "Default URL", text: $tokenSettingsValues.defaultURL)
+            TokenSettingsCustomTextField(
+                placeholder: "API Token", text: $tokenSettingsValues.apiToken)
+            TokenSettingsCustomTextField(
+                placeholder: "Default URL", text: $tokenSettingsValues.defaultURL)
         }
         .padding()
         .background(.ultraThinMaterial)
         .cornerRadius(10)
         .shadow(color: Color.gray.opacity(0.3), radius: 5, x: 0, y: 2)
+    }
+    private func saveCredentials() async {
+        do {
+            try await tokenSettingsValues.saveCredentials()
+            toastParams = AlertToast(
+                displayMode: .alert, type: .complete(Color.green), title: "Saved Successfully")
+            showToast.toggle()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                dismiss()
+            }
+        } catch CredentialSaveError.keychainSaveFailure {
+            toastParams = AlertToast(
+                displayMode: .alert, type: .error(Color.red), title: "Failed to save token!")
+            showToast.toggle()
+        } catch CredentialSaveError.userDefaultsSaveFailure {
+            toastParams = AlertToast(
+                displayMode: .alert, type: .error(Color.red), title: "Failed to save URL!")
+            showToast.toggle()
+            print("Failed to save to UserDefaults")
+        } catch CredentialSaveError.accessError {
+            toastParams = AlertToast(
+                displayMode: .alert, type: .error(Color.red),
+                title: "Could not access with the entered info!")
+            showToast.toggle()
+        } catch {
+            toastParams = AlertToast(
+                displayMode: .alert, type: .error(Color.red), title: "Something went wrong!")
+            showToast.toggle()
+            print("An unexpected error occurred: \(error)")
+        }
     }
 }
 
@@ -102,16 +143,45 @@ struct TokenSettingsAsyncButton<Label: View>: View {
     }
 }
 
+enum CredentialSaveError: Error {
+    case keychainSaveFailure
+    case userDefaultsSaveFailure
+    case accessError
+}
+
 class TokenSettingsViewModel: ObservableObject {
     @Published var apiToken: String = ""
     @Published var defaultURL: String = ""
+    @Published var isLoading: Bool = false
 
-    func saveCredentials() {
-        let keychainData = TokenObject(accessToken: apiToken)
-        KeychainHelper.standard.save(
-            keychainData, service: keychainConsts.accessToken,
-            account: keychainConsts.account)
-        UserDefaults.standard.set(defaultURL, forKey: UserDefaultKeys.baseURLKey)
+    func saveCredentials() async throws {
+        self.isLoading = true
+        do {
+            let keychainData = TokenObject(accessToken: apiToken)
+
+            KeychainHelper.standard.save(
+                keychainData, service: keychainConsts.accessToken,
+                account: keychainConsts.account)
+            UserDefaults.standard.set(defaultURL, forKey: UserDefaultKeys.baseURLKey)
+
+            //Ensure the UserDefaults value was set sucessfully
+            guard UserDefaults.standard.string(forKey: UserDefaultKeys.baseURLKey) == defaultURL
+            else {
+                throw CredentialSaveError.userDefaultsSaveFailure
+            }
+        } catch {
+            print("Failed to save credentials: \(error)")
+            throw CredentialSaveError.keychainSaveFailure
+        }
+
+        //Test if the API actually works
+        do {
+            try await testUserAccessInfo()
+        } catch {
+            print(error)
+            throw CredentialSaveError.accessError
+        }
+        self.isLoading = false
     }
 
     func loadCredentials() {
@@ -123,6 +193,16 @@ class TokenSettingsViewModel: ObservableObject {
             apiToken = result.accessToken
         }
         defaultURL = UserDefaults.standard.string(forKey: UserDefaultKeys.baseURLKey) ?? ""
+    }
+
+    func testUserAccessInfo() async throws {
+        let request = try RequestBuilder(apiURL: apiPaths.userAbout)
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+
+        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            throw CredentialSaveError.accessError
+        }
     }
 }
 
