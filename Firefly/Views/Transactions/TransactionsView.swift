@@ -73,7 +73,7 @@ struct TransactionsView: View {
                 }
             }
             .refreshable {
-                await transactions.fetchTransactions()
+                applyDateFilter()
             }
             .navigationTitle("Transactions")
             .toolbar {
