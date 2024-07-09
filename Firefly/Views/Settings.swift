@@ -31,19 +31,19 @@ struct Settings: View {
                         }
                     }
 
-                    VStack {
-                        Text("All the umbrellas")
-                            .multilineTextAlignment(.center)
-                            .font(Font.system(.title))
-                            .fontWeight(.ultraLight)
-                            .foregroundColor(.white)
-                    }
-                    .frame(width: 350, height: 350)
-                    .background(
-                        RoundedRectangle(
-                            cornerRadius: /*@START_MENU_TOKEN@*/ 25.0 /*@END_MENU_TOKEN@*/
-                        )
-                        .fill(.grainGradient(time: elapsedTime)))
+                    //                    VStack {
+                    //                        Text("All the umbrellas")
+                    //                            .multilineTextAlignment(.center)
+                    //                            .font(Font.system(.title))
+                    //                            .fontWeight(.ultraLight)
+                    //                            .foregroundColor(.white)
+                    //                    }
+                    //                    .frame(width: 350, height: 350)
+                    //                    .background(
+                    //                        RoundedRectangle(
+                    //                            cornerRadius: /*@START_MENU_TOKEN@*/ 25.0 /*@END_MENU_TOKEN@*/
+                    //                        )
+                    //                        .fill(.grainGradient(time: elapsedTime)))
 
                 }
                 .navigationTitle("Settings")

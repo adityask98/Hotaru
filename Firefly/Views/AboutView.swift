@@ -50,14 +50,13 @@ struct AboutView: View {
             //                    }
             //                }
             //            }
-            .navigationTitle("Subtitle")
-            .navigationBarItems(leading: Text("Analytics").font(.subheadline))
+            .navigationTitle("Home")
+            //            .navigationBarItems(leading: Text("Analytics").font(.subheadline))
             //            .navigationTitle("Home")
             //            .navigationBarTitleDisplayMode(.large)
         }
         .background(.ultraThinMaterial)
     }
-        
 
 }
 struct AboutView_Previews: PreviewProvider {

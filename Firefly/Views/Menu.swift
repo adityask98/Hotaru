@@ -36,9 +36,8 @@ struct Menu: View {
     var body: some View {
         TabView {
             AboutView()
-                .ignoresSafeArea(.all)
-                .tabItem { Image(systemName: "house") }
-                .tag(1)
+                .tabItem { Label("Home", systemImage: "house") }
+                .tag(1_)
             TransactionsView()
                 .tabItem { Label("Transactions", systemImage: "list.bullet.circle.fill") }
                 .tag(2)

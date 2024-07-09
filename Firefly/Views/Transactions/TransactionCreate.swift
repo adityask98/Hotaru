@@ -7,6 +7,7 @@
 
 import AlertToast
 import SwiftUI
+import UIKit
 
 struct TransactionCreate: View {
     @Environment(\.dismiss) var dismiss
@@ -32,91 +33,99 @@ struct TransactionCreate: View {
     @State private var toastParams: AlertToast = AlertToast(displayMode: .alert, type: .regular)
     @State private var showingNewCategoryToast = false
     @State private var newCategoryName: String = ""
+    @State private var submitIsLoading = false
 
     var body: some View {
         NavigationView {
-            Form {
-                VStack {
-                    Picker("", selection: $transactionType) {
-                        ForEach(transactionTypes, id: \.self) {
-                            Text($0)
+            VStack {
+                Form {
+                    VStack {
+                        Picker("", selection: $transactionType) {
+                            ForEach(transactionTypes, id: \.self) {
+                                Text($0)
+                            }
                         }
-                    }
-                    .pickerStyle(.segmented)
-                    HStack {
-                        Spacer()
-                        //                        Text("$")
-                        //                            .font(.largeTitle)
-                        TextField("Amount", text: $amount)
-                            .font(.largeTitle)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.center)
-                        Spacer()
-                    }
-                    .padding(.vertical, 20)
-
-                    HStack {
-                        Spacer()
-                        DatePicker("", selection: $date).pickerStyle(.inline).labelsHidden()
-                        Spacer()
-                    }
-                }
-
-                Section("Details") {
-                    TextField("Description", text: $transactionDescription)
-                    Picker("Category", selection: $selectedCategory) {
-                        Text("Uncategorized").tag("Uncategorized")
-                        ForEach(categories.filter { $0 != "Uncategorized" }, id: \.self) {
-                            category in
-                            Text(category)
-                        }
-                    }
-                    Button(action: addNewCategory) {
+                        .pickerStyle(.segmented)
                         HStack {
-                            Image(systemName: "plus.circle.fill")
-                            Text("Add Category")
+                            Spacer()
+                            //                        Text("$")
+                            //                            .font(.largeTitle)
+                            TextField("Amount", text: $amount)
+                                .font(.largeTitle)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.center)
+                            Spacer()
+                        }
+                        .padding(.vertical, 20)
+
+                        HStack {
+                            Spacer()
+                            DatePicker("", selection: $date).pickerStyle(.inline).labelsHidden()
+                            Spacer()
+                        }
+                    }
+
+                    Section("Details") {
+                        TextField("Description", text: $transactionDescription)
+                        Picker("Category", selection: $selectedCategory) {
+                            Text("Uncategorized").tag("Uncategorized")
+                            ForEach(categories.filter { $0 != "Uncategorized" }, id: \.self) {
+                                category in
+                                Text(category)
+                            }
+                        }
+                        Button(action: addNewCategory) {
+                            HStack {
+                                Image(systemName: "plus.circle.fill")
+                                Text("Add Category")
+                            }
+                        }
+
+                    }
+
+                    Section("Accounts") {
+                        switch transactionType {
+                        case "Expenses":
+                            accountPicker(title: "Source Account", binding: $sourceAccount)
+                        case "Income":
+                            accountPicker(
+                                title: "Destination Account", binding: $destinationAccount)
+                        case "Transfer":
+                            accountPicker(title: "Source Account", binding: $sourceAccount)
+                            accountPicker(
+                                title: "Destination Account", binding: $destinationAccount)
+                        default:
+                            EmptyView()
                         }
                     }
 
                 }
-
-                Section("Accounts") {
-                    switch transactionType {
-                    case "Expenses":
-                        accountPicker(title: "Source Account", binding: $sourceAccount)
-                    case "Income":
-                        accountPicker(title: "Destination Account", binding: $destinationAccount)
-                    case "Transfer":
-                        accountPicker(title: "Source Account", binding: $sourceAccount)
-                        accountPicker(title: "Destination Account", binding: $destinationAccount)
-                    default:
-                        EmptyView()
-                    }
+                .toast(isPresenting: $showToast, tapToDismiss: false) {
+                    toastParams
                 }
 
-                Button(action: {
-                    Task {
-                        do {
-                            try await submitTransaction()
-                        } catch {
-                            print("Error submitting transaction: \(error)")
-                            // Handle the error appropriately
+                HStack {
+                    Button(action: {
+                        Task {
+                            do {
+                                try await submitTransaction()
+                            } catch {
+                                print("Error submitting transaction: \(error)")
+                                // Handle the error appropriately
+                            }
                         }
+                    }) {
+                        Text("Add Transaction")
+                            .frame(maxWidth: .infinity)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.blue)
+                            .clipShape(.capsule)
                     }
-                }) {
-                    Text("Add Transaction")
-                        .frame(maxWidth: .infinity)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.blue)
-                        .clipShape(.capsule)
-                }
+                }.padding(.horizontal)
+            }
 
-            }
-            .toast(isPresenting: $showToast, tapToDismiss: false) {
-                toastParams
-            }
-            .navigationTitle("Add Expense")
+            .navigationTitle("Add Transaction")
             .allowsHitTesting(!showToast)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(trailing: Button("Cancel") { dismiss() })
@@ -155,15 +164,20 @@ struct TransactionCreate: View {
                 category: selectedCategory, type: transactionType,
                 sourceAccount: sourceAccount,
                 destinationAccount: destinationAccount)
+            let impact = await UINotificationFeedbackGenerator()
+
             toastParams = AlertToast(
                 displayMode: .alert, type: .complete(Color.green), title: "Saved Successfully")
+            await impact.notificationOccurred(.success)
             showToast = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 dismiss()
             }
         } catch {
+            let impact = await UINotificationFeedbackGenerator()
             toastParams = AlertToast(
                 displayMode: .alert, type: .error(Color.red), title: "Something went wrong")
+            await impact.notificationOccurred(.error)
             showToast = true
         }
     }
