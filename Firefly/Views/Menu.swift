@@ -27,7 +27,7 @@ struct Menu: View {
         }
     }
 
-    @State private var showToast = false
+    @EnvironmentObject private var alertViewModel: AlertViewModel
     @StateObject private var tokenSettingsValue = TokenSettingsViewModel()
     //    @ObservedObject var toastHandler: ToastHandlerModel
     @State private var tokenSheetShown = false
@@ -53,7 +53,7 @@ struct Menu: View {
 
         }
         .sheet(isPresented: $tokenSheetShown) {
-            TokenSettings()
+            TokenSettings().environmentObject(AlertViewModel())
         }
         .task {
             if !hasCheckedToken {
@@ -66,9 +66,6 @@ struct Menu: View {
         }.transition(.opacity)
         .ignoresSafeArea(.all)
 
-        .toast(isPresenting: $showToast, tapToDismiss: true) {
-            AlertToast(displayMode: .hud, type: .regular, title: "TEST")
-        }
     }
     private func checkToken() async throws {
         do {

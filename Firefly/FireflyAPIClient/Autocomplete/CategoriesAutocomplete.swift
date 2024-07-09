@@ -10,6 +10,7 @@ import Foundation
 enum AutocompleteError: Error {
     case decodeError
     case categories
+    case accounts
 }
 
 // MARK: - AutoCategoryElement
@@ -18,8 +19,6 @@ struct AutoCategoryElement: Codable {
 }
 
 typealias AutoCategory = [AutoCategoryElement]
-
-
 
 func fetchCategoriesAutocomplete() async throws -> AutoCategory {
     let request = try RequestBuilder(apiURL: autocompleteApiPaths.categories)
@@ -31,8 +30,6 @@ func fetchCategoriesAutocomplete() async throws -> AutoCategory {
     do {
         let decoder = JSONDecoder()
         let result = try decoder.decode(AutoCategory.self, from: data)
-        print("AUTO CATEGORIES")
-        print(result)
         return result
     } catch {
         print(error)

@@ -24,8 +24,14 @@ struct apiPaths {
     static let accounts = "api/v1/accounts"
 }
 
+struct postApiPaths {
+    static let addCategory = "api/v1/categories"
+    static let addTransactions = "api/v1/transactions"
+}
+
 struct autocompleteApiPaths {
     static let categories = "api/v1/autocomplete/categories"
+    static let accounts = "api/v1/autocomplete/accounts"
 }
 
 struct keychainConsts {

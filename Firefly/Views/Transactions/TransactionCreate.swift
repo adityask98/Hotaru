@@ -5,36 +5,37 @@
 //  Created by Aditya Srinivasa on 2024/07/05.
 //
 
+import AlertToast
 import SwiftUI
 
 struct TransactionCreate: View {
     @Environment(\.dismiss) var dismiss
-    @State private var transactionName: String = ""
+
+    @State private var transactionData: PostTransaction = defaultTransactionData()
+
+    //To populate
+    var transactionTypes = ["Expenses", "Income", "Transfer"]
+    @State private var categories: [String] = ["Default"]
+    @State private var accounts: AutoAccounts = AutoAccounts()
+
+    //Selections
+    @State private var transactionDescription: String = ""
     @State private var amount: String = ""
     @State private var date: Date = Date()
     @State private var selectedCategory: String = "Uncategorized"
     @State private var transactionType = "Expenses"
-    @State private var categories: [String] = ["Default"]
+    @State private var sourceAccount: (id: String, name: String) = ("", "")
+    @State private var destinationAccount: (id: String, name: String) = ("", "")
 
-    var transactionTypes = ["Expenses", "Income"]
-
-    //    var categories = ["Food", "Transport", "Entertainment", "Utilities", "Uncategorized"]
+    //Toasts and controllers
+    @State private var showToast = false
+    @State private var toastParams: AlertToast = AlertToast(displayMode: .alert, type: .regular)
+    @State private var showingNewCategoryToast = false
+    @State private var newCategoryName: String = ""
 
     var body: some View {
         NavigationView {
             Form {
-                //                Section(header: Text("Transaction Details")) {
-                //                    TextField("Transaction Name", text: $transactionName)
-                //
-                //                    HStack {
-                //                        Text("$")
-                //                        TextField("Amount", value: $amount, formatter: NumberFormatter())
-                //                            .keyboardType(.decimalPad)
-                //                    }
-                //
-                //                    DatePicker("Date", selection: $date, displayedComponents: .date)
-                //                }
-
                 VStack {
                     Picker("", selection: $transactionType) {
                         ForEach(transactionTypes, id: \.self) {
@@ -54,24 +55,6 @@ struct TransactionCreate: View {
                     }
                     .padding(.vertical, 20)
 
-                    //Description box
-                    //                    HStack {
-                    //                        Spacer()
-                    //                        TextField("Description", text: $transactionName)
-                    //                            .font(.subheadline)
-                    //                            .padding()
-                    //                            //.background(Color.gray.opacity(0.2))
-                    //                            .background(.ultraThinMaterial)
-                    //                            .clipShape(
-                    //                                RoundedRectangle(
-                    //                                    cornerRadius: 10.0
-                    //                                )
-                    //                            )
-                    //                            .multilineTextAlignment(.center)
-                    //                            .frame(maxWidth: 150)  // Adjust this value as needed
-                    //                        Spacer()
-                    //                    }
-
                     HStack {
                         Spacer()
                         DatePicker("", selection: $date).pickerStyle(.inline).labelsHidden()
@@ -80,27 +63,47 @@ struct TransactionCreate: View {
                 }
 
                 Section("Details") {
-                    TextField("Description", text: $transactionName)
+                    TextField("Description", text: $transactionDescription)
                     Picker("Category", selection: $selectedCategory) {
-                        ForEach(categories, id: \.self) { category in
+                        Text("Uncategorized").tag("Uncategorized")
+                        ForEach(categories.filter { $0 != "Uncategorized" }, id: \.self) {
+                            category in
                             Text(category)
                         }
-                        Divider()
-                        Button(action: addNewCategory) {
-                            HStack {
-                                Image(systemName: "plus.circle.fill")
-                                Text("Add Category")
-                            }
+                    }
+                    Button(action: addNewCategory) {
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                            Text("Add Category")
                         }
                     }
 
                 }
 
-                Button("AUTOCOMPLETE") {
-                    loadCategoryAutocomplete()
+                Section("Accounts") {
+                    switch transactionType {
+                    case "Expenses":
+                        accountPicker(title: "Source Account", binding: $sourceAccount)
+                    case "Income":
+                        accountPicker(title: "Destination Account", binding: $destinationAccount)
+                    case "Transfer":
+                        accountPicker(title: "Source Account", binding: $sourceAccount)
+                        accountPicker(title: "Destination Account", binding: $destinationAccount)
+                    default:
+                        EmptyView()
+                    }
                 }
 
-                Button(action: submitTransaction) {
+                Button(action: {
+                    Task {
+                        do {
+                            try await submitTransaction()
+                        } catch {
+                            print("Error submitting transaction: \(error)")
+                            // Handle the error appropriately
+                        }
+                    }
+                }) {
                     Text("Add Transaction")
                         .frame(maxWidth: .infinity)
                         .foregroundColor(.white)
@@ -110,26 +113,65 @@ struct TransactionCreate: View {
                 }
 
             }
+            .toast(isPresenting: $showToast, tapToDismiss: false) {
+                toastParams
+            }
             .navigationTitle("Add Expense")
+            .allowsHitTesting(!showToast)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(trailing: Button("Cancel") { dismiss() })
+            .alert("Enter the name for a new category", isPresented: $showingNewCategoryToast) {
+                TextField("New category", text: $newCategoryName).foregroundStyle(Color.black)
+                Button("Add") {
+                    Task {
+                        do {
+                            try await confirmAddNewCategory()
+                        } catch {
+                            print(error)
+                        }
+                    }
+
+                }
+                Button("Cancel", role: .cancel) {
+                    showingNewCategoryToast = false
+                }
+            } message: {
+                Text("Please enter a name for the new category.")
+            }
         }
         .onAppear {
-            loadCategoryAutocomplete()
+            loadAutocomplete()
         }
     }
 
-    func submitTransaction() {
+    func submitTransaction() async throws {
         // Implement your submission logic here
-        print(
-            "Transaction submitted: \(transactionName), Amount: \(amount), Date: \(date), Category: \(selectedCategory)"
-        )
-        dismiss()
+        //        print(
+        //            "Transaction submitted: \(transactionDescription), Amount: \(amount), Date: \(date), Category: \(selectedCategory)"
+        //        )
+        do {
+            try await postTransaction(
+                description: transactionDescription, amount: amount, date: date,
+                category: selectedCategory, type: transactionType,
+                sourceAccount: sourceAccount,
+                destinationAccount: destinationAccount)
+            toastParams = AlertToast(
+                displayMode: .alert, type: .complete(Color.green), title: "Saved Successfully")
+            showToast = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                dismiss()
+            }
+        } catch {
+            toastParams = AlertToast(
+                displayMode: .alert, type: .error(Color.red), title: "Something went wrong")
+            showToast = true
+        }
     }
 
-    func loadCategoryAutocomplete() {
+    func loadAutocomplete() {
         Task {
             do {
+                //Categories
                 let result = try await fetchCategoriesAutocomplete()
                 DispatchQueue.main.async {
                     // Extract names from AutoCategoryElement and filter out nil values
@@ -138,24 +180,68 @@ struct TransactionCreate: View {
                         self.categories.insert("Uncategorized", at: 0)
                     }
                 }
+                accounts = try await fetchAccountsAutocomplete()
             } catch {
                 print("Error loading categories: \(error)")
-                // Handle the error appropriately, set a default list of categories
-                DispatchQueue.main.async {
-                    self.categories = [
-                        "Food", "Transport", "Entertainment", "Utilities", "Uncategorized",
-                    ]
-                }
             }
         }
     }
 
     func addNewCategory() {
-        // Implement the logic to add a new category
-        // This could open a new sheet or alert to input the category name
-        print("Add new category tapped")
+        showingNewCategoryToast = true
+        newCategoryName = ""  // Reset the new category name
     }
 
+    func confirmAddNewCategory() async throws {
+        if !newCategoryName.isEmpty {
+            categories.append(newCategoryName)
+            selectedCategory = newCategoryName  // Optionally select the new category
+
+        }
+        showingNewCategoryToast = false
+    }
+    private func accountPicker(title: String, binding: Binding<(id: String, name: String)>)
+        -> some View
+    {
+        AccountsSelectionPicker(title: title, accounts: accounts) { id, name in
+            binding.wrappedValue = (id: id, name: name)
+        }
+    }
+
+}
+
+struct AccountsSelectionPicker: View {
+    let title: String
+    let accounts: AutoAccounts
+    let onSelection: (String, String) -> Void  //Callback for (id, name)
+
+    @State private var selectedAccountID: String?
+
+    init(
+        title: String = "Account", accounts: AutoAccounts,
+        onSelection: @escaping (String, String) -> Void
+    ) {
+        self.title = title
+        self.accounts = accounts
+        self.onSelection = onSelection
+    }
+
+    var body: some View {
+        Picker(title, selection: $selectedAccountID) {
+            Text("Select an account").tag(nil as String?)
+            ForEach(accounts, id: \.id) { account in
+                Text(account.name ?? "Unnamed Account")
+                    .tag(account.id as String?)
+            }
+        }
+        .onChange(of: selectedAccountID) { oldValue, newValue in
+            if let newId = newValue,
+                let selectedAccount = accounts.first(where: { $0.id == newId })
+            {
+                onSelection(newId, selectedAccount.name ?? "Unnamed Account")
+            }
+        }
+    }
 }
 
 //struct TransactionCreate_Previews: PreviewProvider {

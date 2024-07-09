@@ -36,6 +36,7 @@ struct TokenSettings: View {
                 .padding()
             }
         }
+        .padding(.horizontal)
         .onAppear(perform: tokenSettingsValues.loadCredentials)
         .interactiveDismissDisabled()
         .toast(isPresenting: $showToast, tapToDismiss: false) {

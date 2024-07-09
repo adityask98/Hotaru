@@ -49,6 +49,8 @@ func RequestBuilder(apiURL: String, httpMethod: String = "GET", ignoreBaseURL: B
         //throw KeychainError.itemNotFound
     }
     let headers = [
+        "Content-Type": "application/json",
+        "Accept": "application/json",
         "Authorization": "Bearer \(token)"
     ]
 
