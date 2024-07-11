@@ -23,10 +23,11 @@ struct TransactionCreate: View {
     @State private var transactionDescription: String = ""
     @State private var amount: String = ""
     @State private var date: Date = Date()
-    @State private var selectedCategory: String = "Uncategorized"
+    @State private var selectedCategory: String = ""
     @State private var transactionType = "Expenses"
     @State private var sourceAccount: (id: String, name: String) = ("", "")
     @State private var destinationAccount: (id: String, name: String) = ("", "")
+    @State private var transactionNote: String = ""
 
     //Toasts and controllers
     @State private var showToast = false
@@ -66,7 +67,7 @@ struct TransactionCreate: View {
                     Section("Details") {
                         TextField("Description", text: $transactionDescription)
                         Picker("Category", selection: $selectedCategory) {
-                            Text("Uncategorized").tag("Uncategorized")
+                            Text("Uncategorized").tag("")
                             ForEach(categories.filter { $0 != "Uncategorized" }, id: \.self) {
                                 category in
                                 Text(category)
@@ -95,6 +96,11 @@ struct TransactionCreate: View {
                         default:
                             EmptyView()
                         }
+                    }
+
+                    Section("Note") {
+                        TextField("Note", text: $transactionNote, axis: .vertical)
+                            .lineLimit(5)
                     }
 
                 }
@@ -161,7 +167,7 @@ struct TransactionCreate: View {
                 description: transactionDescription, amount: amount, date: date,
                 category: selectedCategory, type: transactionType,
                 sourceAccount: sourceAccount,
-                destinationAccount: destinationAccount)
+                destinationAccount: destinationAccount, notes: transactionNote)
             let impact = await UINotificationFeedbackGenerator()
 
             toastParams = AlertToast(

@@ -94,7 +94,7 @@ struct TransactionsView: View {
             }
         }
         .sheet(isPresented: $addSheetShown) {
-            TransactionCreate().presentationDetents([.fraction(0.9)]).background(.ultraThinMaterial)
+            TransactionCreate().background(.ultraThinMaterial)
         }
     }
 

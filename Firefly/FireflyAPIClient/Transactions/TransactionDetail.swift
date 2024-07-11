@@ -111,9 +111,7 @@ struct TransactionDetail: View {
 
                     VStack(alignment: .leading, spacing: 0) {
                         VStack(alignment: .leading) {
-                            Text(
-                                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse accumsan justo a dolor congue fringilla. Duis non purus velit. Integer hendrerit, lacus ac volutpat ullamcorper."
-                            )
+                            Text(transaction.notes ?? "Something went wrong.")
                             Spacer()  // This will push the content to the top
                         }
                         .frame(maxWidth: .infinity, minHeight: 100, alignment: .topLeading)

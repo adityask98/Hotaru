@@ -13,7 +13,8 @@ enum TransactionPostError: Error {
 
 func postTransaction(
     description: String, amount: String, date: Date, category: String, type: String,
-    sourceAccount: (id: String, name: String), destinationAccount: (id: String, name: String)
+    sourceAccount: (id: String, name: String), destinationAccount: (id: String, name: String),
+    notes: String
 ) async throws {
     let transaction = PostTransaction(
         errorIfDuplicateHash: true, applyRules: true, fireWebhooks: true,
@@ -28,8 +29,7 @@ func postTransaction(
                 sourceName: sourceAccount.name,
                 destinationID: destinationAccount.id,
                 destinationName: destinationAccount.name,
-                latitude: "10.00000",
-                longitude: "10.0000"
+                notes: notes
             )
         ])
 
@@ -42,8 +42,8 @@ func postTransaction(
     let (responseData, response) = try await URLSession.shared.data(for: request)
     print(response)
     if let responseString = String(data: responseData, encoding: .utf8) {
-        //print("Raw response body:")
-        //print(responseString)
+//        print("Raw response body:")
+//        print(responseString)
     } else {
         print("Unable to convert response data to string")
     }
