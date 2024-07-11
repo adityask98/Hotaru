@@ -31,6 +31,8 @@
 		48B9CE6E2C3CF88D00AF7BA8 /* Categories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B9CE6D2C3CF88D00AF7BA8 /* Categories.swift */; };
 		48B9CE702C3D182F00AF7BA8 /* AccountsAutocomplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B9CE6F2C3D182F00AF7BA8 /* AccountsAutocomplete.swift */; };
 		48B9CE722C3D2A4E00AF7BA8 /* TransactionPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B9CE712C3D2A4E00AF7BA8 /* TransactionPost.swift */; };
+		48BB087E2C3E6C2C006D32E3 /* TransactionDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BB087D2C3E6C2B006D32E3 /* TransactionDetail.swift */; };
+		48BB08802C3FD4F5006D32E3 /* UIHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BB087F2C3FD4F5006D32E3 /* UIHelpers.swift */; };
 		48DF33FF2AD3E31900F6F215 /* FireflyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF33FE2AD3E31900F6F215 /* FireflyApp.swift */; };
 		48DF34012AD3E31900F6F215 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF34002AD3E31900F6F215 /* AboutView.swift */; };
 		48DF34032AD3E31A00F6F215 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48DF34022AD3E31A00F6F215 /* Assets.xcassets */; };
@@ -64,6 +66,8 @@
 		48B9CE6D2C3CF88D00AF7BA8 /* Categories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Categories.swift; sourceTree = "<group>"; };
 		48B9CE6F2C3D182F00AF7BA8 /* AccountsAutocomplete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsAutocomplete.swift; sourceTree = "<group>"; };
 		48B9CE712C3D2A4E00AF7BA8 /* TransactionPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionPost.swift; sourceTree = "<group>"; };
+		48BB087D2C3E6C2B006D32E3 /* TransactionDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDetail.swift; sourceTree = "<group>"; };
+		48BB087F2C3FD4F5006D32E3 /* UIHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIHelpers.swift; sourceTree = "<group>"; };
 		48DF33FB2AD3E31900F6F215 /* Firefly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Firefly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		48DF33FE2AD3E31900F6F215 /* FireflyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FireflyApp.swift; sourceTree = "<group>"; };
 		48DF34002AD3E31900F6F215 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
@@ -98,6 +102,7 @@
 				486E1D812C359A520038BB4F /* effetcs.metal */,
 				486E1D832C359BFB0038BB4F /* GrainGradient.metal */,
 				486E1D852C359E450038BB4F /* BackgroundMaterial.swift */,
+				48BB087F2C3FD4F5006D32E3 /* UIHelpers.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -149,6 +154,7 @@
 				48552BA52C1C6B20002ED3CF /* Transactions.swift */,
 				48552BA72C1C6BFE002ED3CF /* TransactionsViewModel.swift */,
 				48B9CE712C3D2A4E00AF7BA8 /* TransactionPost.swift */,
+				48BB087D2C3E6C2B006D32E3 /* TransactionDetail.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -311,6 +317,7 @@
 				48DF34012AD3E31900F6F215 /* AboutView.swift in Sources */,
 				48DF34102AD3E39B00F6F215 /* UserModel.swift in Sources */,
 				48DF34122AD3E68A00F6F215 /* UserAPIClient.swift in Sources */,
+				48BB087E2C3E6C2C006D32E3 /* TransactionDetail.swift in Sources */,
 				480EAAD82C158F2D0038ADF7 /* RequestBuilder.swift in Sources */,
 				48552BA32C1C545E002ED3CF /* ToastHandler.swift in Sources */,
 				48552BAA2C1D2D12002ED3CF /* TransactionsView.swift in Sources */,
@@ -318,6 +325,7 @@
 				4836BEC12C1AFD2E0039D219 /* Settings.swift in Sources */,
 				48DF33FF2AD3E31900F6F215 /* FireflyApp.swift in Sources */,
 				48552BA82C1C6BFE002ED3CF /* TransactionsViewModel.swift in Sources */,
+				48BB08802C3FD4F5006D32E3 /* UIHelpers.swift in Sources */,
 				486E1D862C359E450038BB4F /* BackgroundMaterial.swift in Sources */,
 				48E9195B2AE2C1E60074B904 /* Constants.swift in Sources */,
 				4843D2372B13844A00D1A131 /* Menu.swift in Sources */,
@@ -481,7 +489,8 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -517,7 +526,8 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

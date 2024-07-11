@@ -41,9 +41,16 @@ struct TransactionsView: View {
                         ForEach(transactions.transactions?.data ?? [], id: \.id) {
                             transactionData in
                             if let transaction = transactionData.attributes?.transactions?.first {
-                                TransactionsRow(transaction: transaction)
-                                    .listRowInsets(EdgeInsets())
-                                    .listRowSeparator(.hidden)
+                                ZStack {
+                                    NavigationLink(
+                                        destination: TransactionDetail(transaction: transaction)
+                                    ) { EmptyView() }
+                                    .opacity(0.0).buttonStyle(PlainButtonStyle())
+                                    TransactionsRow(transaction: transaction)
+                                }
+                                .listRowInsets(EdgeInsets())
+                                .listRowSeparator(.hidden)
+
                             }
                         }
 
@@ -93,18 +100,21 @@ struct TransactionsView: View {
 
     private var filterSection: some View {
         VStack {
-            HStack {
-                Text("Filter")
-                    .font(.subheadline)
-                Spacer()
-                Button(action: {
-                    withAnimation {
-                        filterExpanded.toggle()
-                    }
-                }) {
+            Button(action: {
+                withAnimation {
+                    filterExpanded.toggle()
+                }
+            }) {
+                HStack {
+                    Text("Filter")
+                        .font(.subheadline)
+                    Spacer()
                     Image(systemName: filterExpanded ? "chevron.up" : "chevron.down")
                 }
+                .contentShape(Rectangle())  // This ensures the entire HStack is tappable
             }
+            .buttonStyle(PlainButtonStyle())  // This removes the default button styling
+
             if filterExpanded {
                 VStack(alignment: .leading, spacing: 10) {
                     DatePicker(
@@ -146,30 +156,37 @@ struct TransactionsView: View {
 
 struct TransactionsRow: View {
     var transaction: TransactionsTransaction
+    var showDate = true
+    var showAccount = true
     var body: some View {
         VStack {
             HStack {
                 Image(systemName: transactionTypeIcon(transaction.type ?? "unknown"))
-                    .foregroundStyle(transactionTypeColor(transaction.type ?? "unknown"))
+                    .foregroundStyle(transactionTypeStyle(transaction.type ?? "unknown"))
                     .frame(width: 60, height: 60)
                     .font(.system(size: 30))
 
                 VStack(alignment: .leading) {
                     Text(transaction.description ?? "Unkown Description")
                         .font(.headline)
+                        .lineLimit(1)
                     Text(formatAmount(transaction.amount, symbol: transaction.currencySymbol))
                         .font(.largeTitle)
                 }
                 Spacer()
                 VStack(alignment: .trailing) {
                     Spacer()
-                    if transaction.sourceName != nil {
-                        Text(transaction.sourceName ?? "Source Error")
-                            .font(.subheadline)
+                    if showAccount {
+                        if transaction.sourceName != nil {
+                            Text(transaction.sourceName ?? "Source Error")
+                                .font(.subheadline)
+                                .foregroundStyle(.gray)
+                        }
+                    }
+                    if showDate {
+                        Text(formatDate(transaction.date))
                             .foregroundStyle(.gray)
                     }
-                    Text(formatDate(transaction.date))
-                        .foregroundStyle(.gray)
                 }
             }
             .padding(.horizontal, 8)
@@ -179,32 +196,6 @@ struct TransactionsRow: View {
         .cornerRadius(16)  // Round the corners
         .padding(.horizontal)  // Add horizontal padding to the entire row
         .padding(.vertical, 8)
-    }
-
-    private func transactionTypeIcon(_ type: String) -> String {
-        switch type {
-        case "withdrawal":
-            return "arrowshape.down.circle.fill"
-        case "transfer":
-            return "arrow.left.arrow.right.circle.fill"
-        case "deposit":
-            return "arrowshape.up.circle.fill"
-        default:
-            return "circle.badge.questionmark.fill"
-        }
-    }
-
-    private func transactionTypeColor(_ type: String) -> Color {
-        switch type {
-        case "withdrawal":
-            return .red
-        case "deposit":
-            return .green
-        case "transfer":
-            return .blue
-        default:
-            return .gray
-        }
     }
 
     private func formatDate(_ dateString: String?) -> String {
@@ -233,17 +224,6 @@ struct TransactionsRow: View {
         }
     }
 
-    private func formatAmount(_ amountString: String?, symbol: String?) -> String {
-        guard let amountString = amountString,
-            let amount = Double(amountString)
-        else {
-            return "Unknown Amount"
-        }
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencySymbol = symbol ?? "¥"
-        return formatter.string(from: NSNumber(value: amount)) ?? "Unknown Amount"
-    }
 }
 
 //struct TransactionsView_Previews: PreviewProvider {

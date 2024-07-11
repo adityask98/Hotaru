@@ -60,12 +60,14 @@ class AccountsViewModel: ObservableObject {
 
     func getAccounts(
         limit: Int = 20,
-        page: Int
+        page: Int,
+        type: String = "asset"
     ) async throws -> Accounts {
         var request = try RequestBuilder(apiURL: apiPaths.accounts)
         request.url?.append(queryItems: [
             URLQueryItem(name: "page", value: String(page)),
             URLQueryItem(name: "limit", value: String(limit)),
+            URLQueryItem(name: "type", value: type),
         ])
 
         let (data, response) = try await URLSession.shared.data(for: request)

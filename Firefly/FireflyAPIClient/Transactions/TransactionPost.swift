@@ -27,7 +27,9 @@ func postTransaction(
                 sourceID: sourceAccount.id,
                 sourceName: sourceAccount.name,
                 destinationID: destinationAccount.id,
-                destinationName: destinationAccount.name
+                destinationName: destinationAccount.name,
+                latitude: "10.00000",
+                longitude: "10.0000"
             )
         ])
 

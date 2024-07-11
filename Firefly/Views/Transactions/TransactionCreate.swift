@@ -48,8 +48,6 @@ struct TransactionCreate: View {
                         .pickerStyle(.segmented)
                         HStack {
                             Spacer()
-                            //                        Text("$")
-                            //                            .font(.largeTitle)
                             TextField("Amount", text: $amount)
                                 .font(.largeTitle)
                                 .keyboardType(.decimalPad)
@@ -100,9 +98,6 @@ struct TransactionCreate: View {
                     }
 
                 }
-                .toast(isPresenting: $showToast, tapToDismiss: false) {
-                    toastParams
-                }
 
                 HStack {
                     Button(action: {
@@ -129,6 +124,9 @@ struct TransactionCreate: View {
             .allowsHitTesting(!showToast)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(trailing: Button("Cancel") { dismiss() })
+            .toast(isPresenting: $showToast, tapToDismiss: false) {
+                toastParams
+            }
             .alert("Enter the name for a new category", isPresented: $showingNewCategoryToast) {
                 TextField("New category", text: $newCategoryName).foregroundStyle(Color.black)
                 Button("Add") {

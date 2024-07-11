@@ -40,21 +40,21 @@ struct TransactionsTransaction: Codable {
     let amount: String?
     let foreignAmount: JSONNull?
     let description, sourceID, sourceName: String?
-    let sourceIban: JSONNull?
+    let sourceIban: String?
     let sourceType, destinationID, destinationName: String?
     let destinationIban: String?
     let destinationType: String?
-    let budgetID, budgetName: JSONNull?
+    let budgetID, budgetName: String?
     let categoryID, categoryName: String?
     let billID, billName: String?
     let reconciled: Bool?
     let notes: String?
-    let tags: [JSONAny]?
+    let tags: [String]?
     let internalReference, externalID: JSONNull?
     let originalSource: String?
     let recurrenceID: String?
     let recurrenceTotal, recurrenceCount, bunqPaymentID: Int?
-    let externalURL: JSONNull?
+    let externalURL: String?
     let importHashV2: String?
     let sepaCc, sepaCTOp, sepaCTID, sepaDB: JSONNull?
     let sepaCountry, sepaEp, sepaCi, sepaBatchID: JSONNull?
@@ -451,6 +451,7 @@ struct PostTransactionElement: Codable {
     var sepaDB, sepaCountry, sepaEp, sepaCi: String?
     var sepaBatchID, interestDate, bookDate, processDate: String?
     var dueDate, paymentDate, invoiceDate: String?
+    var latitude, longitude: String?
 
     enum CodingKeys: String, CodingKey {
         case type, date, amount, description, order
@@ -490,6 +491,7 @@ struct PostTransactionElement: Codable {
         case dueDate = "due_date"
         case paymentDate = "payment_date"
         case invoiceDate = "invoice_date"
+        case latitude, longitude
     }
 }
 
