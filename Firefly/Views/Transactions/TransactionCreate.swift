@@ -41,7 +41,7 @@ struct TransactionCreate: View {
             VStack {
                 Form {
                     VStack {
-                        Picker("", selection: $transactionType) {
+                        Picker("", selection: $transactionType.animation()) {
                             ForEach(transactionTypes, id: \.self) {
                                 Text($0)
                             }
@@ -103,7 +103,7 @@ struct TransactionCreate: View {
                             .lineLimit(5)
                     }
 
-                }
+                }.scrollDismissesKeyboard(.interactively)
 
                 HStack {
                     Button(action: {
@@ -123,7 +123,7 @@ struct TransactionCreate: View {
                             .background(Color.blue)
                             .clipShape(.capsule)
                     }
-                }.padding(.horizontal)
+                }.padding(.horizontal).padding(.vertical, 8)
             }
 
             .navigationTitle("Add Transaction")
