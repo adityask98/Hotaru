@@ -8,25 +8,40 @@
 import SwiftUI
 
 struct TransactionDetail: View {
-    var transaction: TransactionsTransaction
+    var transaction: TransactionsDatum
     var tags = ["Test1", "Test2", "Test3", "LongTag", "AnotherTag"]
     var body: some View {
         ScrollView {
             VStack {
                 HStack {
-                    Image(systemName: transactionTypeIcon(transaction.type ?? "unknown"))
-                        .foregroundStyle(transactionTypeStyle(transaction.type ?? "unknown"))
-                        .frame(width: 80, height: 60)
-                        .font(.system(size: 60))
+                    Image(
+                        systemName: transactionTypeIcon(
+                            transaction.attributes?.transactions?.first?.type ?? "unknown")
+                    )
+                    .foregroundStyle(
+                        transactionTypeStyle(
+                            transaction.attributes?.transactions?.first?.type ?? "unknown")
+                    )
+                    .frame(width: 80, height: 60)
+                    .font(.system(size: 60))
 
                     VStack(alignment: .leading) {
-                        Text(transaction.description ?? "Unkown")
+                        Text(transaction.attributes?.transactions?.first?.description ?? "Unkown")
 
-                        Text(transaction.type?.capitalized ?? "Unknown").foregroundStyle(
-                            transactionTypeColor(type: transaction.type ?? "unknown"))
+                        Text(
+                            transaction.attributes?.transactions?.first?.type?.capitalized
+                                ?? "Unknown"
+                        ).foregroundStyle(
+                            transactionTypeColor(
+                                type: transaction.attributes?.transactions?.first?.type ?? "unknown"
+                            ))
                         Spacer()
-                        Text(formatDate(transaction.date ?? "Unknown") ?? "Unknown")
-                            .font(.footnote)
+                        Text(
+                            formatDate(
+                                transaction.attributes?.transactions?.first?.date ?? "Unknown")
+                                ?? "Unknown"
+                        )
+                        .font(.footnote)
                     }
                     Spacer()
                 }
@@ -46,10 +61,15 @@ struct TransactionDetail: View {
                         VStack(alignment: .leading) {
                             Text("Amount").font(.title3)
                             Text(
-                                formatAmount(transaction.amount, symbol: transaction.currencySymbol)
+                                formatAmount(
+                                    transaction.attributes?.transactions?.first?.amount,
+                                    symbol: transaction.attributes?.transactions?.first?
+                                        .currencySymbol)
                             ).font(.largeTitle).minimumScaleFactor(0.5).lineLimit(1)
                                 .foregroundStyle(
-                                    transactionTypeColor(type: transaction.type ?? "unknown"))
+                                    transactionTypeColor(
+                                        type: transaction.attributes?.transactions?.first?.type
+                                            ?? "unknown"))
                         }
                         .padding()
 
@@ -60,7 +80,9 @@ struct TransactionDetail: View {
                     HStack(alignment: .top) {
                         VStack(alignment: .leading) {
                             Text("Source").font(.title3)
-                            Text(transaction.sourceName ?? "Unknown").font(.largeTitle)
+                            Text(
+                                transaction.attributes?.transactions?.first?.sourceName ?? "Unknown"
+                            ).font(.largeTitle)
                                 .minimumScaleFactor(0.5).lineLimit(1)
                         }
                         .padding()
@@ -69,7 +91,10 @@ struct TransactionDetail: View {
 
                         VStack(alignment: .leading) {
                             Text("Destination").font(.title3)
-                            Text(transaction.destinationName ?? "Unknown").font(.largeTitle)
+                            Text(
+                                transaction.attributes?.transactions?.first?.destinationName
+                                    ?? "Unknown"
+                            ).font(.largeTitle)
                                 .minimumScaleFactor(0.5).lineLimit(1)
                         }
                         .padding()
@@ -78,17 +103,23 @@ struct TransactionDetail: View {
                     HStack(alignment: .top) {
                         VStack(alignment: .leading) {
                             Text("Category").font(.title3)
-                            Text(transaction.categoryName ?? "Unknown").font(.largeTitle)
+                            Text(
+                                transaction.attributes?.transactions?.first?.categoryName
+                                    ?? "Unknown"
+                            ).font(.largeTitle)
                                 .minimumScaleFactor(0.5).lineLimit(
                                     1)
                         }
                         .padding()
 
                         Spacer()
-                        if transaction.budgetName != nil {
+                        if transaction.attributes?.transactions?.first?.budgetName != nil {
                             VStack(alignment: .leading) {
                                 Text("Budget").font(.title3)
-                                Text(transaction.budgetName ?? "Unknown").font(.largeTitle)
+                                Text(
+                                    transaction.attributes?.transactions?.first?.budgetName
+                                        ?? "Unknown"
+                                ).font(.largeTitle)
                                     .minimumScaleFactor(0.5).lineLimit(
                                         1)
                             }
@@ -101,7 +132,7 @@ struct TransactionDetail: View {
                 .background(.ultraThinMaterial)
                 .clipShape(RoundedRectangle(cornerRadius: 18.0))
 
-                if transaction.notes != nil {
+                if transaction.attributes?.transactions?.first?.notes != nil {
                     HStack {
                         Text("Notes")
                             .fontWeight(.bold)
@@ -111,7 +142,9 @@ struct TransactionDetail: View {
 
                     VStack(alignment: .leading, spacing: 0) {
                         VStack(alignment: .leading) {
-                            Text(transaction.notes ?? "Something went wrong.")
+                            Text(
+                                transaction.attributes?.transactions?.first?.notes
+                                    ?? "Something went wrong.")
                             Spacer()  // This will push the content to the top
                         }
                         .frame(maxWidth: .infinity, minHeight: 100, alignment: .topLeading)

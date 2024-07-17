@@ -109,6 +109,64 @@ class AccountsViewModel: ObservableObject {
         }
     }
 }
+
+class AccountDetailViewModel: ObservableObject {
+    @Published var account: AccountsDatum?
+    @Published var isLoading: Bool = false
+    @Published var accountTransactions: Transactions?
+
+    func fetchAccount(accountID: String) async {
+        self.isLoading = true
+        do {
+            self.account = try await getAccount(id: accountID)
+        } catch {
+            print("error fetching account")
+            print(error)
+        }
+        self.isLoading = false
+    }
+
+    func getAccount(id: String) async throws -> AccountsDatum {
+        let url = apiPaths.accounts + "/\(id)"
+        let request = try RequestBuilder(apiURL: url)
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            throw AccountsModelError.invalidResponse
+        }
+
+        do {
+            let decoder = JSONDecoder()
+            let result = try decoder.decode(AccountsDatum.self, from: data)
+
+            return result
+        } catch {
+            print(error)
+            throw AccountsModelError.invalidData
+        }
+    }
+
+}
+func getTransactionsForAccount(_ id: String) async throws -> Transactions {
+    let url = apiPaths.accountTransactions(id)
+    let request = try RequestBuilder(apiURL: url)
+
+    let (data, response) = try await URLSession.shared.data(for: request)
+
+    guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+        throw TransactionsModelError.invalidResponse
+    }
+
+    do {
+        let decoder = JSONDecoder()
+        let result = try decoder.decode(Transactions.self, from: data)
+
+        return result
+    } catch {
+        print(error)
+        throw TransactionsModelError.invalidData
+    }
+}
 //extension AccountsViewModel {
 //    static func mock() -> AccountsViewModel {
 //        let viewModel = AccountsViewModel()

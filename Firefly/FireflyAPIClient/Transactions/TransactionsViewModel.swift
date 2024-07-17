@@ -13,6 +13,15 @@ enum TransactionsModelError: Error {
     case invalidData
 }
 
+enum TransactionTypes: String, CaseIterable, Identifiable {
+    case all = "all"
+    case withdrawals = "withdrawals"
+    case transfers = "transfers"
+    case deposits = "deposits"
+
+    var id: String { self.rawValue }
+}
+
 @MainActor
 final class TransactionsViewModel: ObservableObject {
     @Published var transactions: Transactions?
@@ -22,6 +31,7 @@ final class TransactionsViewModel: ObservableObject {
     @Published var startDate: Date = Calendar.current.date(
         byAdding: .month, value: -1, to: Date.now)!
     @Published var endDate: Date = Date.now
+    @Published var type: TransactionTypes = .all
 
     func fetchTransactions(loadMore: Bool = false) async {
         if loadMore {
@@ -47,7 +57,7 @@ final class TransactionsViewModel: ObservableObject {
                 }
             } else {
                 self.transactions = try await getTransactions(
-                    startDate: formatDateToYYYYMMDD(self.startDate),
+                    type: type.rawValue, startDate: formatDateToYYYYMMDD(self.startDate),
                     endDate: formatDateToYYYYMMDD(self.endDate),
                     page: 1)
             }
@@ -67,18 +77,19 @@ final class TransactionsViewModel: ObservableObject {
 
     func getTransactions(
         limit: Int = 20,
-        type: String = "expense",
+        type: String = "all",
         startDate: String,
         endDate: String,
         page: Int
     ) async throws -> Transactions {
-        var request = try RequestBuilder(apiURL: apiPaths.accountTransactions())
+        var request = try RequestBuilder(apiURL: apiPaths.transactions)
         request.url?.append(queryItems: [
             //URLQueryItem(name: "type", value: type),
             URLQueryItem(name: "limit", value: String(limit)),
             URLQueryItem(name: "page", value: String(page)),
             URLQueryItem(name: "start", value: startDate),
             URLQueryItem(name: "end", value: endDate),
+            URLQueryItem(name: "type", value: type),
         ])
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -124,6 +135,7 @@ final class TransactionsViewModel: ObservableObject {
         self.startDate = Calendar.current.date(
             byAdding: .month, value: -1, to: Date.now)!
         self.endDate = Date.now
+        self.type = .all
     }
 }
 

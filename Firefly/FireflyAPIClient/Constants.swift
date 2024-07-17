@@ -18,10 +18,12 @@ struct UserDefaultKeys {
 
 struct apiPaths {
     static let userAbout = "api/v1/about/user"
-    static func accountTransactions() -> String {
-        return "api/v1/transactions"
-    }
+    static let transactions = "api/v1/transactions"
     static let accounts = "api/v1/accounts"
+    static func accountTransactions(_ id: String) -> String {
+        return "api/v1/accounts/\(id)/transactions"
+    }
+    static let charts = "api/v1/chart/account/overview"
 }
 
 struct postApiPaths {
@@ -32,6 +34,7 @@ struct postApiPaths {
 struct autocompleteApiPaths {
     static let categories = "api/v1/autocomplete/categories"
     static let accounts = "api/v1/autocomplete/accounts"
+    static let budgets = "api/v1/autocomplete/budgets"
 }
 
 struct keychainConsts {

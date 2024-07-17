@@ -17,13 +17,16 @@ struct TransactionCreate: View {
     //To populate
     var transactionTypes = ["Expenses", "Income", "Transfer"]
     @State private var categories: [String] = ["Default"]
+    @State private var budgets: AutoBudget = AutoBudget()
     @State private var accounts: AutoAccounts = AutoAccounts()
+    
 
     //Selections
     @State private var transactionDescription: String = ""
     @State private var amount: String = ""
     @State private var date: Date = Date()
     @State private var selectedCategory: String = ""
+    @State private var selectedBudget: String = ""
     @State private var transactionType = "Expenses"
     @State private var sourceAccount: (id: String, name: String) = ("", "")
     @State private var destinationAccount: (id: String, name: String) = ("", "")
@@ -66,6 +69,7 @@ struct TransactionCreate: View {
 
                     Section("Details") {
                         TextField("Description", text: $transactionDescription)
+                        
                         Picker("Category", selection: $selectedCategory) {
                             Text("Uncategorized").tag("")
                             ForEach(categories.filter { $0 != "Uncategorized" }, id: \.self) {
@@ -79,6 +83,13 @@ struct TransactionCreate: View {
                                 Text("Add Category")
                             }
                         }
+
+                        //                        AutocompleteSelectionPicker(
+                        //                            title: "Budget", items: budgets,
+                        //                            itemLabel: { $0.name ?? "Unnamed budget" },
+                        //                            onSelection: { id, name in
+                        //                                selectedBudget = (id: id, name: name)
+                        //                            })
 
                     }
 
@@ -198,7 +209,11 @@ struct TransactionCreate: View {
                         self.categories.insert("Uncategorized", at: 0)
                     }
                 }
+                //Accounts
                 accounts = try await fetchAccountsAutocomplete()
+
+                //Budgets
+                budgets = try await fetchBudgetsAutocomplete()
             } catch {
                 print("Error loading categories: \(error)")
             }
@@ -257,6 +272,44 @@ struct AccountsSelectionPicker: View {
                 let selectedAccount = accounts.first(where: { $0.id == newId })
             {
                 onSelection(newId, selectedAccount.name ?? "Unnamed Account")
+            }
+        }
+    }
+}
+
+struct AutocompleteSelectionPicker<T: Identifiable>: View {
+    let title: String
+    let items: [T]
+    let itemLabel: (T) -> String
+    let onSelection: (T) -> Void
+
+    @State private var selectedID: T.ID?
+
+    init(
+        title: String,
+        items: [T],
+        itemLabel: @escaping (T) -> String,
+        onSelection: @escaping (T) -> Void
+    ) {
+        self.title = title
+        self.items = items
+        self.itemLabel = itemLabel
+        self.onSelection = onSelection
+    }
+
+    var body: some View {
+        Picker(title, selection: $selectedID) {
+            Text("Select an item").tag(nil as T.ID?)
+            ForEach(items) { item in
+                Text(itemLabel(item))
+                    .tag(item.id as T.ID?)
+            }
+        }
+        .onChange(of: selectedID) { oldValue, newValue in
+            if let newId = newValue,
+                let selectedItem = items.first(where: { $0.id == newId })
+            {
+                onSelection(selectedItem)
             }
         }
     }

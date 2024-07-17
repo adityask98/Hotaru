@@ -10,13 +10,14 @@ import SwiftUI
 @MainActor
 struct AccountsView: View {
     @StateObject private var accounts = AccountsViewModel()
+    @State private var isLoading = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack {
-                    if accounts.isLoading {
-                        Text("Loading")
+                    if isLoading {
+                        LoadingSpinner()
                     } else {
                         //                        VStack {
                         //                            HStack {
@@ -39,9 +40,7 @@ struct AccountsView: View {
                             ], alignment: .center, spacing: 10
                         ) {
                             ForEach(accounts.accounts?.data ?? [], id: \.id) { accountData in
-                                if let attributes = accountData.attributes {
-                                    AccountItem(account: attributes)
-                                }
+                                AccountItem(account: accountData)
                             }
                         }
                         .padding()
@@ -50,6 +49,11 @@ struct AccountsView: View {
             }
             .navigationTitle("Accounts")
             .background(Color.clear)
+            .refreshable {
+                Task {
+                    await accounts.fetchAccounts()
+                }
+            }
         }
         .onAppear {
             if accounts.accounts == nil {
@@ -62,39 +66,54 @@ struct AccountsView: View {
 }
 
 struct AccountItem: View {
-    var account: AccountsAttributes
+    var account: AccountsDatum
     var body: some View {
-        VStack {
-            // Account Name
-            HStack {
-                Text(account.name ?? "Unknown")
-                    .fontWeight(.semibold)
-                    .lineLimit(1)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(Color.green)
-                    .font(.system(size: 12))
-            }
-            .padding(.bottom, -4)
-            Divider().padding(.horizontal, -16)
-            // Balance
-            Text(formatAmount(account.currentBalance, symbol: account.currencySymbol))
+        ZStack {
+
+            VStack {
+                // Account Name
+                HStack {
+                    Text(account.attributes?.name ?? "Unknown")
+                        .fontWeight(.semibold)
+                        .lineLimit(1)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(Color.green)
+                        .font(.system(size: 12))
+                }
+                .padding(.bottom, -4)
+                Divider().padding(.horizontal, -16)
+                // Balance
+                Text(
+                    formatAmount(
+                        account.attributes?.currentBalance,
+                        symbol: account.attributes?.currencySymbol)
+                )
                 .font(.title)
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            HStack {
-                Spacer()
-                Text("As of \(formatDate(account.currentBalanceDate))").font(.caption2).fontWeight(
-                    .ultraLight)
+                HStack {
+                    Spacer()
+                    Text("As of \(formatDate(account.attributes?.currentBalanceDate))").font(
+                        .caption2
+                    )
+                    .fontWeight(
+                        .ultraLight)
+                }
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 7)
+            .frame(width: 175)
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 18))
+            NavigationLink(destination: AccountDetail(account: account)) {
+                Rectangle()
+                    .fill(Color.clear)
+                    .contentShape(Rectangle())
             }
         }
-        .padding(.horizontal)
-        .padding(.vertical, 7)
-        .frame(width: 175)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 
     private func formatAmount(_ amountString: String?, symbol: String?) -> String {

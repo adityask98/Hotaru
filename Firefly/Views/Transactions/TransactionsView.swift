@@ -21,37 +21,31 @@ struct TransactionsView: View {
     @State private var filterType: TransactionsFilterType = .all
     @State var addSheetShown = false
     @State private var filterExpanded = false
+    @State private var isLoading = false
 
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 0) {
                 filterSection
                     .padding()
-
-                if transactions.isLoading {
-                    Spacer()
-                    HStack(alignment: .center) {
-                        Spacer()
-                        ProgressView()
-                        Spacer()
-                    }
-                    Spacer()
+                if isLoading {
+                    LoadingSpinner()
                 } else {
                     List {
                         ForEach(transactions.transactions?.data ?? [], id: \.id) {
                             transactionData in
-                            if let transaction = transactionData.attributes?.transactions?.first {
-                                ZStack {
-                                    NavigationLink(
-                                        destination: TransactionDetail(transaction: transaction)
-                                    ) { EmptyView() }
-                                    .opacity(0.0).buttonStyle(PlainButtonStyle())
-                                    TransactionsRow(transaction: transaction)
-                                }
+                            //if let transaction = transactionData {
+                            //                                ZStack {
+                            //                                    NavigationLink(
+                            //                                        destination: TransactionDetail(transaction: transaction)
+                            //                                    ) { EmptyView() }
+                            //                                    .opacity(0.0).buttonStyle(PlainButtonStyle())
+                            TransactionsRow(transaction: transactionData)
+                                //}
                                 .listRowInsets(EdgeInsets())
                                 .listRowSeparator(.hidden)
 
-                            }
+                            //}
                         }
 
                         if transactions.hasMorePages {
@@ -75,7 +69,9 @@ struct TransactionsView: View {
             .onAppear {
                 if transactions.transactions == nil {
                     Task {
+                        isLoading = true
                         await transactions.fetchTransactions()
+                        isLoading = false
                     }
                 }
             }
@@ -117,14 +113,26 @@ struct TransactionsView: View {
 
             if filterExpanded {
                 VStack(alignment: .leading, spacing: 10) {
+
                     DatePicker(
-                        "Start Date", selection: $transactions.startDate, displayedComponents: .date
+                        "Start Date", selection: $transactions.startDate,
+                        displayedComponents: .date
                     )
                     .datePickerStyle(CompactDatePickerStyle())
                     DatePicker(
                         "End Date", selection: $transactions.endDate, displayedComponents: .date
                     )
                     .datePickerStyle(CompactDatePickerStyle())
+                    HStack {
+                        Text("Type")
+                        Spacer()
+                        Picker("Type", selection: $transactions.type) {
+                            ForEach(TransactionTypes.allCases) { type in
+                                Text(type.rawValue.capitalized).tag(type)
+                            }
+                        }
+                    }
+
                     HStack {
                         Button("Apply Filter") {
                             applyDateFilter()
@@ -136,6 +144,7 @@ struct TransactionsView: View {
                         }
                     }
                 }
+
                 .padding(.top)
             }
         }
@@ -144,7 +153,7 @@ struct TransactionsView: View {
         .cornerRadius(10)
     }
 
-    private func applyDateFilter() {
+    private func applyDateFilter(isRefreshing: Bool = false) {
         Task {
             await transactions.fetchTransactions()
         }
@@ -155,42 +164,65 @@ struct TransactionsView: View {
 }
 
 struct TransactionsRow: View {
-    var transaction: TransactionsTransaction
+    var transaction: TransactionsDatum
+    @State private var isActiveNav: Bool = true
     var showDate = true
     var showAccount = true
     var body: some View {
-        VStack {
-            HStack {
-                Image(systemName: transactionTypeIcon(transaction.type ?? "unknown"))
-                    .foregroundStyle(transactionTypeStyle(transaction.type ?? "unknown"))
+        ZStack {
+            NavigationLink(
+                destination: TransactionDetail(transaction: transaction)
+            ) { EmptyView() }
+            .opacity(0.0).buttonStyle(PlainButtonStyle())
+            VStack {
+                HStack {
+                    Image(
+                        systemName: transactionTypeIcon(
+                            transaction.attributes?.transactions?.first?.type ?? "unknown")
+                    )
+                    .foregroundStyle(
+                        transactionTypeStyle(
+                            transaction.attributes?.transactions?.first?.type ?? "unknown")
+                    )
                     .frame(width: 60, height: 60)
                     .font(.system(size: 30))
 
-                VStack(alignment: .leading) {
-                    Text(transaction.description ?? "Unkown Description")
+                    VStack(alignment: .leading) {
+                        Text(
+                            transaction.attributes?.transactions?.first?.description
+                                ?? "Unkown Description"
+                        )
                         .font(.headline)
                         .lineLimit(1)
-                    Text(formatAmount(transaction.amount, symbol: transaction.currencySymbol))
+                        Text(
+                            formatAmount(
+                                transaction.attributes?.transactions?.first?.amount,
+                                symbol: transaction.attributes?.transactions?.first?.currencySymbol)
+                        )
                         .font(.largeTitle)
-                }
-                Spacer()
-                VStack(alignment: .trailing) {
+                    }
                     Spacer()
-                    if showAccount {
-                        if transaction.sourceName != nil {
-                            Text(transaction.sourceName ?? "Source Error")
+                    VStack(alignment: .trailing) {
+                        Spacer()
+                        if showAccount {
+                            if transaction.attributes?.transactions?.first?.sourceName != nil {
+                                Text(
+                                    transaction.attributes?.transactions?.first?.sourceName
+                                        ?? "Source Error"
+                                )
                                 .font(.subheadline)
+                                .foregroundStyle(.gray)
+                            }
+                        }
+                        if showDate {
+                            Text(formatDate(transaction.attributes?.transactions?.first?.date))
                                 .foregroundStyle(.gray)
                         }
                     }
-                    if showDate {
-                        Text(formatDate(transaction.date))
-                            .foregroundStyle(.gray)
-                    }
                 }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 8)  // Add padding inside the HStack
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 8)  // Add padding inside the HStack
         }
         .background(.ultraThinMaterial)  // Add a background color if needed
         .cornerRadius(16)  // Round the corners

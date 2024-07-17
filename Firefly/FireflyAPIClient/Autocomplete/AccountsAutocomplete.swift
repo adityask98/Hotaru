@@ -28,18 +28,5 @@ struct AutoAccount: Codable {
 typealias AutoAccounts = [AutoAccount]
 
 func fetchAccountsAutocomplete() async throws -> AutoAccounts {
-    let request = try RequestBuilder(apiURL: autocompleteApiPaths.accounts)
-
-    let (data, response) = try await URLSession.shared.data(for: request)
-    guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-        throw AutocompleteError.categories
-    }
-    do {
-        let decoder = JSONDecoder()
-        let result = try decoder.decode(AutoAccounts.self, from: data)
-        return result
-    } catch {
-        print(error)
-        throw AutocompleteError.decodeError
-    }
+    try await fetchAutocomplete(for: autocompleteApiPaths.accounts)
 }
