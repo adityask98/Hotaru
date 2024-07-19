@@ -18,7 +18,7 @@ struct AccountDetail: View {
                 Text("Current balance")
                 Text(
                     formatAmount(
-                        account.attributes?.currentBalance,
+                        account.attributes?.currentBalance ?? "Unknown",
                         symbol: account.attributes?.currencySymbol)
                 )
                 .font(.largeTitle)

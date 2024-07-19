@@ -189,35 +189,46 @@ struct TransactionsRow: View {
 
                     VStack(alignment: .leading) {
                         Text(
-                            transaction.attributes?.transactions?.first?.description
-                                ?? "Unkown Description"
+                            transactionMainTitle(transaction)
                         )
                         .font(.headline)
                         .lineLimit(1)
                         Text(
                             formatAmount(
-                                transaction.attributes?.transactions?.first?.amount,
+                                calculateTransactionTotalAmount(transaction),
                                 symbol: transaction.attributes?.transactions?.first?.currencySymbol)
                         )
                         .font(.largeTitle)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
                     }
                     Spacer()
                     VStack(alignment: .trailing) {
                         Spacer()
-                        if showAccount {
-                            if transaction.attributes?.transactions?.first?.sourceName != nil {
-                                Text(
-                                    transaction.attributes?.transactions?.first?.sourceName
-                                        ?? "Source Error"
-                                )
-                                .font(.subheadline)
-                                .foregroundStyle(.gray)
+
+                        //In case of split Transaction
+                        if isSplitTransaction(transaction) {
+                            if showAccount {
+                                SplitBadge()
+                            }
+                        } else {
+                            if showAccount {
+                                if transaction.attributes?.transactions?.first?.sourceName != nil {
+                                    Text(
+                                        transaction.attributes?.transactions?.first?.sourceName
+                                            ?? "Source Error"
+                                    )
+                                    .font(.subheadline)
+                                    .foregroundStyle(.gray)
+                                }
                             }
                         }
+
                         if showDate {
                             Text(formatDate(transaction.attributes?.transactions?.first?.date))
                                 .foregroundStyle(.gray)
                         }
+
                     }
                 }
                 .padding(.horizontal, 8)
@@ -256,6 +267,43 @@ struct TransactionsRow: View {
         }
     }
 
+    
+
+}
+
+struct SplitBadge: View {
+    let text: String
+    let imageName: String
+    let font: Font
+    let foregroundStyle: Color
+    let backgroundColor: Color
+
+    init(
+        text: String = "Split",
+        imageName: String = "arrow.branch",
+        font: Font = .subheadline,
+        foregroundStyle: Color = .white,
+        backgroundColor: Color = .green
+    ) {
+        self.text = text
+        self.imageName = imageName
+        self.font = font
+        self.foregroundStyle = foregroundStyle
+        self.backgroundColor = backgroundColor
+    }
+
+    var body: some View {
+        HStack {
+            Image(systemName: imageName)
+            Text(text)
+        }
+        .font(font)
+        .foregroundStyle(foregroundStyle)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 1)
+        .background(backgroundColor)
+        .clipShape(Capsule())
+    }
 }
 
 //struct TransactionsView_Previews: PreviewProvider {

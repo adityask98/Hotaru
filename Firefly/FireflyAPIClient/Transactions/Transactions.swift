@@ -17,7 +17,7 @@ struct TransactionsDatum: Codable {
 // MARK: - TransactionsAttributes
 struct TransactionsAttributes: Codable {
     let createdAt, updatedAt, user: String?
-    let groupTitle: JSONNull?
+    let groupTitle: String?
     let transactions: [TransactionsTransaction]?
 
     enum CodingKeys: String, CodingKey {

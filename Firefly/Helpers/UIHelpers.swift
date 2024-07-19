@@ -8,16 +8,46 @@
 import Foundation
 import SwiftUI
 
-func formatAmount(_ amountString: String?, symbol: String?) -> String {
-    guard let amountString = amountString,
-        let amount = Double(amountString)
-    else {
+func formatAmount(_ amount: String, symbol: String?) -> String {
+    guard let doubleAmount = Double(amount) else {
         return "Unknown Amount"
     }
+    return formatAmount(Decimal(doubleAmount), symbol: symbol)
+}
+
+func formatAmount(_ amount: Decimal, symbol: String?) -> String {
     let formatter = NumberFormatter()
     formatter.numberStyle = .currency
     formatter.currencySymbol = symbol ?? "¥"
-    return formatter.string(from: NSNumber(value: amount)) ?? "Unknown Amount"
+    return formatter.string(from: amount as NSNumber) ?? "Unknown Amount"
+}
+
+//Check if a transaction is a split transaction by counting the number of attributes.transactions
+func isSplitTransaction(_ transaction: TransactionsDatum) -> Bool {
+    return transaction.attributes?.transactions?.count ?? 1 > 1
+}
+
+//Title for the transaction.
+func transactionMainTitle(_ transaction: TransactionsDatum) -> String {
+    if isSplitTransaction(transaction) {
+        if let groupTitle = transaction.attributes?.groupTitle, !groupTitle.isEmpty {
+            return groupTitle
+        }
+    }
+
+    return transaction.attributes?.transactions?.first?.description ?? "Unknown Description"
+}
+
+func calculateTransactionTotalAmount(_ transaction: TransactionsDatum) -> Decimal {
+    guard let transactions = transaction.attributes?.transactions else {
+        return 0
+    }
+
+    let total = transactions.reduce(Decimal.zero) { sum, transaction in
+        sum + (Decimal(string: transaction.amount ?? "0") ?? 0)
+    }
+
+    return total
 }
 
 func transactionTypeIcon(_ type: String) -> String {

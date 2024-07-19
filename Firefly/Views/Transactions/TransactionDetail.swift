@@ -26,7 +26,13 @@ struct TransactionDetail: View {
                     .font(.system(size: 60))
 
                     VStack(alignment: .leading) {
-                        Text(transaction.attributes?.transactions?.first?.description ?? "Unkown")
+
+                        HStack {
+                            Text(transactionMainTitle(transaction))
+                            if isSplitTransaction(transaction) {
+                                SplitBadge()
+                            }
+                        }
 
                         Text(
                             transaction.attributes?.transactions?.first?.type?.capitalized
@@ -46,99 +52,214 @@ struct TransactionDetail: View {
                     Spacer()
                 }
                 .padding()
-                //                .background(.ultraThinMaterial)
-                //                .clipShape(RoundedRectangle(cornerRadius: 16))
+                TransactionDetailSectionHeader(title: "Details")
 
-                HStack {
-                    Text("Details")
-                        .fontWeight(.bold)
-                        .font(.title2)
-                    Spacer()
-                }.padding(.horizontal)
-
-                VStack(alignment: .leading, spacing: 0) {
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading) {
-                            Text("Amount").font(.title3)
-                            Text(
-                                formatAmount(
-                                    transaction.attributes?.transactions?.first?.amount,
-                                    symbol: transaction.attributes?.transactions?.first?
-                                        .currencySymbol)
-                            ).font(.largeTitle).minimumScaleFactor(0.5).lineLimit(1)
-                                .foregroundStyle(
-                                    transactionTypeColor(
-                                        type: transaction.attributes?.transactions?.first?.type
-                                            ?? "unknown"))
-                        }
-                        .padding()
-
-                        Spacer()
-
-                    }
-                    Divider()
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading) {
-                            Text("Source").font(.title3)
-                            Text(
-                                transaction.attributes?.transactions?.first?.sourceName ?? "Unknown"
-                            ).font(.largeTitle)
-                                .minimumScaleFactor(0.5).lineLimit(1)
-                        }
-                        .padding()
-
-                        Spacer()
-
-                        VStack(alignment: .leading) {
-                            Text("Destination").font(.title3)
-                            Text(
-                                transaction.attributes?.transactions?.first?.destinationName
-                                    ?? "Unknown"
-                            ).font(.largeTitle)
-                                .minimumScaleFactor(0.5).lineLimit(1)
-                        }
-                        .padding()
-                    }
-                    Divider()
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading) {
-                            Text("Category").font(.title3)
-                            Text(
-                                transaction.attributes?.transactions?.first?.categoryName
-                                    ?? "Unknown"
-                            ).font(.largeTitle)
-                                .minimumScaleFactor(0.5).lineLimit(
-                                    1)
-                        }
-                        .padding()
-
-                        Spacer()
-                        if transaction.attributes?.transactions?.first?.budgetName != nil {
+                if isSplitTransaction(transaction) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        HStack(alignment: .top) {
                             VStack(alignment: .leading) {
-                                Text("Budget").font(.title3)
+                                Text("Total Amount").font(.title3)
                                 Text(
-                                    transaction.attributes?.transactions?.first?.budgetName
+                                    formatAmount(
+                                        calculateTransactionTotalAmount(transaction),
+                                        symbol: transaction.attributes?.transactions?.first?
+                                            .currencySymbol)
+
+                                ).font(.largeTitle).minimumScaleFactor(0.5).lineLimit(1)
+                                    .foregroundStyle(
+                                        transactionTypeColor(
+                                            type: transaction.attributes?.transactions?.first?.type
+                                                ?? "unknown"))
+                            }
+                            .padding()
+
+                            Spacer()
+
+                        }
+                        Divider()
+                        HStack(alignment: .top) {
+                            VStack(alignment: .leading) {
+                                Text("Source").font(.title3)
+                                Text(
+                                    transaction.attributes?.transactions?.first?.sourceName
+                                        ?? "Unknown"
+                                ).font(.largeTitle)
+                                    .minimumScaleFactor(0.5).lineLimit(1)
+                            }
+                            .padding()
+
+                            Spacer()
+
+                            VStack(alignment: .leading) {
+                                Text("Destination").font(.title3)
+                                Text(
+                                    transaction.attributes?.transactions?.first?.destinationName
+                                        ?? "Unknown"
+                                ).font(.largeTitle)
+                                    .minimumScaleFactor(0.5).lineLimit(1)
+                            }
+                            .padding()
+                        }
+                        Divider()
+
+                    }
+                    .padding(.horizontal)
+                    .background(.ultraThinMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 18.0))
+
+                    //                    ForEach(
+                    //                        Array(
+                    //                            transaction.attributes?.transactions?.enumerated() ?? [].enumerated()),
+                    //                        id: \.element.transaction_journal_id
+                    //                    ) { index, transactionData in
+                    //                        Text("Split Transaction #\(index + 1)")
+                    //                    }
+
+                    if let transactions = transaction.attributes?.transactions {
+                        ForEach(
+                            Array(transactions.enumerated()), id: \.element.transactionJournalID
+                        ) { index, splitTransaction in
+                            //Text("Split Transaction #\(index + 1)")
+                            TransactionDetailSectionHeader(title: "Split Transaction #\(index + 1)")
+                            VStack(alignment: .leading, spacing: 0) {
+                                HStack(alignment: .top) {
+                                    VStack(alignment: .leading) {
+                                        Text("Amount").font(.title3)
+                                        Text(
+                                            formatAmount(
+                                                splitTransaction.amount ?? "Unknown",
+                                                symbol: splitTransaction.currencySymbol)
+
+                                        ).font(.largeTitle).minimumScaleFactor(0.5).lineLimit(1)
+                                            .foregroundStyle(
+                                                transactionTypeColor(
+                                                    type: transaction.attributes?.transactions?
+                                                        .first?.type
+                                                        ?? "unknown"))
+                                    }
+                                    .padding()
+                                    Spacer()
+                                }
+                                Divider()
+                                HStack(alignment: .top) {
+                                    VStack(alignment: .leading) {
+                                        Text("Category").font(.title3)
+                                        Text(
+                                            splitTransaction.categoryName
+                                                ?? "Unknown"
+                                        ).font(.largeTitle)
+                                            .minimumScaleFactor(0.5).lineLimit(
+                                                1)
+                                    }
+                                    .padding()
+
+                                    Spacer()
+                                    if splitTransaction.budgetName
+                                        != nil
+                                    {
+                                        VStack(alignment: .leading) {
+                                            Text("Budget").font(.title3)
+                                            Text(
+                                                splitTransaction.budgetName
+                                                    ?? "Unknown"
+                                            ).font(.largeTitle)
+                                                .minimumScaleFactor(0.5).lineLimit(
+                                                    1)
+                                        }
+                                        .padding()
+                                    }
+
+                                }
+                            }
+                            .padding(.horizontal)
+                            .background(.ultraThinMaterial)
+                            .clipShape(RoundedRectangle(cornerRadius: 18.0))
+
+                        }
+                    }
+
+                } else {
+                    VStack(alignment: .leading, spacing: 0) {
+                        HStack(alignment: .top) {
+                            VStack(alignment: .leading) {
+                                Text("Amount").font(.title3)
+                                Text(
+                                    formatAmount(
+                                        calculateTransactionTotalAmount(transaction),
+                                        symbol: transaction.attributes?.transactions?.first?
+                                            .currencySymbol)
+
+                                ).font(.largeTitle).minimumScaleFactor(0.5).lineLimit(1)
+                                    .foregroundStyle(
+                                        transactionTypeColor(
+                                            type: transaction.attributes?.transactions?.first?.type
+                                                ?? "unknown"))
+                            }
+                            .padding()
+
+                            Spacer()
+
+                        }
+                        Divider()
+                        HStack(alignment: .top) {
+                            VStack(alignment: .leading) {
+                                Text("Source").font(.title3)
+                                Text(
+                                    transaction.attributes?.transactions?.first?.sourceName
+                                        ?? "Unknown"
+                                ).font(.largeTitle)
+                                    .minimumScaleFactor(0.5).lineLimit(1)
+                            }
+                            .padding()
+
+                            Spacer()
+
+                            VStack(alignment: .leading) {
+                                Text("Destination").font(.title3)
+                                Text(
+                                    transaction.attributes?.transactions?.first?.destinationName
+                                        ?? "Unknown"
+                                ).font(.largeTitle)
+                                    .minimumScaleFactor(0.5).lineLimit(1)
+                            }
+                            .padding()
+                        }
+                        Divider()
+                        HStack(alignment: .top) {
+                            VStack(alignment: .leading) {
+                                Text("Category").font(.title3)
+                                Text(
+                                    transaction.attributes?.transactions?.first?.categoryName
                                         ?? "Unknown"
                                 ).font(.largeTitle)
                                     .minimumScaleFactor(0.5).lineLimit(
                                         1)
                             }
                             .padding()
-                        }
 
+                            Spacer()
+                            if transaction.attributes?.transactions?.first?.budgetName != nil {
+                                VStack(alignment: .leading) {
+                                    Text("Budget").font(.title3)
+                                    Text(
+                                        transaction.attributes?.transactions?.first?.budgetName
+                                            ?? "Unknown"
+                                    ).font(.largeTitle)
+                                        .minimumScaleFactor(0.5).lineLimit(
+                                            1)
+                                }
+                                .padding()
+                            }
+
+                        }
                     }
+                    .padding(.horizontal)
+                    .background(.ultraThinMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 18.0))
                 }
-                .padding(.horizontal)
-                .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 18.0))
 
                 if transaction.attributes?.transactions?.first?.notes != nil {
-                    HStack {
-                        Text("Notes")
-                            .fontWeight(.bold)
-                            .font(.title2)
-                        Spacer()
-                    }.padding().padding(.bottom, -10)
+                    TransactionDetailSectionHeader(title: "Notes").padding(.bottom, -10)
 
                     VStack(alignment: .leading, spacing: 0) {
                         VStack(alignment: .leading) {
@@ -180,6 +301,8 @@ struct TransactionDetail: View {
         }
 
     }
+    
+    
 
     private func formatDate(_ dateString: String) -> String? {
 
@@ -207,6 +330,31 @@ struct TagView: View {
     }
 }
 
+struct TransactionDetailSectionHeader: View {
+    let title: String
+
+    var body: some View {
+        HStack {
+            Text(title)
+                .fontWeight(.bold)
+                .font(.title2)
+            Spacer()
+        }
+        .padding(.horizontal)
+    }
+}
+
+//struct TransactionDetailAmountSection: View {
+//    let title: String
+//   let 
+//    
+//    var body: some View {
+//        VStack(alignment: .leading) {
+//            Text(title).font(.title3)
+//            Text(formatAmount)
+//        }
+//    }
+//}
 //#Preview {
 //    TransactionDetail()
 //}
