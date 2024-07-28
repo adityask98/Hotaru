@@ -33,6 +33,8 @@ struct AccountsView: View {
                         //                            }
                         //                        }
 
+                        // BalanceCharts()
+
                         LazyVGrid(
                             columns: [
                                 GridItem(.flexible()),
@@ -89,6 +91,7 @@ struct AccountItem: View {
                         account.attributes?.currentBalance,
                         symbol: account.attributes?.currencySymbol)
                 )
+                .contentTransition(.numericText())
                 .font(.title)
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
@@ -96,11 +99,9 @@ struct AccountItem: View {
 
                 HStack {
                     Spacer()
-                    Text("As of \(formatDate(account.attributes?.currentBalanceDate))").font(
-                        .caption2
-                    )
-                    .fontWeight(
-                        .ultraLight)
+                    Text("As of \(formatDate(account.attributes?.currentBalanceDate))")
+                        .font(.caption2)
+                        .fontWeight(.ultraLight)
                 }
             }
             .padding(.horizontal)

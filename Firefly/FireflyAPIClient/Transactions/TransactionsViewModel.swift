@@ -95,7 +95,7 @@ final class TransactionsViewModel: ObservableObject {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            throw UserModelError.invalidResponse
+            throw TransactionsModelError.invalidResponse
         }
 
         do {
@@ -105,7 +105,7 @@ final class TransactionsViewModel: ObservableObject {
             return result
         } catch {
             print(error)
-            throw UserModelError.invalidData
+            throw TransactionsModelError.invalidData
         }
     }
 

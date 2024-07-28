@@ -24,6 +24,12 @@ struct apiPaths {
         return "api/v1/accounts/\(id)/transactions"
     }
     static let charts = "api/v1/chart/account/overview"
+    static func transaction(_ id: String) -> String {
+        return "api/v1/transactions/\(id)"
+    }
+    static func categoryTransactions(_ id: String) -> String {
+        return "api/v1/categories/\(id)/transactions"
+    }
 }
 
 struct postApiPaths {
@@ -40,4 +46,12 @@ struct autocompleteApiPaths {
 struct keychainConsts {
     static let account = "swiftFirefly"
     static let accessToken = "accessToken"
+}
+
+struct insightsApiPaths {
+    static let expenseCategories = "api/v1/insight/expense/category"
+}
+
+struct chartsApiPaths {
+    static let overview = "api/v1/chart/account/overview"
 }

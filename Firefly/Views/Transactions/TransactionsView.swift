@@ -22,6 +22,7 @@ struct TransactionsView: View {
     @State var addSheetShown = false
     @State private var filterExpanded = false
     @State private var isLoading = false
+    @State private var shouldRefresh: Bool? = false  //Used to refresh after the create page is dismissed.
 
     var body: some View {
         NavigationStack {
@@ -34,12 +35,6 @@ struct TransactionsView: View {
                     List {
                         ForEach(transactions.transactions?.data ?? [], id: \.id) {
                             transactionData in
-                            //if let transaction = transactionData {
-                            //                                ZStack {
-                            //                                    NavigationLink(
-                            //                                        destination: TransactionDetail(transaction: transaction)
-                            //                                    ) { EmptyView() }
-                            //                                    .opacity(0.0).buttonStyle(PlainButtonStyle())
                             TransactionsRow(transaction: transactionData)
                                 //}
                                 .listRowInsets(EdgeInsets())
@@ -89,8 +84,18 @@ struct TransactionsView: View {
                 }
             }
         }
-        .sheet(isPresented: $addSheetShown) {
-            TransactionCreate().background(.ultraThinMaterial)
+        .sheet(
+            isPresented: $addSheetShown,
+            onDismiss: {
+                if shouldRefresh! {
+                    Task {
+                        applyDateFilter()
+                        shouldRefresh = false
+                    }
+                }
+            }
+        ) {
+            TransactionCreate(shouldRefresh: $shouldRefresh).background(.ultraThinMaterial)
         }
     }
 
@@ -266,8 +271,6 @@ struct TransactionsRow: View {
             return formatter.string(from: date)
         }
     }
-
-    
 
 }
 

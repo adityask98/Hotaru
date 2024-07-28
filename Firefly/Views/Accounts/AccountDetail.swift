@@ -62,6 +62,8 @@ struct AccountTransactionsView: View {
     var accountID: String
     @State private var transactions: Transactions? = nil
     @State private var isLoading = false
+    @State private var transactionsLoaded = false
+
 
     var body: some View {
         NavigationStack {
@@ -71,6 +73,8 @@ struct AccountTransactionsView: View {
                 if transactions?.data?.count != 0 {
                     ForEach(transactions?.data ?? [], id: \.id) { transactionData in
                         TransactionsRow(transaction: transactionData)
+                            .animation(.easeIn(duration: 0.3).delay(    0.05), value: transactionsLoaded)
+
                     }
 
                 }
@@ -95,7 +99,7 @@ struct AccountTransactionsView: View {
     func fetchAccountTransactions(_ accountID: String) async throws -> Transactions {
         var request = try RequestBuilder(apiURL: apiPaths.accountTransactions(accountID))
         request.url?.append(queryItems: [
-            URLQueryItem(name: "limit", value: "10")
+            URLQueryItem(name: "limit", value: "100")
         ])
 
         let (data, response) = try await URLSession.shared.data(for: request)

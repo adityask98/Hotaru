@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TransactionDetail: View {
-    var transaction: TransactionsDatum
+    @State var transaction: TransactionsDatum
     var tags = ["Test1", "Test2", "Test3", "LongTag", "AnotherTag"]
     var body: some View {
         ScrollView {
@@ -119,8 +119,10 @@ struct TransactionDetail: View {
                         ForEach(
                             Array(transactions.enumerated()), id: \.element.transactionJournalID
                         ) { index, splitTransaction in
-                            //Text("Split Transaction #\(index + 1)")
-                            TransactionDetailSectionHeader(title: "Split Transaction #\(index + 1)")
+                            //TransactionDetailSectionHeader(title: "Split Transaction #\(index + 1)")
+                            TransactionDetailSectionHeader(
+                                title: splitTransaction.description ?? "Unknown",
+                                subTitle: "Split Transaction #\(index + 1)")
                             VStack(alignment: .leading, spacing: 0) {
                                 HStack(alignment: .top) {
                                     VStack(alignment: .leading) {
@@ -276,24 +278,6 @@ struct TransactionDetail: View {
                     .background(.ultraThinMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 18.0))
                 }
-
-                //                HStack {
-                //                    Text("Tags")
-                //                        .fontWeight(.bold)
-                //                        .font(.title2)
-                //                    Spacer()
-                //                }.padding().padding(.bottom, -10)
-
-                //                LazyVGrid(
-                //                    columns: [GridItem(.adaptive(minimum: 50, maximum: 80))], alignment: .leading, spacing: 8
-                //                ) {
-                //                    ForEach(tags, id: \.self) { tag in
-                //                        TagView(tag: tag)
-                //                    }
-                //                }
-                //                .padding()
-                //                //.background(.ultraThinMaterial)
-                //                .clipShape(RoundedRectangle(cornerRadius: 18.0))
             }
             .padding(.horizontal, 15)
             .navigationTitle("Transaction Details")
@@ -301,8 +285,6 @@ struct TransactionDetail: View {
         }
 
     }
-    
-    
 
     private func formatDate(_ dateString: String) -> String? {
 
@@ -332,22 +314,35 @@ struct TagView: View {
 
 struct TransactionDetailSectionHeader: View {
     let title: String
+    let subTitle: String?
+
+    init(title: String = "Details", subTitle: String? = nil) {
+        self.title = title
+        self.subTitle = subTitle
+    }
 
     var body: some View {
-        HStack {
+        VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .fontWeight(.bold)
                 .font(.title2)
-            Spacer()
+
+            if let subTitle = subTitle {
+                Text(subTitle)
+                    .font(.caption)
+                    .fontWeight(.light)
+                    .foregroundStyle(Color.secondary)
+            }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
     }
 }
 
 //struct TransactionDetailAmountSection: View {
 //    let title: String
-//   let 
-//    
+//   let
+//
 //    var body: some View {
 //        VStack(alignment: .leading) {
 //            Text(title).font(.title3)

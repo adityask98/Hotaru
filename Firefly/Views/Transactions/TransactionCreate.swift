@@ -11,6 +11,7 @@ import UIKit
 
 struct TransactionCreate: View {
     @Environment(\.dismiss) var dismiss
+    @Binding var shouldRefresh: Bool?
 
     @State private var transactionData: PostTransaction = defaultTransactionData()
 
@@ -19,7 +20,6 @@ struct TransactionCreate: View {
     @State private var categories: [String] = ["Default"]
     @State private var budgets: AutoBudget = AutoBudget()
     @State private var accounts: AutoAccounts = AutoAccounts()
-    
 
     //Selections
     @State private var transactionDescription: String = ""
@@ -69,7 +69,7 @@ struct TransactionCreate: View {
 
                     Section("Details") {
                         TextField("Description", text: $transactionDescription)
-                        
+
                         Picker("Category", selection: $selectedCategory) {
                             Text("Uncategorized").tag("")
                             ForEach(categories.filter { $0 != "Uncategorized" }, id: \.self) {
@@ -186,6 +186,7 @@ struct TransactionCreate: View {
             await impact.notificationOccurred(.success)
             showToast = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                shouldRefresh? = true
                 dismiss()
             }
         } catch {

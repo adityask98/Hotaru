@@ -27,6 +27,11 @@
 		486E1D842C359BFB0038BB4F /* GrainGradient.metal in Sources */ = {isa = PBXBuildFile; fileRef = 486E1D832C359BFB0038BB4F /* GrainGradient.metal */; };
 		486E1D862C359E450038BB4F /* BackgroundMaterial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486E1D852C359E450038BB4F /* BackgroundMaterial.swift */; };
 		4890B2762C4643120032BE86 /* Loading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4890B2752C4643120032BE86 /* Loading.swift */; };
+		4890B2782C56141F0032BE86 /* TransactionDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4890B2772C56141F0032BE86 /* TransactionDetailViewModel.swift */; };
+		4890B27B2C561A690032BE86 /* CategoriesDonut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4890B27A2C561A690032BE86 /* CategoriesDonut.swift */; };
+		4890B27E2C5626A60032BE86 /* Insights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4890B27D2C5626A60032BE86 /* Insights.swift */; };
+		4890B2802C5627350032BE86 /* CategoriesInsights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4890B27F2C5627350032BE86 /* CategoriesInsights.swift */; };
+		4890B2822C5639A00032BE86 /* BalanceCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4890B2812C5639A00032BE86 /* BalanceCharts.swift */; };
 		489EB28E2B46EB2800414CCB /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489EB28D2B46EB2800414CCB /* AccountsView.swift */; };
 		48B9CE6E2C3CF88D00AF7BA8 /* Categories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B9CE6D2C3CF88D00AF7BA8 /* Categories.swift */; };
 		48B9CE702C3D182F00AF7BA8 /* AccountsAutocomplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B9CE6F2C3D182F00AF7BA8 /* AccountsAutocomplete.swift */; };
@@ -67,6 +72,11 @@
 		486E1D832C359BFB0038BB4F /* GrainGradient.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = GrainGradient.metal; sourceTree = "<group>"; };
 		486E1D852C359E450038BB4F /* BackgroundMaterial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundMaterial.swift; sourceTree = "<group>"; };
 		4890B2752C4643120032BE86 /* Loading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Loading.swift; sourceTree = "<group>"; };
+		4890B2772C56141F0032BE86 /* TransactionDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDetailViewModel.swift; sourceTree = "<group>"; };
+		4890B27A2C561A690032BE86 /* CategoriesDonut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesDonut.swift; sourceTree = "<group>"; };
+		4890B27D2C5626A60032BE86 /* Insights.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights.swift; sourceTree = "<group>"; };
+		4890B27F2C5627350032BE86 /* CategoriesInsights.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesInsights.swift; sourceTree = "<group>"; };
+		4890B2812C5639A00032BE86 /* BalanceCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceCharts.swift; sourceTree = "<group>"; };
 		489EB28D2B46EB2800414CCB /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		48B9CE6D2C3CF88D00AF7BA8 /* Categories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Categories.swift; sourceTree = "<group>"; };
 		48B9CE6F2C3D182F00AF7BA8 /* AccountsAutocomplete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsAutocomplete.swift; sourceTree = "<group>"; };
@@ -122,6 +132,7 @@
 		4843D2352B13843C00D1A131 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4890B2792C561A580032BE86 /* Charts */,
 				48BB088C2C411B0E006D32E3 /* Accounts */,
 				485467AA2C37C89B00C40E92 /* Transactions */,
 				486E1D7E2C354A170038BB4F /* Shared */,
@@ -168,6 +179,7 @@
 				48552BA52C1C6B20002ED3CF /* Transactions.swift */,
 				48552BA72C1C6BFE002ED3CF /* TransactionsViewModel.swift */,
 				48B9CE712C3D2A4E00AF7BA8 /* TransactionPost.swift */,
+				4890B2772C56141F0032BE86 /* TransactionDetailViewModel.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -187,6 +199,24 @@
 				486E1D7F2C354A2F0038BB4F /* SearchOption.swift */,
 			);
 			path = Shared;
+			sourceTree = "<group>";
+		};
+		4890B2792C561A580032BE86 /* Charts */ = {
+			isa = PBXGroup;
+			children = (
+				4890B27A2C561A690032BE86 /* CategoriesDonut.swift */,
+				4890B2812C5639A00032BE86 /* BalanceCharts.swift */,
+			);
+			path = Charts;
+			sourceTree = "<group>";
+		};
+		4890B27C2C5626800032BE86 /* Insights */ = {
+			isa = PBXGroup;
+			children = (
+				4890B27D2C5626A60032BE86 /* Insights.swift */,
+				4890B27F2C5627350032BE86 /* CategoriesInsights.swift */,
+			);
+			path = Insights;
 			sourceTree = "<group>";
 		};
 		48BB08892C411A26006D32E3 /* Charts */ = {
@@ -249,6 +279,7 @@
 		48DF340D2AD3E35A00F6F215 /* FireflyAPIClient */ = {
 			isa = PBXGroup;
 			children = (
+				4890B27C2C5626800032BE86 /* Insights */,
 				48BB08892C411A26006D32E3 /* Charts */,
 				485467AE2C37FB3500C40E92 /* Autocomplete */,
 				485467AD2C37FB0600C40E92 /* Categories */,
@@ -362,8 +393,10 @@
 				48BB08882C40F60E006D32E3 /* AccountDetail.swift in Sources */,
 				48BB088B2C411A38006D32E3 /* ChartsModel.swift in Sources */,
 				486E1D862C359E450038BB4F /* BackgroundMaterial.swift in Sources */,
+				4890B2822C5639A00032BE86 /* BalanceCharts.swift in Sources */,
 				48BB08862C40F3DE006D32E3 /* PredictingTextField.swift in Sources */,
 				48E9195B2AE2C1E60074B904 /* Constants.swift in Sources */,
+				4890B27B2C561A690032BE86 /* CategoriesDonut.swift in Sources */,
 				4843D2372B13844A00D1A131 /* Menu.swift in Sources */,
 				489EB28E2B46EB2800414CCB /* AccountsView.swift in Sources */,
 				482139282C10652600D8D1C6 /* TokenSettings.swift in Sources */,
@@ -373,8 +406,11 @@
 				4861BF802ADCE82F00FAC64D /* AccountsModel.swift in Sources */,
 				48B9CE702C3D182F00AF7BA8 /* AccountsAutocomplete.swift in Sources */,
 				485467AC2C37C8CB00C40E92 /* TransactionCreate.swift in Sources */,
+				4890B2782C56141F0032BE86 /* TransactionDetailViewModel.swift in Sources */,
 				4836BEC62C1B29B90039D219 /* KeychainHelper.swift in Sources */,
 				4839B4132ADE3AD3001A4F8F /* AccountsViewModel.swift in Sources */,
+				4890B27E2C5626A60032BE86 /* Insights.swift in Sources */,
+				4890B2802C5627350032BE86 /* CategoriesInsights.swift in Sources */,
 				486E1D802C354A2F0038BB4F /* SearchOption.swift in Sources */,
 				485467B02C37FBC400C40E92 /* CategoriesAutocomplete.swift in Sources */,
 				4890B2762C4643120032BE86 /* Loading.swift in Sources */,

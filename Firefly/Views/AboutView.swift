@@ -12,26 +12,30 @@ struct AboutView: View {
     @State private var transactions = TransactionsViewModel()
     var body: some View {
         NavigationView {
-            VStack {
-                List {
-                    HStack {
-                        Text("Email:")
-                        Spacer()
-                        Text(user.user?.data?.attributes?.email ?? "Email Placeholder")
-                    }
-                    NavigationLink(destination: TokenSettings()) {
-                        Text("Token")
-                    }
-                }
-                .refreshable {
-                    do {
-                        print("Refreshing")
-                        print(user.user?.data?.attributes?.email ?? "Nothing")
-                        try await user.getUser()
-                    } catch {
-                        print(error)
-                    }
-                }
+            VStack(alignment: .leading) {
+                //                List {
+                //                    HStack {
+                //                        Text("Email:")
+                //                        Spacer()
+                //                        Text(user.user?.data?.attributes?.email ?? "Email Placeholder")
+                //                    }
+                //                    NavigationLink(destination: TokenSettings()) {
+                //                        Text("Token")
+                //                    }
+                //
+                //                }
+                //                .refreshable {
+                //                    do {
+                //                        print("Refreshing")
+                //                        print(user.user?.data?.attributes?.email ?? "Nothing")
+                //                        try await user.getUser()
+                //                    } catch {
+                //                        print(error)
+                //                    }
+                //                }
+                CategoriesDonut()
+                    .frame(height: 300)
+                Spacer()
             }
 
             //.frame(width: .infinity, height: .infinity)
