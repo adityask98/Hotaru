@@ -15,24 +15,35 @@ struct CategoriesDonut: View {
     ]
     @State private var chartData: CategoriesInsight?
     @State var isLoading = false
+    @State var selectedAngle: Int?
+    @State var selectedCategory: String?
     var body: some View {
         if isLoading {
             LoadingSpinner()
         } else {
-            VStack {
-                HStack {
-                    Text("Category Summary for current month").font(.headline)
-                    Spacer()
-                }
+            VStack(alignment: .leading) {
+                Text("Category Summary").font(.title2).fontWeight(.semibold)
+                Text("Current Month").font(.footnote).foregroundStyle(.gray)
 
                 Chart(chartData ?? [], id: \.id) { item in
                     SectorMark(
                         angle: .value("Amount spend", -(item.differenceFloat ?? 0)),
-                        innerRadius: .ratio(0.6),
-                        angularInset: 2
+                        innerRadius: .ratio(0.618),
+                        outerRadius: selectedCategory == "Eating out" ? 400 : 150,
+                        angularInset: 1
                     )
                     .cornerRadius(5)
                     .foregroundStyle(by: .value("Category", item.name ?? ""))
+                }
+                .chartAngleSelection(value: $selectedAngle)
+                .frame(width: 300, height: 300)
+            }
+            .onChange(of: selectedAngle) { oldValue, newValue in
+                if let newValue {
+                    print(selectedAngle)
+                    withAnimation {
+                        getSelectedCategory(value: selectedAngle!)
+                    }
                 }
             }
 
@@ -47,8 +58,41 @@ struct CategoriesDonut: View {
                     }
                 }
             }
-            .scaledToFit()
+            //.scaledToFit()
             .padding()
+        }
+    }
+
+    //    private func getSelectedCategory(value: Int) {
+    //        var cumulativeTotal = 0
+    //        let category = chartData?.first { item in
+    //            cumulativeTotal += Int(item.differenceFloat!)
+    //            if value <= cumulativeTotal {
+    //                selectedCategory = item.name
+    //                print(selectedCategory)
+    //                return true
+    //            }
+    //            return false
+    //        }
+    //    }
+
+    private func getSelectedCategory(value: Int) {
+        var totalFirst = chartData?.reduce(0) { $0 + (abs($1.differenceFloat ?? 0)) } ?? 0
+        var total = Double(totalFirst)
+        let normalizedAngle = Double(value) / 360.0 * total
+
+        var cumulativeTotal: Double = 0
+
+        for item in chartData ?? [] {
+            let itemValue = abs(Double(item.differenceFloat ?? 0))
+            cumulativeTotal += itemValue
+            if normalizedAngle <= cumulativeTotal {
+                DispatchQueue.main.async {
+                    self.selectedCategory = item.name
+                    print(selectedCategory)
+                }
+                break
+            }
         }
     }
 

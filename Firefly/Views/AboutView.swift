@@ -34,7 +34,7 @@ struct AboutView: View {
                 //                    }
                 //                }
                 CategoriesDonut()
-                    .frame(height: 300)
+                    //.frame(height: 300)
                 Spacer()
             }
 

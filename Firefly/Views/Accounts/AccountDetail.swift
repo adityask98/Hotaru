@@ -86,7 +86,6 @@ struct AccountTransactionsView: View {
                         do {
                             isLoading = true
                             transactions = try await fetchAccountTransactions(accountID)
-                            //print(transactions)
                             isLoading = false
 
                         }
@@ -111,7 +110,6 @@ struct AccountTransactionsView: View {
         do {
             let decoder = JSONDecoder()
             let result = try decoder.decode(Transactions.self, from: data)
-            print(result)
             return result
         }
     }
