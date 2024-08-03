@@ -32,6 +32,7 @@
 		4890B27E2C5626A60032BE86 /* Insights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4890B27D2C5626A60032BE86 /* Insights.swift */; };
 		4890B2802C5627350032BE86 /* CategoriesInsights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4890B27F2C5627350032BE86 /* CategoriesInsights.swift */; };
 		4890B2822C5639A00032BE86 /* BalanceCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4890B2812C5639A00032BE86 /* BalanceCharts.swift */; };
+		4890B2852C57BD0F0032BE86 /* AccountDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4890B2842C57BD0F0032BE86 /* AccountDetailViewModel.swift */; };
 		489EB28E2B46EB2800414CCB /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489EB28D2B46EB2800414CCB /* AccountsView.swift */; };
 		48B9CE6E2C3CF88D00AF7BA8 /* Categories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B9CE6D2C3CF88D00AF7BA8 /* Categories.swift */; };
 		48B9CE702C3D182F00AF7BA8 /* AccountsAutocomplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B9CE6F2C3D182F00AF7BA8 /* AccountsAutocomplete.swift */; };
@@ -77,6 +78,7 @@
 		4890B27D2C5626A60032BE86 /* Insights.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insights.swift; sourceTree = "<group>"; };
 		4890B27F2C5627350032BE86 /* CategoriesInsights.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesInsights.swift; sourceTree = "<group>"; };
 		4890B2812C5639A00032BE86 /* BalanceCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceCharts.swift; sourceTree = "<group>"; };
+		4890B2842C57BD0F0032BE86 /* AccountDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDetailViewModel.swift; sourceTree = "<group>"; };
 		489EB28D2B46EB2800414CCB /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		48B9CE6D2C3CF88D00AF7BA8 /* Categories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Categories.swift; sourceTree = "<group>"; };
 		48B9CE6F2C3D182F00AF7BA8 /* AccountsAutocomplete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsAutocomplete.swift; sourceTree = "<group>"; };
@@ -189,6 +191,7 @@
 			children = (
 				4861BF7F2ADCE82F00FAC64D /* AccountsModel.swift */,
 				4839B4122ADE3AD3001A4F8F /* AccountsViewModel.swift */,
+				4890B2842C57BD0F0032BE86 /* AccountDetailViewModel.swift */,
 			);
 			path = Accounts;
 			sourceTree = "<group>";
@@ -217,6 +220,13 @@
 				4890B27F2C5627350032BE86 /* CategoriesInsights.swift */,
 			);
 			path = Insights;
+			sourceTree = "<group>";
+		};
+		4890B2832C57BC9B0032BE86 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Common;
 			sourceTree = "<group>";
 		};
 		48BB08892C411A26006D32E3 /* Charts */ = {
@@ -279,6 +289,7 @@
 		48DF340D2AD3E35A00F6F215 /* FireflyAPIClient */ = {
 			isa = PBXGroup;
 			children = (
+				4890B2832C57BC9B0032BE86 /* Common */,
 				4890B27C2C5626800032BE86 /* Insights */,
 				48BB08892C411A26006D32E3 /* Charts */,
 				485467AE2C37FB3500C40E92 /* Autocomplete */,
@@ -390,6 +401,7 @@
 				48BB08822C40D2BB006D32E3 /* BudgetsAutocomplete.swift in Sources */,
 				48552BA82C1C6BFE002ED3CF /* TransactionsViewModel.swift in Sources */,
 				48BB08802C3FD4F5006D32E3 /* UIHelpers.swift in Sources */,
+				4890B2852C57BD0F0032BE86 /* AccountDetailViewModel.swift in Sources */,
 				48BB08882C40F60E006D32E3 /* AccountDetail.swift in Sources */,
 				48BB088B2C411A38006D32E3 /* ChartsModel.swift in Sources */,
 				486E1D862C359E450038BB4F /* BackgroundMaterial.swift in Sources */,
@@ -573,6 +585,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -610,6 +624,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

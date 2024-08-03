@@ -339,6 +339,7 @@ struct TransactionDetailSectionHeader: View {
     }
 }
 
+
 //struct TransactionDetailAmountSection: View {
 //    let title: String
 //   let
