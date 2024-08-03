@@ -147,26 +147,7 @@ class AccountDetailViewModel: ObservableObject {
     }
 
 }
-func getTransactionsForAccount(_ id: String) async throws -> Transactions {
-    let url = apiPaths.accountTransactions(id)
-    let request = try RequestBuilder(apiURL: url)
 
-    let (data, response) = try await URLSession.shared.data(for: request)
-
-    guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-        throw TransactionsModelError.invalidResponse
-    }
-
-    do {
-        let decoder = JSONDecoder()
-        let result = try decoder.decode(Transactions.self, from: data)
-
-        return result
-    } catch {
-        print(error)
-        throw TransactionsModelError.invalidData
-    }
-}
 //extension AccountsViewModel {
 //    static func mock() -> AccountsViewModel {
 //        let viewModel = AccountsViewModel()

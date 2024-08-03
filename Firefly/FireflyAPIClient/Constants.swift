@@ -20,6 +20,9 @@ struct apiPaths {
     static let userAbout = "api/v1/about/user"
     static let transactions = "api/v1/transactions"
     static let accounts = "api/v1/accounts"
+    static func account(_ id: String) -> String {
+        return "api/v1/accounts/\(id)"
+    }
     static func accountTransactions(_ id: String) -> String {
         return "api/v1/accounts/\(id)/transactions"
     }
