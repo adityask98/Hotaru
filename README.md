@@ -1,6 +1,6 @@
 <div align="center">
     <p></p>
-  <img alt="logo" src=".github/img/logo.png" height=120 style="border-radius: 20%;" />
+  <img alt="logo" src=".github/img/logo.jpg" height=120 style="border-radius: 20%;" />
 </div>
 
 ### Introduction
