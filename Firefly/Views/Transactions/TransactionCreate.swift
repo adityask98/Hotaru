@@ -20,6 +20,7 @@ struct TransactionCreate: View {
     @State private var categories: [String] = ["Default"]
     @State private var budgets: AutoBudget = AutoBudget()
     @State private var accounts: AutoAccounts = AutoAccounts()
+    @State private var currencies: AutoCurrency = AutoCurrency()
 
     //Selections
     @State private var transactionDescription: String = ""
@@ -215,6 +216,10 @@ struct TransactionCreate: View {
 
                 //Budgets
                 budgets = try await fetchBudgetsAutocomplete()
+                
+                //Currencies
+                
+                //currencies = try await fetchCurrenciesAutoComplete()
             } catch {
                 print("Error loading categories: \(error)")
             }
@@ -311,6 +316,37 @@ struct AutocompleteSelectionPicker<T: Identifiable>: View {
                 let selectedItem = items.first(where: { $0.id == newId })
             {
                 onSelection(selectedItem)
+            }
+        }
+    }
+}
+
+struct CurrencyPicker: View {
+    let currencies: AutoCurrency
+    let onSelection: (String, String) -> Void
+
+    @State private var selectedCurrencyID: String?
+
+    init(
+        currencies: AutoCurrency,
+        onSelection: @escaping (String, String) -> Void
+    ) {
+        self.currencies = currencies
+        self.onSelection = onSelection
+    }
+
+    var body: some View {
+        Picker(selection: $selectedCurrencyID, label: EmptyView()) {
+            ForEach(currencies, id: \.id) { currency in
+                Text(currency.name ?? "Unknown currency")
+                    .tag(currency.id as String?)
+            }
+        }
+        .onChange(of: selectedCurrencyID) { oldValue, newValue in
+            if let newId = newValue,
+                let selectedCurrency = currencies.first(where: { $0.id == newId })
+            {
+                onSelection(newId, selectedCurrency.name ?? "Unknown Currency")
             }
         }
     }

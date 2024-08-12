@@ -20,6 +20,7 @@
 		48552BA62C1C6B20002ED3CF /* Transactions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48552BA52C1C6B20002ED3CF /* Transactions.swift */; };
 		48552BA82C1C6BFE002ED3CF /* TransactionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48552BA72C1C6BFE002ED3CF /* TransactionsViewModel.swift */; };
 		48552BAA2C1D2D12002ED3CF /* TransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48552BA92C1D2D12002ED3CF /* TransactionsView.swift */; };
+		4857609A2C6629BA0050027B /* CurrenciesAutocomplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485760992C6629BA0050027B /* CurrenciesAutocomplete.swift */; };
 		4861BF802ADCE82F00FAC64D /* AccountsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4861BF7F2ADCE82F00FAC64D /* AccountsModel.swift */; };
 		486E1D7D2C33DAE60038BB4F /* DateHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486E1D7C2C33DAE60038BB4F /* DateHelpers.swift */; };
 		486E1D802C354A2F0038BB4F /* SearchOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486E1D7F2C354A2F0038BB4F /* SearchOption.swift */; };
@@ -66,6 +67,7 @@
 		48552BA52C1C6B20002ED3CF /* Transactions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transactions.swift; sourceTree = "<group>"; };
 		48552BA72C1C6BFE002ED3CF /* TransactionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsViewModel.swift; sourceTree = "<group>"; };
 		48552BA92C1D2D12002ED3CF /* TransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsView.swift; sourceTree = "<group>"; };
+		485760992C6629BA0050027B /* CurrenciesAutocomplete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrenciesAutocomplete.swift; sourceTree = "<group>"; };
 		4861BF7F2ADCE82F00FAC64D /* AccountsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsModel.swift; sourceTree = "<group>"; };
 		486E1D7C2C33DAE60038BB4F /* DateHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateHelpers.swift; sourceTree = "<group>"; };
 		486E1D7F2C354A2F0038BB4F /* SearchOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchOption.swift; sourceTree = "<group>"; };
@@ -171,6 +173,7 @@
 				48B9CE6F2C3D182F00AF7BA8 /* AccountsAutocomplete.swift */,
 				48BB08812C40D2BB006D32E3 /* BudgetsAutocomplete.swift */,
 				48BB08832C40D4EA006D32E3 /* Autocomplete.swift */,
+				485760992C6629BA0050027B /* CurrenciesAutocomplete.swift */,
 			);
 			path = Autocomplete;
 			sourceTree = "<group>";
@@ -399,6 +402,7 @@
 				4836BEC12C1AFD2E0039D219 /* Settings.swift in Sources */,
 				48DF33FF2AD3E31900F6F215 /* FireflyApp.swift in Sources */,
 				48BB08822C40D2BB006D32E3 /* BudgetsAutocomplete.swift in Sources */,
+				4857609A2C6629BA0050027B /* CurrenciesAutocomplete.swift in Sources */,
 				48552BA82C1C6BFE002ED3CF /* TransactionsViewModel.swift in Sources */,
 				48BB08802C3FD4F5006D32E3 /* UIHelpers.swift in Sources */,
 				4890B2852C57BD0F0032BE86 /* AccountDetailViewModel.swift in Sources */,

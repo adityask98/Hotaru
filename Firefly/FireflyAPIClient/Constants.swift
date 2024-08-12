@@ -44,6 +44,7 @@ struct autocompleteApiPaths {
     static let categories = "api/v1/autocomplete/categories"
     static let accounts = "api/v1/autocomplete/accounts"
     static let budgets = "api/v1/autocomplete/budgets"
+    static let currencies = "api/v1/autocomplete/currencies"
 }
 
 struct keychainConsts {
