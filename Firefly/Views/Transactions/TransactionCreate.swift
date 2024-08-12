@@ -21,6 +21,7 @@ struct TransactionCreate: View {
     @State private var budgets: AutoBudget = AutoBudget()
     @State private var accounts: AutoAccounts = AutoAccounts()
     @State private var currencies: AutoCurrency = AutoCurrency()
+    @State private var descriptions: AutoTransactions = AutoTransactions()
 
     //Selections
     @State private var transactionDescription: String = ""
@@ -69,7 +70,9 @@ struct TransactionCreate: View {
                     }
 
                     Section("Details") {
-                        TextField("Description", text: $transactionDescription)
+                        DescriptionInput(
+                            bindingText: $transactionDescription,
+                            transactionsAutocomplete: descriptions)
 
                         Picker("Category", selection: $selectedCategory) {
                             Text("Uncategorized").tag("")
@@ -170,10 +173,6 @@ struct TransactionCreate: View {
     }
 
     func submitTransaction() async throws {
-        // Implement your submission logic here
-        //        print(
-        //            "Transaction submitted: \(transactionDescription), Amount: \(amount), Date: \(date), Category: \(selectedCategory)"
-        //        )
         do {
             try await postTransaction(
                 description: transactionDescription, amount: amount, date: date,
@@ -216,10 +215,14 @@ struct TransactionCreate: View {
 
                 //Budgets
                 budgets = try await fetchBudgetsAutocomplete()
-                
+
                 //Currencies
-                
+
                 //currencies = try await fetchCurrenciesAutoComplete()
+
+                //Transactions (for Description Autocomplete)
+                descriptions = try await fetchTransactionAutocomplete()
+
             } catch {
                 print("Error loading categories: \(error)")
             }
@@ -247,6 +250,76 @@ struct TransactionCreate: View {
         }
     }
 
+}
+
+struct DescriptionInput: View {
+
+    var bindingText: Binding<String>
+    @FocusState private var focused: Bool
+    @State private var showSuggestions = false
+    var transactionsAutocomplete: [AutoTransactionElement]
+    private var filteredAutocomplete: [AutoTransactionElement] {
+        if bindingText.wrappedValue.isEmpty {
+            return transactionsAutocomplete
+        } else {
+            return transactionsAutocomplete.filter {
+                $0.description!.lowercased().contains(bindingText.wrappedValue.lowercased())
+            }
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            HStack {
+                TextField("Description", text: bindingText)
+                    .focused($focused)
+                if !bindingText.wrappedValue.isEmpty && focused {
+                    Button(
+                        action: {
+                            bindingText.wrappedValue = ""
+                            focused = false
+                        },
+                        label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .buttonStyle(.borderless)
+                                .foregroundStyle(.gray)
+                        })
+                }
+            }
+
+            if showSuggestions {
+                VStack(alignment: .leading) {
+                    Text("Suggestions").font(.caption).fontWeight(.light)
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach(filteredAutocomplete, id: \.id) {
+                                data in
+                                SuggestionChip(label: data.description ?? "Unknown").onTapGesture {
+                                    bindingText.wrappedValue = data.description ?? ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .onChange(of: focused) { _, newValue in
+            withAnimation(.default) {
+                showSuggestions = newValue
+            }
+        }
+    }
+}
+
+struct SuggestionChip: View {
+    let label: String
+    var body: some View {
+        Text(label)
+            .font(.subheadline).foregroundStyle(.white).padding(.vertical, 1)
+            .padding(.horizontal, 10).background(.gray)
+            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 5, height: 10)))
+    }
 }
 
 struct AccountsSelectionPicker: View {
