@@ -17,32 +17,36 @@ struct TokenSettings: View {
     @State private var toastParams: AlertToast = AlertToast(displayMode: .alert, type: .regular)
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                Text("Credentials")
-                    .font(.title)
-                    .padding()
+        NavigationStack {
 
-                instructionsLink
+            ScrollView {
+                VStack(spacing: 24) {
 
-                credentialsForm
+                    instructionsLink
 
-                TokenSettingsAsyncButton(action: saveCredentials) {
-                    Text("Save")
-                        .frame(maxWidth: .infinity)
+                    credentialsForm
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(!tokenSettingsValues.isFormValid)
-                .padding()
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Save") {
+                            Task {
+                                await saveCredentials()
+                            }
+                        }
+                        .disabled(!tokenSettingsValues.isFormValid)
+                    }
+                }
+            }
+            .padding(.horizontal)
+            .onAppear(perform: tokenSettingsValues.loadCredentials)
+            .interactiveDismissDisabled()
+            .toast(isPresenting: $showToast, tapToDismiss: false) {
+                toastParams
             }
         }
-        .padding(.horizontal)
-        .onAppear(perform: tokenSettingsValues.loadCredentials)
-        .interactiveDismissDisabled()
-        .toast(isPresenting: $showToast, tapToDismiss: false) {
-            toastParams
-        }
+
     }
+
     private var instructionsLink: some View {
         Link(
             destination: URL(
@@ -63,16 +67,27 @@ struct TokenSettings: View {
         }
     }
     private var credentialsForm: some View {
-        VStack {
-            TokenSettingsCustomTextField(
-                placeholder: "API Token", text: $tokenSettingsValues.apiToken)
-            TokenSettingsCustomTextField(
-                placeholder: "Default URL", text: $tokenSettingsValues.defaultURL)
+        VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Credentials").fontWeight(.semibold).font(.title2)
+                    Spacer()
+                }
+                .padding(.horizontal, 4)
+                TokenSettingsCustomTextField(
+                    placeholder: "API Token", keyboardType: .default,
+                    text: $tokenSettingsValues.apiToken)
+                TokenSettingsCustomTextField(
+                    placeholder: "Default URL", keyboardType: .URL,
+                    text: $tokenSettingsValues.defaultURL)
+            }
+            .padding()
+            .background(.ultraThinMaterial)
+
         }
-        .padding()
-        .background(.ultraThinMaterial)
         .cornerRadius(10)
         .shadow(color: Color.gray.opacity(0.3), radius: 5, x: 0, y: 2)
+
     }
     private func saveCredentials() async {
         do {
@@ -108,13 +123,38 @@ struct TokenSettings: View {
 
 struct TokenSettingsCustomTextField: View {
     let placeholder: String
+    let keyboardType: UIKeyboardType?
     @Binding var text: String
+    @FocusState var focused: Bool
     var body: some View {
-        TextField(placeholder, text: $text)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-            .padding(.horizontal)
-            .autocapitalization(.none)
-            .disableAutocorrection(true)
+        VStack(alignment: .leading, spacing: 5) {
+            Text(placeholder.uppercased()).fontWeight(.semibold).font(.callout).padding(
+                .horizontal, 12
+            ).opacity(0.5)
+            TextField(placeholder, text: $text)
+                .focused($focused)
+                .autocorrectionDisabled(true)
+                .keyboardType(keyboardType ?? .default)
+                .textInputAutocapitalization(.none)
+                .fontDesign(.monospaced)
+                .padding(.vertical, 16)
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color(.darkGray))
+                        .brightness(focused ? 0.1 : 0)
+                        .shadow(
+                            color: .black.opacity(focused ? 0.15 : 0), radius: focused ? 12 : 0,
+                            y: focused ? 6 : 0
+                        )
+                        .animation(.easeOut.speed(2.5), value: focused)
+                        .onTapGesture {
+                            focused = true
+                        }
+
+                )
+        }
     }
 }
 
@@ -150,6 +190,7 @@ enum CredentialSaveError: Error {
     case accessError
 }
 
+@MainActor
 class TokenSettingsViewModel: ObservableObject {
     @Published var apiToken: String = ""
     @Published var defaultURL: String = ""
@@ -157,6 +198,8 @@ class TokenSettingsViewModel: ObservableObject {
 
     func saveCredentials() async throws {
         self.isLoading = true
+
+        //Save Creds
         do {
             let keychainData = TokenObject(accessToken: apiToken)
 
@@ -165,7 +208,7 @@ class TokenSettingsViewModel: ObservableObject {
                 account: keychainConsts.account)
             UserDefaults.standard.set(defaultURL, forKey: UserDefaultKeys.baseURLKey)
 
-            //Ensure the UserDefaults value was set sucessfully
+            //Ensure the UserDefaults value was set successfully
             guard UserDefaults.standard.string(forKey: UserDefaultKeys.baseURLKey) == defaultURL
             else {
                 throw CredentialSaveError.userDefaultsSaveFailure
@@ -174,7 +217,6 @@ class TokenSettingsViewModel: ObservableObject {
             print("Failed to save credentials: \(error)")
             throw CredentialSaveError.keychainSaveFailure
         }
-
         //Test if the API actually works
         do {
             try await testUserAccessInfo()
