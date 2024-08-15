@@ -11,7 +11,6 @@ struct Settings: View {
     @State private var startTime = Date.now
     var body: some View {
         TimelineView(.animation) { timeline in
-            let elapsedTime = startTime.distance(to: Date.now)
 
             NavigationStack {
                 List {
@@ -19,7 +18,7 @@ struct Settings: View {
                         Section {
                             NavigationLink(destination: TokenSettings()) {
                                 HStack {
-                                    Image(systemName: "gear")
+                                    Image(systemName: "key.horizontal.fill")
                                     Text("Credentials")
                                     Spacer()
 
