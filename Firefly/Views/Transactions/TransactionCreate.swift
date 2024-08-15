@@ -277,7 +277,6 @@ struct DescriptionInput: View {
                     Button(
                         action: {
                             bindingText.wrappedValue = ""
-                            focused = false
                         },
                         label: {
                             Image(systemName: "xmark.circle.fill")
@@ -297,6 +296,7 @@ struct DescriptionInput: View {
                                 data in
                                 SuggestionChip(label: data.description ?? "Unknown").onTapGesture {
                                     bindingText.wrappedValue = data.description ?? ""
+                                    focused = false
                                 }
                             }
                         }
