@@ -135,7 +135,7 @@ struct TokenSettingsCustomTextField: View {
                 .focused($focused)
                 .autocorrectionDisabled(true)
                 .keyboardType(keyboardType ?? .default)
-                .textInputAutocapitalization(.none)
+                .textInputAutocapitalization(.never)
                 .fontDesign(.monospaced)
                 .padding(.vertical, 16)
                 .padding(.horizontal, 12)

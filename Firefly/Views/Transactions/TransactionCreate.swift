@@ -300,8 +300,10 @@ struct DescriptionInput: View {
                                 }
                             }
                         }
+                        .frame(maxWidth: .infinity)
                     }
                 }
+                .frame(maxWidth: .infinity)
             }
         }
         .onChange(of: focused) { _, newValue in
@@ -320,6 +322,7 @@ struct SuggestionChip: View {
             .padding(.horizontal, 10).background(.gray)
             .clipShape(RoundedRectangle(cornerSize: CGSize(width: 5, height: 10)))
     }
+
 }
 
 struct AccountsSelectionPicker: View {
