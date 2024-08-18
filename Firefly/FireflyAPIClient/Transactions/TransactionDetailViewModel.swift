@@ -7,22 +7,28 @@
 
 import Foundation
 
+struct TransactionDetailDatum: Codable {
+    var data: TransactionsDatum?
+}
+
 @MainActor
 final class TransactionDetailViewModel: ObservableObject {
-    @Published var transaction: TransactionsDatum?
+    @Published var transaction: TransactionDetailDatum?
     @Published var isLoading: Bool = false
 
-    func fetchTransaction(_ transactionID: String) async {
+    func fetchTransaction(transactionID: String) async {
         self.isLoading = true
         do {
+            print(transactionID)
             self.transaction = try await getTransaction(transactionID: transactionID)
+            //print (self.transaction)
         } catch {
             print(error)
         }
     }
 
-    func getTransaction(transactionID: String) async throws -> TransactionsDatum {
-        var request = try RequestBuilder(apiURL: apiPaths.transaction(transactionID))
+    func getTransaction(transactionID: String) async throws -> TransactionDetailDatum {
+        let request = try RequestBuilder(apiURL: apiPaths.transaction(transactionID))
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
@@ -31,7 +37,11 @@ final class TransactionDetailViewModel: ObservableObject {
 
         do {
             let decoder = JSONDecoder()
-            let result = try decoder.decode(TransactionsDatum.self, from: data)
+            let result = try decoder.decode(TransactionDetailDatum.self, from: data)
+//            if let str = String(data: data, encoding: .utf8) {
+//                print("Successfully decoded: \(str)")
+//            }
+            //print(result)
             return result
         } catch {
             print(error)

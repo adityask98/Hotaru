@@ -9,10 +9,16 @@ import SwiftUI
 
 struct TransactionDetail: View {
     @State var transaction: TransactionsDatum
+    @StateObject private var transactionData = TransactionDetailViewModel()
+    @State private var editSheetShown = false
+    @State private var isLoading = true
     var tags = ["Test1", "Test2", "Test3", "LongTag", "AnotherTag"]
     var body: some View {
         ScrollView {
             VStack {
+                if isLoading {
+                    LoadingSpinner()
+                }
                 HStack {
                     Image(
                         systemName: transactionTypeIcon(
@@ -279,6 +285,36 @@ struct TransactionDetail: View {
                     .clipShape(RoundedRectangle(cornerRadius: 18.0))
                 }
             }
+            .sheet(
+                isPresented: $editSheetShown,
+                content: {
+                    TransactionEdit(transactionData: (transactionData.transaction?.data)!)
+                }
+            )
+            .toolbar {
+                Button(action: {
+                    editSheetShown = true
+                }) {
+                    Image(systemName: "pencil.circle.fill")
+                        .padding(6)
+                        .fontWeight(.heavy)
+                }
+            }
+            .onAppear {
+                if transactionData.transaction == nil {
+                    Task {
+                        guard transaction.id != nil else {
+                            print("No ID")
+                            throw TransactionsModelError.invalidData
+                        }
+                        isLoading = true
+                        await transactionData.fetchTransaction(transactionID: transaction.id!)
+                        print(transactionData.transaction)
+                        isLoading = false
+                    }
+                }
+            }
+
             .padding(.horizontal, 15)
             .navigationTitle("Transaction Details")
             .toolbarTitleDisplayMode(.inline)
@@ -338,7 +374,6 @@ struct TransactionDetailSectionHeader: View {
         .padding(.horizontal)
     }
 }
-
 
 //struct TransactionDetailAmountSection: View {
 //    let title: String
