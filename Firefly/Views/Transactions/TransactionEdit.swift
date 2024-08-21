@@ -5,6 +5,7 @@
 //  Created by Aditya Srinivasa on 2024/08/17.
 //
 
+import AlertToast
 import SwiftUI
 
 struct TransactionEdit: View {
@@ -16,9 +17,11 @@ struct TransactionEdit: View {
     @State private var categories: [String] = ["Default"]
     @State private var descriptions: AutoTransactions = AutoTransactions()
     @State private var accounts: AutoAccounts = AutoAccounts()
-    
+
     //Toasts and UIControllers
     @State private var submitLoading = false
+    @State private var showToast = false
+    @State private var toastParams: AlertToast = AlertToast(displayMode: .alert, type: .regular)
 
     init(transactionData: TransactionsDatum) {
         self._transactionData = State(initialValue: transactionData)
@@ -162,7 +165,8 @@ struct TransactionEdit: View {
                                 },
                                 set: { newValue in
                                     postTransactionData.transactions?[index].notes = newValue
-                                }))
+                                }), axis: .vertical
+                        ).lineLimit(5)
 
                         //TODO: add category button
                         //TODO: budget select
@@ -180,11 +184,31 @@ struct TransactionEdit: View {
                 }
 
             }
+            .overlay(
+                MasterButton(
+                    icon: "square.and.pencil", label: "Edit Transaction", fullWidth: true,
+                    disabled: submitLoading,
+                    action: {
+                        Task {
+                            do {
+                                try await submitTransaction()
+                            } catch {
+                                print("ERROR EDITING: \(error)")
+                            }
+                        }
+                    }
+                )
+                .padding(.horizontal, 16)
+                .padding(.bottom, 8), alignment: .bottom
+            )
             .navigationTitle("Edit Transaction")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(trailing: Button("Cancel") { dismiss() })
+            .toast(isPresenting: $showToast, tapToDismiss: false) {
+                toastParams
+            }
         }
-        
+
         .onAppear {
             loadAutocomplete()
         }
@@ -205,8 +229,24 @@ struct TransactionEdit: View {
             }
         }
     }
-    
+
     func submitTransaction() async throws {
-        
+        submitLoading = true
+        do {
+            try await editTransaction(
+                transactionData: postTransactionData, transactionID: transactionData.id!)
+            toastParams = AlertToast(
+                displayMode: .alert, type: .complete(Color.green), title: "Saved Successfully")
+            showToast = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                dismiss()
+            }
+
+        } catch {
+            toastParams = AlertToast(
+                displayMode: .alert, type: .error(Color.red), title: "Something went wrong")
+            showToast = true
+        }
+        submitLoading = false
     }
 }

@@ -16,10 +16,10 @@ struct MasterButton: View {
     var color: Color = .blue
     var textColor: Color = .white
     var padding: CGFloat = 16
-    var height: CGFloat = 36
+    var height: CGFloat = 48
     var fullWidth: Bool = false
     var align: Alignment = .center
-    var cornerRadius: CGFloat = 10
+    var cornerRadius: CGFloat = 16
     var disabled = false
     var loading = false
     let action: () -> Void
@@ -51,6 +51,8 @@ struct MasterButton: View {
         .saturation(disabled ? 0 : 1)
         .opacity(disabled ? 0.65 : 1)
         .animation(.spring(), value: loading)
+        .accessibilityLabel(Text(label ?? "Button"))
+        .accessibilityAddTraits(.isButton)
 
     }
 }

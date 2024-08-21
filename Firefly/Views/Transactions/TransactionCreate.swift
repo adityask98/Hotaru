@@ -16,7 +16,7 @@ struct TransactionCreate: View {
     @State private var transactionData: PostTransaction = defaultTransactionData()
 
     //To populate
-    var transactionTypes = ["Expenses", "Income", "Transfer"]
+    var transactionTypes = ["Withdrawal", "Income", "Transfer"]
     @State private var categories: [String] = ["Default"]
     @State private var budgets: AutoBudget = AutoBudget()
     @State private var accounts: AutoAccounts = AutoAccounts()
@@ -113,32 +113,31 @@ struct TransactionCreate: View {
                         }
                     }
 
-                    Section("Note") {
-                        TextField("Note", text: $transactionNote, axis: .vertical)
+                    Section("Notes") {
+                        TextField("Notes", text: $transactionNote, axis: .vertical)
                             .lineLimit(5)
                     }
 
-                }.scrollDismissesKeyboard(.interactively)
-
-                HStack {
-                    Button(action: {
-                        Task {
-                            do {
-                                try await submitTransaction()
-                            } catch {
-                                print("Error submitting transaction: \(error)")
-                                // Handle the error appropriately
+                }
+                .overlay(
+                    MasterButton(
+                        icon: "plus.circle.fill", label: "Add Transaction", fullWidth: true,
+                        disabled: submitIsLoading,
+                        action: {
+                            Task {
+                                do {
+                                    try await submitTransaction()
+                                } catch {
+                                    print("Error submitting transaction: \(error)")
+                                    // Handle the error appropriately
+                                }
                             }
                         }
-                    }) {
-                        Text("Add Transaction")
-                            .frame(maxWidth: .infinity)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.blue)
-                            .clipShape(.capsule)
-                    }
-                }.padding(.horizontal).padding(.vertical, 8)
+                    )
+                    .padding(.horizontal, 16).padding(.bottom, 8), alignment: .bottom
+                )
+                .scrollDismissesKeyboard(.interactively)
+
             }
 
             .navigationTitle("Add Transaction")
@@ -173,6 +172,7 @@ struct TransactionCreate: View {
     }
 
     func submitTransaction() async throws {
+        submitIsLoading = true
         do {
             try await postTransaction(
                 description: transactionDescription, amount: amount, date: date,
@@ -196,6 +196,7 @@ struct TransactionCreate: View {
             await impact.notificationOccurred(.error)
             showToast = true
         }
+        submitIsLoading = false
     }
 
     func loadAutocomplete() {

@@ -40,6 +40,12 @@ struct postApiPaths {
     static let addTransactions = "api/v1/transactions"
 }
 
+struct putApiPaths {
+    static func editTransaction(_ id: String) -> String {
+        return "api/v1/transactions/\(id)"
+    }
+}
+
 struct autocompleteApiPaths {
     static let categories = "api/v1/autocomplete/categories"
     static let accounts = "api/v1/autocomplete/accounts"

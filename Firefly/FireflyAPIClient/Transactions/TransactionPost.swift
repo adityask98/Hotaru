@@ -40,13 +40,27 @@ func postTransaction(
     request.httpBody = data
 
     let (responseData, response) = try await URLSession.shared.data(for: request)
-    print(response)
+    //print(response)
     if let responseString = String(data: responseData, encoding: .utf8) {
-//        print("Raw response body:")
-//        print(responseString)
+        //        print("Raw response body:")
+        //        print(responseString)
     } else {
         print("Unable to convert response data to string")
     }
+    guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+        throw TransactionPostError.invalidResponse
+    }
+}
+
+func editTransaction(transactionData: PostTransaction, transactionID: String) async throws {
+    var request = try RequestBuilder(
+        apiURL: putApiPaths.editTransaction(transactionID), httpMethod: "PUT")
+
+    let encoder = JSONEncoder()
+    let data = try encoder.encode(transactionData)
+    request.httpBody = data
+
+    let (responseData, response) = try await URLSession.shared.data(for: request)
     guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
         throw TransactionPostError.invalidResponse
     }
