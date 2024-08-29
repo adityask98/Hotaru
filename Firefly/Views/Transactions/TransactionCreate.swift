@@ -29,7 +29,7 @@ struct TransactionCreate: View {
     @State private var date: Date = Date()
     @State private var selectedCategory: String = ""
     @State private var selectedBudget: String = ""
-    @State private var transactionType = "Expenses"
+    @State private var transactionType = "Withdrawal"
     @State private var sourceAccount: (id: String, name: String) = ("", "")
     @State private var destinationAccount: (id: String, name: String) = ("", "")
     @State private var transactionNote: String = ""

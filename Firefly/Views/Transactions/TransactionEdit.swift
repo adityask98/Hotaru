@@ -69,43 +69,7 @@ struct TransactionEdit: View {
 
                 }
 
-                VStack {
-                    Picker("", selection: $transactionData.type.animation()) {
-                        ForEach(transactionTypes, id: \.self) {
-                            Text($0)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    HStack {
-                        Spacer()
-                        TextField(
-                            "Amount",
-                            text: Binding(
-                                get: {
-                                    postTransactionData.transactions?.first?.amount ?? ""
-                                },
-                                set: { newValue in
-                                    if var transaction = transactionData.attributes?.transactions?
-                                        .first
-                                    {
-                                        transaction.amount = newValue
-                                        transactionData.attributes?.transactions?[0] = transaction
-                                    }
-                                })
-                        )
-                        .font(.largeTitle)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.center)
-                        Spacer()
-                    }
-                    .padding(.vertical, 20)
-
-                    HStack {
-                        Spacer()
-                        //DatePicker("", selection: $date).pickerStyle(.inline).labelsHidden()
-                        Spacer()
-                    }
-                }
+                
 
                 ForEach(Array(postTransactionData.transactions!.enumerated()), id: \.offset) {
                     index, transaction in
