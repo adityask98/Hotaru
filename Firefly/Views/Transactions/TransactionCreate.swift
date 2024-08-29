@@ -99,7 +99,7 @@ struct TransactionCreate: View {
 
                     Section("Accounts") {
                         switch transactionType {
-                        case "Expenses":
+                        case "Withdrawal":
                             accountPicker(title: "Source Account", binding: $sourceAccount)
                         case "Income":
                             accountPicker(

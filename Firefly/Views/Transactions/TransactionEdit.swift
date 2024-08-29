@@ -68,9 +68,6 @@ struct TransactionEdit: View {
                     }
 
                 }
-
-                
-
                 ForEach(Array(postTransactionData.transactions!.enumerated()), id: \.offset) {
                     index, transaction in
 
