@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MasterButton: View {
-    var icon: String? = nil
+    var icon: String?
     var label: String? = ""
     var textSize: CGFloat = 16
     var textWeight: Font.Weight = .semibold
