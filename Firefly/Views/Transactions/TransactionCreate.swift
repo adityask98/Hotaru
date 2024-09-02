@@ -119,22 +119,25 @@ struct TransactionCreate: View {
                     }
 
                 }
-                .overlay(
-                    MasterButton(
-                        icon: "plus.circle.fill", label: "Add Transaction", fullWidth: true,
-                        disabled: submitIsLoading,
-                        action: {
-                            Task {
-                                do {
-                                    try await submitTransaction()
-                                } catch {
-                                    print("Error submitting transaction: \(error)")
-                                    // Handle the error appropriately
+                .safeAreaInset(
+                    edge: .bottom,
+                    content: {
+                        MasterButton(
+                            icon: "plus.circle.fill", label: "Add Transaction", fullWidth: true,
+                            disabled: submitIsLoading,
+                            action: {
+                                Task {
+                                    do {
+                                        try await submitTransaction()
+                                    } catch {
+                                        print("Error submitting transaction: \(error)")
+                                        // Handle the error appropriately
+                                    }
                                 }
                             }
-                        }
-                    )
-                    .padding(.horizontal, 16).padding(.bottom, 8), alignment: .bottom
+                        )
+                        .padding(.horizontal, 16).padding(.bottom, 8)
+                    }
                 )
                 .scrollDismissesKeyboard(.interactively)
 

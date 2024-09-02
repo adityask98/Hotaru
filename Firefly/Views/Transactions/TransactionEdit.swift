@@ -90,6 +90,64 @@ struct TransactionEdit: View {
                                     postTransactionData.transactions?[index].amount = amount
                                 })
                         ).keyboardType(.decimalPad)
+
+                        switch transaction.type {
+                        case "withdrawal":
+                            //Text("WithDrawal")
+                            AccountPicker(
+                                title: "Source Account", accounts: accounts,
+                                selectedAccountID: Binding(
+                                    get: { transaction.sourceID ?? "" },
+                                    set: { newValue in
+                                        postTransactionData.transactions?[index].sourceID = newValue
+                                        postTransactionData.transactions?[index].sourceName =
+                                            accounts.first(where: { $0.id == newValue })?.name ?? ""
+                                    }
+                                )
+                            )
+                        case "deposit":
+                            //Text("Deposit")
+                            AccountPicker(
+                                title: "Destination Account", accounts: accounts,
+                                selectedAccountID: Binding(
+                                    get: { transaction.destinationID ?? "" },
+                                    set: { newValue in
+                                        postTransactionData.transactions?[index].destinationID =
+                                            newValue
+                                        postTransactionData.transactions?[index].destinationName =
+                                            accounts.first(where: { $0.id == newValue })?.name ?? ""
+                                    }
+                                )
+                            )
+                        case "transfer":
+                            //Text("Transfer")
+                            AccountPicker(
+                                title: "Source Account", accounts: accounts,
+                                selectedAccountID: Binding(
+                                    get: { transaction.sourceID ?? "" },
+                                    set: { newValue in
+                                        postTransactionData.transactions?[index].sourceID = newValue
+                                        postTransactionData.transactions?[index].sourceName =
+                                            accounts.first(where: { $0.id == newValue })?.name ?? ""
+                                    }
+                                )
+                            )
+                            AccountPicker(
+                                title: "Destination Account", accounts: accounts,
+                                selectedAccountID: Binding(
+                                    get: { transaction.destinationID ?? "" },
+                                    set: { newValue in
+                                        postTransactionData.transactions?[index].destinationID =
+                                            newValue
+                                        postTransactionData.transactions?[index].destinationName =
+                                            accounts.first(where: { $0.id == newValue })?.name ?? ""
+                                    }
+                                )
+                            )
+                        default:
+                            EmptyView()
+                        }
+
                         Picker(
                             "Category",
                             selection: Binding(
@@ -104,6 +162,7 @@ struct TransactionEdit: View {
                                 Text(category).tag(category)
                             }
                         }
+
                         DatePicker(
                             "Date",
                             selection: Binding(
@@ -118,6 +177,7 @@ struct TransactionEdit: View {
                                 }
                             )
                         ).datePickerStyle(.compact)
+
                         TextField(
                             "Notes",
                             text: Binding(
@@ -145,22 +205,23 @@ struct TransactionEdit: View {
                 }
 
             }
-            .overlay(
-                MasterButton(
-                    icon: "square.and.pencil", label: "Edit Transaction", fullWidth: true,
-                    disabled: submitLoading,
-                    action: {
-                        Task {
-                            do {
-                                try await submitTransaction()
-                            } catch {
-                                print("ERROR EDITING: \(error)")
+            .safeAreaInset(
+                edge: .bottom,
+                content: {
+                    MasterButton(
+                        icon: "square.and.pencil", label: "Edit Transaction", fullWidth: true,
+                        disabled: submitLoading,
+                        action: {
+                            Task {
+                                do {
+                                    try await submitTransaction()
+                                } catch {
+                                    print("ERROR EDITING: \(error)")
+                                }
                             }
                         }
-                    }
-                )
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8), alignment: .bottom
+                    ).padding(.horizontal, 16).padding(.bottom, 8)
+                }
             )
             .navigationTitle("Edit Transaction")
             .navigationBarTitleDisplayMode(.inline)
@@ -207,7 +268,24 @@ struct TransactionEdit: View {
             toastParams = AlertToast(
                 displayMode: .alert, type: .error(Color.red), title: "Something went wrong")
             showToast = true
+            print(error)
         }
         submitLoading = false
+    }
+}
+
+struct AccountPicker: View {
+    let title: String
+    let accounts: AutoAccounts
+    @Binding var selectedAccountID: String
+
+    var body: some View {
+        Picker(title, selection: $selectedAccountID) {
+            Text("Select an account").tag("")
+            ForEach(accounts, id: \.id) { account in
+                Text(account.name ?? "Unnamed Account")
+                    .tag(account.id ?? "")
+            }
+        }
     }
 }
