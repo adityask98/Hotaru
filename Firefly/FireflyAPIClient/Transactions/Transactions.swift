@@ -9,16 +9,16 @@ struct Transactions: Codable {
 
 // MARK: - TransactionsDatum
 struct TransactionsDatum: Codable {
-    let type, id: String?
-    let attributes: TransactionsAttributes?
-    let links: TransactionsDatumLinks?
+    var type, id: String?
+    var attributes: TransactionsAttributes?
+    var links: TransactionsDatumLinks?
 }
 
 // MARK: - TransactionsAttributes
 struct TransactionsAttributes: Codable {
-    let createdAt, updatedAt, user: String?
-    let groupTitle: String?
-    let transactions: [TransactionsTransaction]?
+    var createdAt, updatedAt, user: String?
+    var groupTitle: String?
+    var transactions: [TransactionsTransaction]?
 
     enum CodingKeys: String, CodingKey {
         case createdAt = "created_at"
@@ -35,10 +35,10 @@ struct TransactionsTransaction: Codable {
     let order: Int?
     let currencyID, currencyCode, currencyName, currencySymbol: String?
     let currencyDecimalPlaces: Int?
-    let foreignCurrencyID, foreignCurrencyCode, foreignCurrencySymbol: JSONNull?
+    let foreignCurrencyID, foreignCurrencyCode, foreignCurrencySymbol: String?
     let foreignCurrencyDecimalPlaces: Int?
-    let amount: String?
-    let foreignAmount: JSONNull?
+    var amount: String?
+    let foreignAmount: String?
     let description, sourceID, sourceName: String?
     let sourceIban: String?
     let sourceType, destinationID, destinationName: String?
@@ -50,17 +50,17 @@ struct TransactionsTransaction: Codable {
     let reconciled: Bool?
     let notes: String?
     let tags: [String]?
-    let internalReference, externalID: JSONNull?
+    let internalReference, externalID: String?
     let originalSource: String?
     let recurrenceID: String?
     let recurrenceTotal, recurrenceCount, bunqPaymentID: Int?
     let externalURL: String?
     let importHashV2: String?
-    let sepaCc, sepaCTOp, sepaCTID, sepaDB: JSONNull?
-    let sepaCountry, sepaEp, sepaCi, sepaBatchID: JSONNull?
-    let interestDate, bookDate, processDate, dueDate: JSONNull?
-    let paymentDate, invoiceDate, longitude, latitude: JSONNull?
-    let zoomLevel: JSONNull?
+    let sepaCc, sepaCTOp, sepaCTID, sepaDB: String?
+    let sepaCountry, sepaEp, sepaCi, sepaBatchID: String?
+    let interestDate, bookDate, processDate, dueDate: String?
+    let paymentDate, invoiceDate, longitude, latitude: String?
+    let zoomLevel: Int?
     let hasAttachments: Bool?
 
     enum CodingKeys: String, CodingKey {
@@ -445,7 +445,7 @@ struct PostTransactionElement: Codable {
     var reconciled: Bool?
     var piggyBankID: Int?
     var piggyBankName, billID, billName: String?
-    var tags: JSONNull?
+    var tags: [String]?
     var notes, internalReference, externalID, externalURL: String?
     var bunqPaymentID, sepaCc, sepaCTOp, sepaCTID: String?
     var sepaDB, sepaCountry, sepaEp, sepaCi: String?

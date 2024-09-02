@@ -27,6 +27,10 @@ func isSplitTransaction(_ transaction: TransactionsDatum) -> Bool {
     return transaction.attributes?.transactions?.count ?? 1 > 1
 }
 
+func isSplitTransaction(_ postTransaction: PostTransaction) -> Bool {
+    return postTransaction.transactions?.count ?? 1 > 1
+}
+
 //Title for the transaction.
 func transactionMainTitle(_ transaction: TransactionsDatum) -> String {
     if isSplitTransaction(transaction) {
@@ -100,4 +104,15 @@ func doThisAfter(_ seconds: CGFloat, callback: @escaping () -> Void) {
     return DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
         callback()
     }
+}
+
+func formatAmountForTextField(_ amountString: String, decimalPlace: Int) -> String {
+    guard let amount = Double(amountString) else {
+     return ""
+    }
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    formatter.minimumFractionDigits = 0
+    formatter.maximumFractionDigits = decimalPlace
+    return formatter.string(from: NSNumber(value: amount)) ?? ""
 }

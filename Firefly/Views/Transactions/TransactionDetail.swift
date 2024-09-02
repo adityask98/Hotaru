@@ -9,276 +9,281 @@ import SwiftUI
 
 struct TransactionDetail: View {
     @State var transaction: TransactionsDatum
+    @StateObject private var transactionData = TransactionDetailViewModel()
+    @State private var editSheetShown = false
+    @State private var isLoading = true
     var tags = ["Test1", "Test2", "Test3", "LongTag", "AnotherTag"]
     var body: some View {
         ScrollView {
             VStack {
-                HStack {
-                    Image(
-                        systemName: transactionTypeIcon(
-                            transaction.attributes?.transactions?.first?.type ?? "unknown")
-                    )
-                    .foregroundStyle(
-                        transactionTypeStyle(
-                            transaction.attributes?.transactions?.first?.type ?? "unknown")
-                    )
-                    .frame(width: 80, height: 60)
-                    .font(.system(size: 60))
+                if isLoading {
+                    LoadingSpinner()
+                } else {
+                    if let data = transactionData.transaction?.data {
 
-                    VStack(alignment: .leading) {
-
-                        HStack {
-                            Text(transactionMainTitle(transaction))
-                            if isSplitTransaction(transaction) {
-                                SplitBadge()
-                            }
-                        }
-
-                        Text(
-                            transaction.attributes?.transactions?.first?.type?.capitalized
-                                ?? "Unknown"
-                        ).foregroundStyle(
-                            transactionTypeColor(
-                                type: transaction.attributes?.transactions?.first?.type ?? "unknown"
-                            ))
-                        Spacer()
-                        Text(
-                            formatDate(
-                                transaction.attributes?.transactions?.first?.date ?? "Unknown")
-                                ?? "Unknown"
-                        )
-                        .font(.footnote)
+                        TransactionDetailHeader(data: data)
                     }
-                    Spacer()
-                }
-                .padding()
-                TransactionDetailSectionHeader(title: "Details")
 
-                if isSplitTransaction(transaction) {
-                    VStack(alignment: .leading, spacing: 0) {
-                        HStack(alignment: .top) {
-                            VStack(alignment: .leading) {
-                                Text("Total Amount").font(.title3)
-                                Text(
-                                    formatAmount(
-                                        calculateTransactionTotalAmount(transaction),
-                                        symbol: transaction.attributes?.transactions?.first?
-                                            .currencySymbol)
+                    TransactionDetailSectionHeader(title: "Details")
 
-                                ).font(.largeTitle).minimumScaleFactor(0.5).lineLimit(1)
-                                    .foregroundStyle(
-                                        transactionTypeColor(
-                                            type: transaction.attributes?.transactions?.first?.type
-                                                ?? "unknown"))
-                            }
-                            .padding()
+                    if isSplitTransaction(transaction) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            HStack(alignment: .top) {
+                                VStack(alignment: .leading) {
+                                    Text("Total Amount").font(.title3)
+                                    Text(
+                                        formatAmount(
+                                            calculateTransactionTotalAmount(transaction),
+                                            symbol: transaction.attributes?.transactions?.first?
+                                                .currencySymbol)
 
-                            Spacer()
-
-                        }
-                        Divider()
-                        HStack(alignment: .top) {
-                            VStack(alignment: .leading) {
-                                Text("Source").font(.title3)
-                                Text(
-                                    transaction.attributes?.transactions?.first?.sourceName
-                                        ?? "Unknown"
-                                ).font(.largeTitle)
-                                    .minimumScaleFactor(0.5).lineLimit(1)
-                            }
-                            .padding()
-
-                            Spacer()
-
-                            VStack(alignment: .leading) {
-                                Text("Destination").font(.title3)
-                                Text(
-                                    transaction.attributes?.transactions?.first?.destinationName
-                                        ?? "Unknown"
-                                ).font(.largeTitle)
-                                    .minimumScaleFactor(0.5).lineLimit(1)
-                            }
-                            .padding()
-                        }
-                        Divider()
-
-                    }
-                    .padding(.horizontal)
-                    .background(.ultraThinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 18.0))
-
-                    //                    ForEach(
-                    //                        Array(
-                    //                            transaction.attributes?.transactions?.enumerated() ?? [].enumerated()),
-                    //                        id: \.element.transaction_journal_id
-                    //                    ) { index, transactionData in
-                    //                        Text("Split Transaction #\(index + 1)")
-                    //                    }
-
-                    if let transactions = transaction.attributes?.transactions {
-                        ForEach(
-                            Array(transactions.enumerated()), id: \.element.transactionJournalID
-                        ) { index, splitTransaction in
-                            //TransactionDetailSectionHeader(title: "Split Transaction #\(index + 1)")
-                            TransactionDetailSectionHeader(
-                                title: splitTransaction.description ?? "Unknown",
-                                subTitle: "Split Transaction #\(index + 1)")
-                            VStack(alignment: .leading, spacing: 0) {
-                                HStack(alignment: .top) {
-                                    VStack(alignment: .leading) {
-                                        Text("Amount").font(.title3)
-                                        Text(
-                                            formatAmount(
-                                                splitTransaction.amount ?? "Unknown",
-                                                symbol: splitTransaction.currencySymbol)
-
-                                        ).font(.largeTitle).minimumScaleFactor(0.5).lineLimit(1)
-                                            .foregroundStyle(
-                                                transactionTypeColor(
-                                                    type: transaction.attributes?.transactions?
-                                                        .first?.type
-                                                        ?? "unknown"))
-                                    }
-                                    .padding()
-                                    Spacer()
+                                    ).font(.largeTitle).minimumScaleFactor(0.5).lineLimit(1)
+                                        .foregroundStyle(
+                                            transactionTypeColor(
+                                                type: transaction.attributes?.transactions?.first?
+                                                    .type
+                                                    ?? "unknown"))
                                 }
-                                Divider()
-                                HStack(alignment: .top) {
-                                    VStack(alignment: .leading) {
-                                        Text("Category").font(.title3)
-                                        Text(
-                                            splitTransaction.categoryName
-                                                ?? "Unknown"
-                                        ).font(.largeTitle)
-                                            .minimumScaleFactor(0.5).lineLimit(
-                                                1)
-                                    }
-                                    .padding()
+                                .padding()
 
-                                    Spacer()
-                                    if splitTransaction.budgetName
-                                        != nil
-                                    {
+                                Spacer()
+
+                            }
+                            Divider()
+                            HStack(alignment: .top) {
+                                VStack(alignment: .leading) {
+                                    Text("Source").font(.title3)
+                                    Text(
+                                        transaction.attributes?.transactions?.first?.sourceName
+                                            ?? "Unknown"
+                                    ).font(.largeTitle)
+                                        .minimumScaleFactor(0.5).lineLimit(1)
+                                }
+                                .padding()
+
+                                Spacer()
+
+                                VStack(alignment: .leading) {
+                                    Text("Destination").font(.title3)
+                                    Text(
+                                        transaction.attributes?.transactions?.first?.destinationName
+                                            ?? "Unknown"
+                                    ).font(.largeTitle)
+                                        .minimumScaleFactor(0.5).lineLimit(1)
+                                }
+                                .padding()
+                            }
+                            Divider()
+
+                        }
+                        .padding(.horizontal)
+                        .background(.ultraThinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 18.0))
+
+                        //                    ForEach(
+                        //                        Array(
+                        //                            transaction.attributes?.transactions?.enumerated() ?? [].enumerated()),
+                        //                        id: \.element.transaction_journal_id
+                        //                    ) { index, transactionData in
+                        //                        Text("Split Transaction #\(index + 1)")
+                        //                    }
+
+                        if let transactions = transaction.attributes?.transactions {
+                            ForEach(
+                                Array(transactions.enumerated()), id: \.element.transactionJournalID
+                            ) { index, splitTransaction in
+                                //TransactionDetailSectionHeader(title: "Split Transaction #\(index + 1)")
+                                TransactionDetailSectionHeader(
+                                    title: splitTransaction.description ?? "Unknown",
+                                    subTitle: "Split Transaction #\(index + 1)")
+                                VStack(alignment: .leading, spacing: 0) {
+                                    HStack(alignment: .top) {
                                         VStack(alignment: .leading) {
-                                            Text("Budget").font(.title3)
+                                            Text("Amount").font(.title3)
                                             Text(
-                                                splitTransaction.budgetName
+                                                formatAmount(
+                                                    splitTransaction.amount ?? "Unknown",
+                                                    symbol: splitTransaction.currencySymbol)
+
+                                            ).font(.largeTitle).minimumScaleFactor(0.5).lineLimit(1)
+                                                .foregroundStyle(
+                                                    transactionTypeColor(
+                                                        type: transaction.attributes?.transactions?
+                                                            .first?.type
+                                                            ?? "unknown"))
+                                        }
+                                        .padding()
+                                        Spacer()
+                                    }
+                                    Divider()
+                                    HStack(alignment: .top) {
+                                        VStack(alignment: .leading) {
+                                            Text("Category").font(.title3)
+                                            Text(
+                                                splitTransaction.categoryName
                                                     ?? "Unknown"
                                             ).font(.largeTitle)
                                                 .minimumScaleFactor(0.5).lineLimit(
                                                     1)
                                         }
                                         .padding()
+
+                                        Spacer()
+                                        if splitTransaction.budgetName
+                                            != nil
+                                        {
+                                            VStack(alignment: .leading) {
+                                                Text("Budget").font(.title3)
+                                                Text(
+                                                    splitTransaction.budgetName
+                                                        ?? "Unknown"
+                                                ).font(.largeTitle)
+                                                    .minimumScaleFactor(0.5).lineLimit(
+                                                        1)
+                                            }
+                                            .padding()
+                                        }
+
                                     }
-
                                 }
-                            }
-                            .padding(.horizontal)
-                            .background(.ultraThinMaterial)
-                            .clipShape(RoundedRectangle(cornerRadius: 18.0))
+                                .padding(.horizontal)
+                                .background(.ultraThinMaterial)
+                                .clipShape(RoundedRectangle(cornerRadius: 18.0))
 
+                            }
                         }
-                    }
 
-                } else {
-                    VStack(alignment: .leading, spacing: 0) {
-                        HStack(alignment: .top) {
-                            VStack(alignment: .leading) {
-                                Text("Amount").font(.title3)
-                                Text(
-                                    formatAmount(
-                                        calculateTransactionTotalAmount(transaction),
-                                        symbol: transaction.attributes?.transactions?.first?
-                                            .currencySymbol)
-
-                                ).font(.largeTitle).minimumScaleFactor(0.5).lineLimit(1)
-                                    .foregroundStyle(
-                                        transactionTypeColor(
-                                            type: transaction.attributes?.transactions?.first?.type
-                                                ?? "unknown"))
-                            }
-                            .padding()
-
-                            Spacer()
-
-                        }
-                        Divider()
-                        HStack(alignment: .top) {
-                            VStack(alignment: .leading) {
-                                Text("Source").font(.title3)
-                                Text(
-                                    transaction.attributes?.transactions?.first?.sourceName
-                                        ?? "Unknown"
-                                ).font(.largeTitle)
-                                    .minimumScaleFactor(0.5).lineLimit(1)
-                            }
-                            .padding()
-
-                            Spacer()
-
-                            VStack(alignment: .leading) {
-                                Text("Destination").font(.title3)
-                                Text(
-                                    transaction.attributes?.transactions?.first?.destinationName
-                                        ?? "Unknown"
-                                ).font(.largeTitle)
-                                    .minimumScaleFactor(0.5).lineLimit(1)
-                            }
-                            .padding()
-                        }
-                        Divider()
-                        HStack(alignment: .top) {
-                            VStack(alignment: .leading) {
-                                Text("Category").font(.title3)
-                                Text(
-                                    transaction.attributes?.transactions?.first?.categoryName
-                                        ?? "Unknown"
-                                ).font(.largeTitle)
-                                    .minimumScaleFactor(0.5).lineLimit(
-                                        1)
-                            }
-                            .padding()
-
-                            Spacer()
-                            if transaction.attributes?.transactions?.first?.budgetName != nil {
+                    } else {
+                        VStack(alignment: .leading, spacing: 0) {
+                            HStack(alignment: .top) {
                                 VStack(alignment: .leading) {
-                                    Text("Budget").font(.title3)
+                                    Text("Amount").font(.title3)
                                     Text(
-                                        transaction.attributes?.transactions?.first?.budgetName
+                                        formatAmount(
+                                            calculateTransactionTotalAmount(transaction),
+                                            symbol: transaction.attributes?.transactions?.first?
+                                                .currencySymbol)
+
+                                    ).font(.largeTitle).minimumScaleFactor(0.5).lineLimit(1)
+                                        .foregroundStyle(
+                                            transactionTypeColor(
+                                                type: transaction.attributes?.transactions?.first?
+                                                    .type
+                                                    ?? "unknown"))
+                                }
+                                .padding()
+
+                                Spacer()
+
+                            }
+                            Divider()
+                            HStack(alignment: .top) {
+                                VStack(alignment: .leading) {
+                                    Text("Source").font(.title3)
+                                    Text(
+                                        transaction.attributes?.transactions?.first?.sourceName
+                                            ?? "Unknown"
+                                    ).font(.largeTitle)
+                                        .minimumScaleFactor(0.5).lineLimit(1)
+                                }
+                                .padding()
+
+                                Spacer()
+
+                                VStack(alignment: .leading) {
+                                    Text("Destination").font(.title3)
+                                    Text(
+                                        transaction.attributes?.transactions?.first?.destinationName
+                                            ?? "Unknown"
+                                    ).font(.largeTitle)
+                                        .minimumScaleFactor(0.5).lineLimit(1)
+                                }
+                                .padding()
+                            }
+                            Divider()
+                            HStack(alignment: .top) {
+                                VStack(alignment: .leading) {
+                                    Text("Category").font(.title3)
+                                    Text(
+                                        transaction.attributes?.transactions?.first?.categoryName
                                             ?? "Unknown"
                                     ).font(.largeTitle)
                                         .minimumScaleFactor(0.5).lineLimit(
                                             1)
                                 }
                                 .padding()
+
+                                Spacer()
+                                if transaction.attributes?.transactions?.first?.budgetName != nil {
+                                    VStack(alignment: .leading) {
+                                        Text("Budget").font(.title3)
+                                        Text(
+                                            transaction.attributes?.transactions?.first?.budgetName
+                                                ?? "Unknown"
+                                        ).font(.largeTitle)
+                                            .minimumScaleFactor(0.5).lineLimit(
+                                                1)
+                                    }
+                                    .padding()
+                                }
+
                             }
-
                         }
+                        .padding(.horizontal)
+                        .background(.ultraThinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 18.0))
                     }
-                    .padding(.horizontal)
-                    .background(.ultraThinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 18.0))
-                }
 
-                if transaction.attributes?.transactions?.first?.notes != nil {
-                    TransactionDetailSectionHeader(title: "Notes").padding(.bottom, -10)
+                    if transaction.attributes?.transactions?.first?.notes != nil {
+                        TransactionDetailSectionHeader(title: "Notes").padding(.bottom, -10)
 
-                    VStack(alignment: .leading, spacing: 0) {
-                        VStack(alignment: .leading) {
-                            Text(
-                                transaction.attributes?.transactions?.first?.notes
-                                    ?? "Something went wrong.")
-                            Spacer()  // This will push the content to the top
+                        VStack(alignment: .leading, spacing: 0) {
+                            VStack(alignment: .leading) {
+                                Text(
+                                    transaction.attributes?.transactions?.first?.notes
+                                        ?? "Something went wrong.")
+                                Spacer()  // This will push the content to the top
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 100, alignment: .topLeading)
+                            .padding(.vertical)
                         }
-                        .frame(maxWidth: .infinity, minHeight: 100, alignment: .topLeading)
-                        .padding(.vertical)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal)
+                        .background(.ultraThinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 18.0))
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal)
-                    .background(.ultraThinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 18.0))
                 }
             }
+            .sheet(
+                isPresented: $editSheetShown,
+                content: {
+                    TransactionEdit(transactionData: (transactionData.transaction?.data)!)
+                }
+            )
+            .toolbar {
+                Button(action: {
+                    editSheetShown = true
+                }) {
+                    Image(systemName: "pencil.circle.fill")
+                        .padding(6)
+                        .fontWeight(.heavy)
+                }.disabled(isLoading)
+            }
+            .onAppear {
+                if transactionData.transaction == nil {
+                    Task {
+                        guard transaction.id != nil else {
+                            print("No ID")
+                            throw TransactionsModelError.invalidData
+                        }
+                        isLoading = true
+                        await transactionData.fetchTransaction(transactionID: transaction.id!)
+                        print(transactionData.transaction)
+                        isLoading = false
+                    }
+                }
+            }
+
             .padding(.horizontal, 15)
             .navigationTitle("Transaction Details")
             .toolbarTitleDisplayMode(.inline)
@@ -339,6 +344,54 @@ struct TransactionDetailSectionHeader: View {
     }
 }
 
+struct TransactionDetailHeader: View {
+
+    let data: TransactionsDatum
+    var body: some View {
+        HStack {
+            Image(
+                systemName: transactionTypeIcon(
+                    data.attributes?.transactions?
+                        .first?
+                        .type ?? "unknown")
+            )
+            .foregroundStyle(
+                transactionTypeStyle(
+                    data.attributes?.transactions?.first?.type ?? "unknown")
+            )
+            .frame(width: 80, height: 60)
+            .font(.system(size: 60))
+
+            VStack(alignment: .leading) {
+
+                HStack {
+                    Text(transactionMainTitle(data))
+                    if isSplitTransaction(data) {
+                        SplitBadge()
+                    }
+                }
+
+                Text(
+                    data.attributes?.transactions?.first?.type?.capitalized
+                        ?? "Unknown"
+                ).foregroundStyle(
+                    transactionTypeColor(
+                        type: data.attributes?.transactions?.first?.type
+                            ?? "unknown"
+                    ))
+                Spacer()
+                Text(
+                    formatJSONToPrettyStringDate(
+                        data.attributes?.transactions?.first?.date
+                            ?? "Unknown")
+                        ?? "Unknown"
+                )
+                .font(.footnote)
+            }
+            Spacer()
+        }.padding()
+    }
+}
 
 //struct TransactionDetailAmountSection: View {
 //    let title: String
