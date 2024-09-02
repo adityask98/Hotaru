@@ -267,7 +267,7 @@ struct TransactionDetail: View {
                     Image(systemName: "pencil.circle.fill")
                         .padding(6)
                         .fontWeight(.heavy)
-                }
+                }.disabled(isLoading)
             }
             .onAppear {
                 if transactionData.transaction == nil {
