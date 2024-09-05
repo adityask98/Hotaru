@@ -100,19 +100,23 @@ func transactionTypeColor(type: String) -> Color {
     }
 }
 
+
+// Allows an action after a delay (in seconds)
 func doThisAfter(_ seconds: CGFloat, callback: @escaping () -> Void) {
     return DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
         callback()
     }
 }
 
+// Formats amount number to a string with the appropriate decimal placement
 func formatAmountForTextField(_ amountString: String, decimalPlace: Int) -> String {
     guard let amount = Double(amountString) else {
-     return ""
+        return ""
     }
     let formatter = NumberFormatter()
     formatter.numberStyle = .decimal
     formatter.minimumFractionDigits = 0
     formatter.maximumFractionDigits = decimalPlace
+    formatter.usesGroupingSeparator = false
     return formatter.string(from: NSNumber(value: amount)) ?? ""
 }

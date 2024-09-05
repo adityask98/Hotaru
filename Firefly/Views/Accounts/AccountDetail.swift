@@ -152,15 +152,16 @@ struct AccountTransactionsView: View {
 
             VStack {
                 //Text("Transactions: \(transactions?.data?.count ?? 0)")
-                if transactions?.data?.count != 0 {
+                //if transactions?.data?.count != 0 {
+                List {
                     ForEach(transactions?.data ?? [], id: \.id) { transactionData in
                         TransactionsRow(transaction: transactionData)
                             .animation(
                                 .easeIn(duration: 0.3).delay(0.05), value: transactionsLoaded)
-
                     }
-
                 }
+
+                //}
 
             }
             .onAppear {

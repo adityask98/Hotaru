@@ -149,6 +149,7 @@ struct TransactionCreate: View {
             .navigationBarItems(trailing: Button("Cancel") { dismiss() })
             .toast(isPresenting: $showToast, tapToDismiss: false) {
                 toastParams
+                
             }
             .alert("Enter the name for a new category", isPresented: $showingNewCategoryToast) {
                 TextField("New category", text: $newCategoryName).foregroundStyle(Color.black)

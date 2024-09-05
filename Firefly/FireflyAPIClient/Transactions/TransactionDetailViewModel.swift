@@ -19,12 +19,16 @@ final class TransactionDetailViewModel: ObservableObject {
     func fetchTransaction(transactionID: String) async {
         self.isLoading = true
         do {
-            print(transactionID)
             self.transaction = try await getTransaction(transactionID: transactionID)
-            //print (self.transaction)
         } catch {
             print(error)
         }
+    }
+
+    func refreshTransaction(transactionID: String) async {
+        self.isLoading = true
+        await fetchTransaction(transactionID: transactionID)
+        self.isLoading = false
     }
 
     func getTransaction(transactionID: String) async throws -> TransactionDetailDatum {
@@ -38,9 +42,9 @@ final class TransactionDetailViewModel: ObservableObject {
         do {
             let decoder = JSONDecoder()
             let result = try decoder.decode(TransactionDetailDatum.self, from: data)
-//            if let str = String(data: data, encoding: .utf8) {
-//                print("Successfully decoded: \(str)")
-//            }
+            //            if let str = String(data: data, encoding: .utf8) {
+            //                print("Successfully decoded: \(str)")
+            //            }
             //print(result)
             return result
         } catch {

@@ -23,6 +23,7 @@
 		4857609A2C6629BA0050027B /* CurrenciesAutocomplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485760992C6629BA0050027B /* CurrenciesAutocomplete.swift */; };
 		4857609C2C69FCF00050027B /* TransactionsAutocomplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4857609B2C69FCF00050027B /* TransactionsAutocomplete.swift */; };
 		4861BF802ADCE82F00FAC64D /* AccountsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4861BF7F2ADCE82F00FAC64D /* AccountsModel.swift */; };
+		486742552C89CBA700D31B76 /* DebugHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486742542C89CBA600D31B76 /* DebugHelpers.swift */; };
 		486E1D7D2C33DAE60038BB4F /* DateHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486E1D7C2C33DAE60038BB4F /* DateHelpers.swift */; };
 		486E1D802C354A2F0038BB4F /* SearchOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486E1D7F2C354A2F0038BB4F /* SearchOption.swift */; };
 		486E1D822C359A520038BB4F /* effetcs.metal in Sources */ = {isa = PBXBuildFile; fileRef = 486E1D812C359A520038BB4F /* effetcs.metal */; };
@@ -73,6 +74,7 @@
 		485760992C6629BA0050027B /* CurrenciesAutocomplete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrenciesAutocomplete.swift; sourceTree = "<group>"; };
 		4857609B2C69FCF00050027B /* TransactionsAutocomplete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsAutocomplete.swift; sourceTree = "<group>"; };
 		4861BF7F2ADCE82F00FAC64D /* AccountsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsModel.swift; sourceTree = "<group>"; };
+		486742542C89CBA600D31B76 /* DebugHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugHelpers.swift; sourceTree = "<group>"; };
 		486E1D7C2C33DAE60038BB4F /* DateHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateHelpers.swift; sourceTree = "<group>"; };
 		486E1D7F2C354A2F0038BB4F /* SearchOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchOption.swift; sourceTree = "<group>"; };
 		486E1D812C359A520038BB4F /* effetcs.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = effetcs.metal; sourceTree = "<group>"; };
@@ -134,6 +136,7 @@
 				486E1D852C359E450038BB4F /* BackgroundMaterial.swift */,
 				48BB087F2C3FD4F5006D32E3 /* UIHelpers.swift */,
 				4890B2752C4643120032BE86 /* Loading.swift */,
+				486742542C89CBA600D31B76 /* DebugHelpers.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -438,6 +441,7 @@
 				4890B2822C5639A00032BE86 /* BalanceCharts.swift in Sources */,
 				48831AE82C71E724005DBBF4 /* MasterButton.swift in Sources */,
 				48E9195B2AE2C1E60074B904 /* Constants.swift in Sources */,
+				486742552C89CBA700D31B76 /* DebugHelpers.swift in Sources */,
 				4890B27B2C561A690032BE86 /* CategoriesDonut.swift in Sources */,
 				4843D2372B13844A00D1A131 /* Menu.swift in Sources */,
 				489EB28E2B46EB2800414CCB /* AccountsView.swift in Sources */,

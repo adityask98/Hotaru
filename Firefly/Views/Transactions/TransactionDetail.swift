@@ -12,6 +12,7 @@ struct TransactionDetail: View {
     @StateObject private var transactionData = TransactionDetailViewModel()
     @State private var editSheetShown = false
     @State private var isLoading = true
+    @State private var shouldRefresh: Bool? = false  // User to control refresh
     var tags = ["Test1", "Test2", "Test3", "LongTag", "AnotherTag"]
     var body: some View {
         ScrollView {
@@ -256,6 +257,11 @@ struct TransactionDetail: View {
             }
             .sheet(
                 isPresented: $editSheetShown,
+                onDismiss: {
+                    Task {
+                        await refresh()
+                    }
+                },
                 content: {
                     TransactionEdit(transactionData: (transactionData.transaction?.data)!)
                 }
@@ -278,7 +284,6 @@ struct TransactionDetail: View {
                         }
                         isLoading = true
                         await transactionData.fetchTransaction(transactionID: transaction.id!)
-                        print(transactionData.transaction)
                         isLoading = false
                     }
                 }
@@ -288,7 +293,19 @@ struct TransactionDetail: View {
             .navigationTitle("Transaction Details")
             .toolbarTitleDisplayMode(.inline)
         }
+        .refreshable {
+            await refresh()
+        }
 
+    }
+
+    @MainActor
+    private func refresh() async {
+        Task(priority: .background) {
+            isLoading = true
+            await transactionData.refreshTransaction(transactionID: transaction.id!)
+            isLoading = false
+        }
     }
 
     private func formatDate(_ dateString: String) -> String? {

@@ -56,6 +56,7 @@ struct TransactionsView: View {
                             .buttonStyle(PlainButtonStyle())
                         }
                     }
+                    //.listRowSpacing(-10)
                     .listStyle(PlainListStyle())
                     .background(Color.clear)
                 }
@@ -241,9 +242,9 @@ struct TransactionsRow: View {
             }
         }
         .background(.ultraThinMaterial)  // Add a background color if needed
-        .cornerRadius(16)  // Round the corners
+        .cornerRadius(12)  // Round the corners
         .padding(.horizontal)  // Add horizontal padding to the entire row
-        .padding(.vertical, 8)
+        .padding(.vertical, 2)
     }
 
     private func formatDate(_ dateString: String?) -> String {
