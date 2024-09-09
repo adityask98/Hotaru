@@ -14,6 +14,7 @@ let baseURL = "dummy.com"
 struct UserDefaultKeys {
     static let apiTokenKey = "APIToken"
     static let baseURLKey = "DefaultURL"
+    static let fireWebhooks = "FireWebhooks"
 }
 
 struct apiPaths {

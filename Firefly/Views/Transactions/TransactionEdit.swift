@@ -22,6 +22,7 @@ struct TransactionEdit: View {
     @State private var submitLoading = false
     @State private var showToast = false
     @State private var toastParams: AlertToast = AlertToast(displayMode: .alert, type: .regular)
+    @State private var autocompleteLoading = true
 
     init(transactionData: TransactionsDatum) {
         self._transactionData = State(initialValue: transactionData)
@@ -147,19 +148,24 @@ struct TransactionEdit: View {
                         default:
                             EmptyView()
                         }
+                        if autocompleteLoading {
+                            ProgressView()
+                        } else {
 
-                        Picker(
-                            "Category",
-                            selection: Binding(
-                                get: { transaction.categoryName ?? "" },
-                                set: { newValue in
-                                    postTransactionData.transactions?[index].categoryName = newValue
-                                })
-                        ) {
-                            Text("Uncategorized").tag("")
-                            ForEach(categories.filter { $0 != "Uncategorized" }, id: \.self) {
-                                category in
-                                Text(category).tag(category)
+                            Picker(
+                                "Category",
+                                selection: Binding(
+                                    get: { transaction.categoryName ?? "" },
+                                    set: { newValue in
+                                        postTransactionData.transactions?[index].categoryName =
+                                            newValue
+                                    })
+                            ) {
+                                Text("Uncategorized").tag("")
+                                ForEach(categories.filter { $0 != "Uncategorized" }, id: \.self) {
+                                    category in
+                                    Text(category).tag(category)
+                                }
                             }
                         }
 
@@ -239,12 +245,14 @@ struct TransactionEdit: View {
     func loadAutocomplete() {
         Task {
             do {
+                autocompleteLoading = true
                 //Categories
                 categories = try await createCategoriesAutocompleteArray()
                 //Transactions (for Description Autocomplete)
                 descriptions = try await fetchTransactionAutocomplete()
                 //Accounts
                 accounts = try await fetchAccountsAutocomplete()
+                autocompleteLoading = false
 
             } catch {
                 print("Error: \(error)")
