@@ -15,6 +15,7 @@ struct TransactionDetailDatum: Codable {
 final class TransactionDetailViewModel: ObservableObject {
     @Published var transaction: TransactionDetailDatum?
     @Published var isLoading: Bool = false
+    @Published var errorMessage: String = ""
 
     func fetchTransaction(transactionID: String) async {
         self.isLoading = true
@@ -29,6 +30,21 @@ final class TransactionDetailViewModel: ObservableObject {
         self.isLoading = true
         await fetchTransaction(transactionID: transactionID)
         self.isLoading = false
+    }
+
+    func deleteTransaction(transactionID: String) async throws {
+        let request = try RequestBuilder(
+            apiURL: apiPaths.transaction("test"), httpMethod: "DELETE")
+        let (data, response) = try await URLSession.shared.data(for: request)
+        printResponse(data)
+
+        guard let response = response as? HTTPURLResponse, response.statusCode == 204 else {
+            let commonError = try ErrorDecoder(data)
+            errorMessage = commonError.message ?? "No message"
+            print(errorMessage)
+            throw TransactionsModelError.invalidResponse
+        }
+        print(response)
     }
 
     func getTransaction(transactionID: String) async throws -> TransactionDetailDatum {
