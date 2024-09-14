@@ -11,12 +11,17 @@ import SwiftUI
 struct TransactionDetail: View {
     @State var transaction: TransactionsDatum
     @StateObject private var transactionData = TransactionDetailViewModel()
+
+    //Toasts and controllers
+    @Environment(\.dismiss) var dismiss
+    //@Binding var shouldRefresh: Bool?
+
     @State private var editSheetShown = false
     @State private var isLoading = true
-    @State private var shouldRefresh: Bool? = false  // User to control refresh
     @State private var toastParams: AlertToast = AlertToast(
         displayMode: .hud, type: .error(Color.red))
     @State private var showToast = false
+    @State private var deleteToast = false
 
     var tags = ["Test1", "Test2", "Test3", "LongTag", "AnotherTag"]
     var body: some View {
@@ -255,12 +260,7 @@ struct TransactionDetail: View {
                             icon: "trash.fill", label: "Delete Transaction", color: Color.red,
                             fullWidth: true,
                             action: {
-                                Task {
-                                    do {
-                                        try await deleteTransaction()
-                                    }
-                                }
-
+                                deleteToast.toggle()
                             }
                         ).padding(.vertical, 8)
                     }
@@ -307,6 +307,15 @@ struct TransactionDetail: View {
             .toast(isPresenting: $showToast, tapToDismiss: false) {
                 toastParams
             }
+            .alert("Are you sure you want to delete this transaction?", isPresented: $deleteToast) {
+                Button("Delete", role: .destructive) {
+                    Task {
+                        do {
+                            try await deleteTransaction()
+                        }
+                    }
+                }
+            }
         }
         .refreshable {
             await refresh()
@@ -328,10 +337,25 @@ struct TransactionDetail: View {
             do {
                 try await transactionData.deleteTransaction(
                     transactionID: (transactionData.transaction?.data?.id)!)
+                toastParams = AlertToast(
+                    displayMode: .alert, type: .complete(Color.green),
+                    title: "Transaction deleted successfully")
+                showToast = true
+                doThisAfter(2.0) {
+                    //shouldRefresh? = true
+                    dismiss()
+                }
             } catch {
                 toastParams = AlertToast(
-                    displayMode: .banner(.pop), type: .error(Color.red), title: transactionData.errorMessage)
-                showToast = true
+                    displayMode: .alert,
+                    type: .systemImage("exclamationmark.triangle.fill", Color.red),
+                    title: transactionData.errorMessage)
+                withAnimation {
+                    showToast = true
+                }
+                doThisAfter(2.0) {
+                    showToast = false
+                }
             }
         }
     }

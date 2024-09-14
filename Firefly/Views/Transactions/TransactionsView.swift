@@ -35,10 +35,12 @@ struct TransactionsView: View {
                     List {
                         ForEach(transactions.transactions?.data ?? [], id: \.id) {
                             transactionData in
-                            TransactionsRow(transaction: transactionData)
-                                //}
-                                .listRowInsets(EdgeInsets())
-                                .listRowSeparator(.hidden)
+                            TransactionsRow(
+                                transaction: transactionData
+                            )
+                            //}
+                            .listRowInsets(EdgeInsets())
+                            .listRowSeparator(.hidden)
 
                             //}
                         }

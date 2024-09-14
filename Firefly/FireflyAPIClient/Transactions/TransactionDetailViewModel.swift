@@ -34,9 +34,9 @@ final class TransactionDetailViewModel: ObservableObject {
 
     func deleteTransaction(transactionID: String) async throws {
         let request = try RequestBuilder(
-            apiURL: apiPaths.transaction("test"), httpMethod: "DELETE")
+            apiURL: apiPaths.transaction(transactionID), httpMethod: "DELETE")
         let (data, response) = try await URLSession.shared.data(for: request)
-        printResponse(data)
+        //printResponse(data)
 
         guard let response = response as? HTTPURLResponse, response.statusCode == 204 else {
             let commonError = try ErrorDecoder(data)
