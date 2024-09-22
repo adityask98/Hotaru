@@ -44,7 +44,7 @@ struct MasterButton: View {
         .fontSize(textSize, textWeight, design: textDesign)
         .padding(.horizontal, 10 * 1.5)
         .foregroundStyle(textColor)
-        .frame(maxWidth: fullWidth ? .infinity : nil, maxHeight: height, alignment: align)
+        .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: height, alignment: align)
         .background(RoundedRectangle(cornerRadius: cornerRadius).fill(color))
         .highPriorityGesture(TapGesture().onEnded { action() })
         .disabled(disabled)
@@ -58,7 +58,8 @@ struct MasterButton: View {
 }
 
 #Preview {
+    @Previewable @State var loading = false
     MasterButton(
-        icon: "square.and.pencil", label: "Edit Transaction", disabled: true, loading: true,
-        action: {})
+        icon: "square.and.pencil", label: "Edit Transaction", disabled: false, loading: loading,
+        action: { loading.toggle() })
 }

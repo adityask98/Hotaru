@@ -100,7 +100,6 @@ func transactionTypeColor(type: String) -> Color {
     }
 }
 
-
 // Allows an action after a delay (in seconds)
 func doThisAfter(_ seconds: CGFloat, callback: @escaping () -> Void) {
     return DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
