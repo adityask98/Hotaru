@@ -332,30 +332,29 @@ struct TransactionDetail: View {
         }
     }
 
+    @MainActor
     private func deleteTransaction() async throws {
-        Task(priority: .background) {
-            do {
-                try await transactionData.deleteTransaction(
-                    transactionID: (transactionData.transaction?.data?.id)!)
-                toastParams = AlertToast(
-                    displayMode: .alert, type: .complete(Color.green),
-                    title: "Transaction deleted successfully")
+        do {
+            try await transactionData.deleteTransaction(
+                transactionID: (transactionData.transaction?.data?.id)!)
+            toastParams = AlertToast(
+                displayMode: .alert, type: .complete(Color.green),
+                title: "Transaction deleted successfully")
+            showToast = true
+            doThisAfter(2.0) {
+                //shouldRefresh? = true
+                dismiss()
+            }
+        } catch {
+            toastParams = AlertToast(
+                displayMode: .alert,
+                type: .systemImage("exclamationmark.triangle.fill", Color.red),
+                title: transactionData.errorMessage)
+            withAnimation {
                 showToast = true
-                doThisAfter(2.0) {
-                    //shouldRefresh? = true
-                    dismiss()
-                }
-            } catch {
-                toastParams = AlertToast(
-                    displayMode: .alert,
-                    type: .systemImage("exclamationmark.triangle.fill", Color.red),
-                    title: transactionData.errorMessage)
-                withAnimation {
-                    showToast = true
-                }
-                doThisAfter(2.0) {
-                    showToast = false
-                }
+            }
+            doThisAfter(2.0) {
+                showToast = false
             }
         }
     }
