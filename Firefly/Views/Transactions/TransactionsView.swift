@@ -175,6 +175,10 @@ struct TransactionsRow: View {
     @State private var isActiveNav: Bool = true
     var showDate = true
     var showAccount = true
+    var animate = true
+
+    @State private var opacity: Double = 1.0
+    @State private var offset: CGFloat = 50
     var body: some View {
         NavigationLink(
             destination: TransactionDetail(transaction: transaction)
@@ -228,24 +232,32 @@ struct TransactionsRow: View {
                                 }
                             }
                         }
-
                         if showDate {
                             Text(formatDate(transaction.attributes?.transactions?.first?.date))
                                 .foregroundStyle(.gray)
                         }
-
                     }
                 }
                 .padding(.horizontal, 8)
                 .padding(.vertical, 8)  // Add padding inside the HStack
             }
-            //}
             .background(.ultraThinMaterial)  // Add a background color if needed
             .cornerRadius(12)  // Round the corners
             .padding(.horizontal)  // Add horizontal padding to the entire row
             .padding(.vertical, 2)
         }
         .buttonStyle(PlainButtonStyle())
+        .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+        .opacity(opacity)
+        .offset(x: offset)
+        .onAppear {
+            if animate {
+                withAnimation(.easeInOut(duration: 0.1)) {
+                    opacity = 1.0
+                    offset = 0
+                }
+            }
+        }
     }
 
     //date formatter specific to this View
