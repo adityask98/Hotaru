@@ -119,10 +119,3 @@ func formatAmountForTextField(_ amountString: String, decimalPlace: Int) -> Stri
     formatter.usesGroupingSeparator = false
     return formatter.string(from: NSNumber(value: amount)) ?? ""
 }
-
-// Do this after
-func doThisAfter(_ seconds: Double, callback: @escaping () -> Void) {
-    return DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
-        callback()
-    }
-}
