@@ -150,19 +150,14 @@ struct AccountTransactionsView: View {
     var body: some View {
         NavigationStack {
 
-            VStack {
-                //Text("Transactions: \(transactions?.data?.count ?? 0)")
-                //if transactions?.data?.count != 0 {
-                List {
+            ScrollView {
+                LazyVStack {
                     ForEach(transactions?.data ?? [], id: \.id) { transactionData in
                         TransactionsRow(transaction: transactionData)
                             .animation(
                                 .easeIn(duration: 0.3).delay(0.05), value: transactionsLoaded)
                     }
                 }
-
-                //}
-
             }
             .onAppear {
                 if transactions == nil {
@@ -171,7 +166,6 @@ struct AccountTransactionsView: View {
                             isLoading = true
                             transactions = try await fetchAccountTransactions(accountID)
                             isLoading = false
-
                         }
                     }
                 }

@@ -32,30 +32,29 @@ struct TransactionsView: View {
                 if isLoading {
                     LoadingSpinner()
                 } else {
-                    List {
-                        ForEach(transactions.transactions?.data ?? [], id: \.id) {
-                            transactionData in
-                            TransactionsRow(
-                                transaction: transactionData
-                            )
-                            //}
-                            .listRowInsets(EdgeInsets())
-                            .listRowSeparator(.hidden)
-
-                            //}
-                        }
-
-                        if transactions.hasMorePages {
-                            Button(action: {
-                                Task {
-                                    await transactions.fetchTransactions(loadMore: true)
-                                }
-                            }) {
-                                Text("Load More")
-                                    .frame(maxWidth: .infinity, alignment: .center)
+                    ScrollView {
+                        LazyVStack {
+                            ForEach(transactions.transactions?.data ?? [], id: \.id) {
+                                transactionData in
+                                TransactionsRow(
+                                    transaction: transactionData
+                                )
+                                .listRowInsets(EdgeInsets())
+                                .listRowSeparator(.hidden)
                             }
-                            .listRowSeparator(.hidden)
-                            .buttonStyle(PlainButtonStyle())
+
+                            if transactions.hasMorePages {
+                                Button(action: {
+                                    Task {
+                                        await transactions.fetchTransactions(loadMore: true)
+                                    }
+                                }) {
+                                    Text("Load More")
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                }
+                                .listRowSeparator(.hidden)
+                                .buttonStyle(PlainButtonStyle())
+                            }
                         }
                     }
                     //.listRowSpacing(-10)
@@ -177,11 +176,9 @@ struct TransactionsRow: View {
     var showDate = true
     var showAccount = true
     var body: some View {
-        ZStack {
-            NavigationLink(
-                destination: TransactionDetail(transaction: transaction)
-            ) { EmptyView() }
-            .opacity(0.0).buttonStyle(PlainButtonStyle())
+        NavigationLink(
+            destination: TransactionDetail(transaction: transaction)
+        ) {
             VStack {
                 HStack {
                     Image(
@@ -242,13 +239,16 @@ struct TransactionsRow: View {
                 .padding(.horizontal, 8)
                 .padding(.vertical, 8)  // Add padding inside the HStack
             }
+            //}
+            .background(.ultraThinMaterial)  // Add a background color if needed
+            .cornerRadius(12)  // Round the corners
+            .padding(.horizontal)  // Add horizontal padding to the entire row
+            .padding(.vertical, 2)
         }
-        .background(.ultraThinMaterial)  // Add a background color if needed
-        .cornerRadius(12)  // Round the corners
-        .padding(.horizontal)  // Add horizontal padding to the entire row
-        .padding(.vertical, 2)
+        .buttonStyle(PlainButtonStyle())
     }
 
+    //date formatter specific to this View
     private func formatDate(_ dateString: String?) -> String {
         guard let dateString = dateString,
             let date = ISO8601DateFormatter().date(from: dateString)
