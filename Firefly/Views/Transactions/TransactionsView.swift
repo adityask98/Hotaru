@@ -178,7 +178,7 @@ struct TransactionsRow: View {
     var animate = true
 
     @State private var opacity: Double = 1.0
-    @State private var offset: CGFloat = 50
+
     var body: some View {
         NavigationLink(
             destination: TransactionDetail(transaction: transaction)
@@ -249,12 +249,10 @@ struct TransactionsRow: View {
         .buttonStyle(PlainButtonStyle())
         .transition(.opacity.animation(.easeInOut(duration: 0.3)))
         .opacity(opacity)
-        .offset(x: offset)
         .onAppear {
             if animate {
                 withAnimation(.easeInOut(duration: 0.1)) {
                     opacity = 1.0
-                    offset = 0
                 }
             }
         }
