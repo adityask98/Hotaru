@@ -8,6 +8,8 @@
 import AlertToast
 import SwiftUI
 
+
+
 struct Menu: View {
 
     init() {
@@ -26,6 +28,10 @@ struct Menu: View {
             UITabBar.appearance().scrollEdgeAppearance = appearance
         }
     }
+
+    #if DEBUG
+        @ObserveInjection var redraw
+    #endif
 
     @EnvironmentObject private var alertViewModel: AlertViewModel
     @StateObject private var tokenSettingsValue = TokenSettingsViewModel()
@@ -62,7 +68,12 @@ struct Menu: View {
                     tokenSheetShown = true
                 }
             }
-        }.transition(.opacity)
+        }
+
+        #if DEBUG
+            .eraseToAnyView()
+        #endif
+        .transition(.opacity)
         .ignoresSafeArea(.all)
 
     }

@@ -50,6 +50,7 @@
 		48BB08842C40D4EA006D32E3 /* Autocomplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BB08832C40D4EA006D32E3 /* Autocomplete.swift */; };
 		48BB08882C40F60E006D32E3 /* AccountDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BB08872C40F60E006D32E3 /* AccountDetail.swift */; };
 		48BB088B2C411A38006D32E3 /* ChartsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BB088A2C411A38006D32E3 /* ChartsModel.swift */; };
+		48D9B4652CA57EBF00257479 /* HotSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 48D9B4642CA57EBF00257479 /* HotSwiftUI */; };
 		48DF33FF2AD3E31900F6F215 /* FireflyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF33FE2AD3E31900F6F215 /* FireflyApp.swift */; };
 		48DF34012AD3E31900F6F215 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF34002AD3E31900F6F215 /* AboutView.swift */; };
 		48DF34032AD3E31A00F6F215 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48DF34022AD3E31A00F6F215 /* Assets.xcassets */; };
@@ -119,6 +120,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				48D9B4652CA57EBF00257479 /* HotSwiftUI in Frameworks */,
 				4836BEC42C1B10F20039D219 /* AlertToast in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -371,6 +373,7 @@
 			name = Firefly;
 			packageProductDependencies = (
 				4836BEC32C1B10F20039D219 /* AlertToast */,
+				48D9B4642CA57EBF00257479 /* HotSwiftUI */,
 			);
 			productName = Firefly;
 			productReference = 48DF33FB2AD3E31900F6F215 /* Firefly.app */;
@@ -402,6 +405,7 @@
 			mainGroup = 48DF33F22AD3E31900F6F215;
 			packageReferences = (
 				4836BEC22C1B10F20039D219 /* XCRemoteSwiftPackageReference "AlertToast" */,
+				48D9B4632CA57EBF00257479 /* XCRemoteSwiftPackageReference "HotSwiftUI" */,
 			);
 			productRefGroup = 48DF33FC2AD3E31900F6F215 /* Products */;
 			projectDirPath = "";
@@ -630,6 +634,11 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "";
+				"OTHER_LDFLAGS[arch=*]" = (
+					"-Xlinker",
+					"-interposable",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.aditya.Firefly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -670,6 +679,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.aditya.Firefly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -714,6 +724,14 @@
 				minimumVersion = 1.3.9;
 			};
 		};
+		48D9B4632CA57EBF00257479 /* XCRemoteSwiftPackageReference "HotSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/johnno1962/HotSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.11;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -721,6 +739,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4836BEC22C1B10F20039D219 /* XCRemoteSwiftPackageReference "AlertToast" */;
 			productName = AlertToast;
+		};
+		48D9B4642CA57EBF00257479 /* HotSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 48D9B4632CA57EBF00257479 /* XCRemoteSwiftPackageReference "HotSwiftUI" */;
+			productName = HotSwiftUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
