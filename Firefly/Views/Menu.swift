@@ -69,7 +69,6 @@ struct Menu: View {
                 }
             }
         }
-
         #if DEBUG
             .eraseToAnyView()
         #endif
