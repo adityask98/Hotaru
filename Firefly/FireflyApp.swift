@@ -5,12 +5,27 @@
 //  Created by Aditya Srinivasa on 2023/10/09.
 //
 
+@_exported import HotSwiftUI
 import SwiftUI
 
 @main
 struct FireflyApp: App {
     @StateObject private var alertViewModel = AlertViewModel()
     @Environment(\.scenePhase) var scenePhase
+
+    init() {
+        #if DEBUG
+            Bundle(path: "/Applications/InjectionIII.app/Contents/Resources/iOSInjection.bundle")?
+                .load()
+            //for tvOS:
+            Bundle(path: "/Applications/InjectionIII.app/Contents/Resources/tvOSInjection.bundle")?
+                .load()
+            print("loading injection")
+            //Or for macOS:
+            Bundle(path: "/Applications/InjectionIII.app/Contents/Resources/macOSInjection.bundle")?
+                .load()
+        #endif
+    }
 
     var body: some Scene {
         WindowGroup {
