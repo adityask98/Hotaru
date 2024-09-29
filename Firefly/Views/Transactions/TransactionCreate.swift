@@ -23,6 +23,9 @@ struct TransactionCreate: View {
     @State private var currencies: AutoCurrency = AutoCurrency()
     @State private var descriptions: AutoTransactions = AutoTransactions()
 
+    //PostTransactionMigration
+    @State var postTransactionData: PostTransaction = defaultTransactionData()
+
     //Selections
     @State private var transactionDescription: String = ""
     @State private var amount: String = ""
@@ -40,6 +43,11 @@ struct TransactionCreate: View {
     @State private var showingNewCategoryToast = false
     @State private var newCategoryName: String = ""
     @State private var submitIsLoading = false
+
+    //    init(postTransactionData: PostTransaction = defaultTransactionData()) {
+    //        self._postTransactionData = State(initialValue: postTransactionData),
+    //
+    //    }
 
     var body: some View {
         NavigationView {
@@ -117,6 +125,42 @@ struct TransactionCreate: View {
                         TextField("Notes", text: $transactionNote, axis: .vertical)
                             .lineLimit(5)
                     }
+                    //                    ForEach(Array(postTransactionData.transactions!.enumerated()), id: \.offset) {
+                    //                        index, transaction in
+                    //                        VStack {
+                    //                            Picker("", selection: $transactionType.animation()) {
+                    //                                ForEach(transactionTypes, id: \.self) {
+                    //                                    Text($0)
+                    //                                }
+                    //                            }
+                    //                            .pickerStyle(.segmented)
+                    //                            Picker(
+                    //                                "",
+                    //                                selection: Binding(
+                    //                                    get: {
+                    //                                        postTransactionData.transactions[index].type
+                    //                                    },
+                    //                                    set: { newValue in
+                    //                                        postTransactionData.transactions[index].type = newValue
+                    //                                    }))
+                    //                            HStack {
+                    //                                Spacer()
+                    //                                TextField("Amount", text: $amount)
+                    //                                    .font(.largeTitle)
+                    //                                    .keyboardType(.decimalPad)
+                    //                                    .multilineTextAlignment(.center)
+                    //                                Spacer()
+                    //                            }
+                    //                            .padding(.vertical, 20)
+                    //
+                    //                            HStack {
+                    //                                Spacer()
+                    //                                DatePicker("", selection: $date).pickerStyle(.inline).labelsHidden()
+                    //                                Spacer()
+                    //                            }
+                    //                        }
+                    //
+                    //                    }
 
                 }
                 .safeAreaInset(
@@ -149,7 +193,7 @@ struct TransactionCreate: View {
             .navigationBarItems(trailing: Button("Cancel") { dismiss() })
             .toast(isPresenting: $showToast, tapToDismiss: false) {
                 toastParams
-                
+
             }
             .alert("Enter the name for a new category", isPresented: $showingNewCategoryToast) {
                 TextField("New category", text: $newCategoryName).foregroundStyle(Color.black)

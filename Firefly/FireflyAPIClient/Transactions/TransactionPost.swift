@@ -20,10 +20,8 @@ func postTransaction(
         errorIfDuplicateHash: true, applyRules: true, fireWebhooks: true,
         transactions: [
             PostTransactionElement(
-                type: convertTransactionType(type: type),
-                date: ISO8601DateFormatter().string(from: date),
-                amount: amount,
-                description: description,
+                date: ISO8601DateFormatter().string(from: date), amount: amount,
+                description: description, type: convertTransactionType(type: type),
                 categoryName: category,
                 sourceID: sourceAccount.id,
                 sourceName: sourceAccount.name,

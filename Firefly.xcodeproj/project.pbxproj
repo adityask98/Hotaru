@@ -30,6 +30,7 @@
 		486E1D822C359A520038BB4F /* effetcs.metal in Sources */ = {isa = PBXBuildFile; fileRef = 486E1D812C359A520038BB4F /* effetcs.metal */; };
 		486E1D842C359BFB0038BB4F /* GrainGradient.metal in Sources */ = {isa = PBXBuildFile; fileRef = 486E1D832C359BFB0038BB4F /* GrainGradient.metal */; };
 		486E1D862C359E450038BB4F /* BackgroundMaterial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486E1D852C359E450038BB4F /* BackgroundMaterial.swift */; };
+		487C3D592CA85CAD00576F13 /* TransactionCreateNew.swift in Sources */ = {isa = PBXBuildFile; fileRef = 487C3D582CA85CAD00576F13 /* TransactionCreateNew.swift */; };
 		48831AE52C70BFAA005DBBF4 /* TransactionEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48831AE42C70BFAA005DBBF4 /* TransactionEdit.swift */; };
 		48831AE82C71E724005DBBF4 /* MasterButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48831AE72C71E724005DBBF4 /* MasterButton.swift */; };
 		48831AEB2C71E9C0005DBBF4 /* fontSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48831AEA2C71E9C0005DBBF4 /* fontSize.swift */; };
@@ -83,6 +84,7 @@
 		486E1D812C359A520038BB4F /* effetcs.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = effetcs.metal; sourceTree = "<group>"; };
 		486E1D832C359BFB0038BB4F /* GrainGradient.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = GrainGradient.metal; sourceTree = "<group>"; };
 		486E1D852C359E450038BB4F /* BackgroundMaterial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundMaterial.swift; sourceTree = "<group>"; };
+		487C3D582CA85CAD00576F13 /* TransactionCreateNew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCreateNew.swift; sourceTree = "<group>"; };
 		48831AE42C70BFAA005DBBF4 /* TransactionEdit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionEdit.swift; sourceTree = "<group>"; };
 		48831AE72C71E724005DBBF4 /* MasterButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterButton.swift; sourceTree = "<group>"; };
 		48831AEA2C71E9C0005DBBF4 /* fontSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = fontSize.swift; sourceTree = "<group>"; };
@@ -167,6 +169,7 @@
 				485467AB2C37C8CB00C40E92 /* TransactionCreate.swift */,
 				48BB087D2C3E6C2B006D32E3 /* TransactionDetail.swift */,
 				48831AE42C70BFAA005DBBF4 /* TransactionEdit.swift */,
+				487C3D582CA85CAD00576F13 /* TransactionCreateNew.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -442,6 +445,7 @@
 				480EAAD82C158F2D0038ADF7 /* RequestBuilder.swift in Sources */,
 				48552BA32C1C545E002ED3CF /* ToastHandler.swift in Sources */,
 				48552BAA2C1D2D12002ED3CF /* TransactionsView.swift in Sources */,
+				487C3D592CA85CAD00576F13 /* TransactionCreateNew.swift in Sources */,
 				486E1D822C359A520038BB4F /* effetcs.metal in Sources */,
 				4836BEC12C1AFD2E0039D219 /* Settings.swift in Sources */,
 				48DF33FF2AD3E31900F6F215 /* FireflyApp.swift in Sources */,

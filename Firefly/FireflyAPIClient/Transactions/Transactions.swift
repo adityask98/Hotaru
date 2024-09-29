@@ -29,6 +29,14 @@ struct TransactionsAttributes: Codable {
     }
 }
 
+enum TransactionType: String, Codable, CaseIterable {
+    case withdrawal = "withdrawal"
+    case deposit = "deposit"
+    case transfer = "transfer"
+    case reconciliation = "reconciliation"
+    case openingBalance = "opening balance"
+}
+
 // MARK: - TransactionsTransaction
 struct TransactionsTransaction: Codable {
     let user, transactionJournalID, type, date: String?
@@ -437,7 +445,8 @@ struct PostTransaction: Codable {
 
 // MARK: - PostTransactionElement
 struct PostTransactionElement: Codable {
-    var type, date, amount, description: String?
+    var date, amount, description: String?
+    var type: String?
     var order: Int?
     var currencyID, currencyCode, foreignAmount, foreignCurrencyID: String?
     var foreignCurrencyCode, budgetID, categoryID, categoryName: String?
@@ -496,5 +505,20 @@ struct PostTransactionElement: Codable {
 }
 
 func defaultTransactionData() -> PostTransaction {
-    return PostTransaction(transactions: [PostTransactionElement()])
+    return PostTransaction(
+        errorIfDuplicateHash: true, applyRules: true, fireWebhooks: true, groupTitle: nil,
+        transactions: [PostTransactionElement()])
+}
+
+func defaultPostTransactionElement() -> PostTransactionElement {
+    return PostTransactionElement(
+        date: ISO8601DateFormatter().string(from: Date()), amount: "", description: "",
+        type: TransactionType.withdrawal.rawValue,
+        categoryName: "",
+        sourceID: "",
+        sourceName: "",
+        destinationID: "",
+        destinationName: "",
+        notes: ""
+    )
 }

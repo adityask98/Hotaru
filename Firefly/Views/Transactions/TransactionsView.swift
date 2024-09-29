@@ -20,6 +20,7 @@ struct TransactionsView: View {
     @StateObject private var transactions = TransactionsViewModel()
     @State private var filterType: TransactionsFilterType = .all
     @State var addSheetShown = false
+    @State var newAddSheetShown = false
     @State private var filterExpanded = false
     @State private var isLoading = false
     @State private var shouldRefresh: Bool? = false  //Used to refresh after the create page is dismissed.
@@ -84,6 +85,7 @@ struct TransactionsView: View {
                         .padding(6)
                         .fontWeight(.heavy)
                 }
+                .simultaneousGesture(LongPressGesture().onEnded { _ in newAddSheetShown = true })
             }
         }
         .sheet(
@@ -98,6 +100,19 @@ struct TransactionsView: View {
             }
         ) {
             TransactionCreate(shouldRefresh: $shouldRefresh).background(.ultraThinMaterial)
+        }
+        .sheet(
+            isPresented: $newAddSheetShown,
+            onDismiss: {
+                if shouldRefresh! {
+                    Task {
+                        applyDateFilter()
+                        shouldRefresh = false
+                    }
+                }
+            }
+        ) {
+            TransactionCreateNew(shouldRefresh: $shouldRefresh)
         }
     }
 

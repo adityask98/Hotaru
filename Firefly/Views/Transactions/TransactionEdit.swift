@@ -32,12 +32,9 @@ struct TransactionEdit: View {
                 groupTitle: transactionData.attributes?.groupTitle,
                 transactions: transactionData.attributes?.transactions?.map { transaction in
                     PostTransactionElement(
-                        type: transaction.type?.lowercased(),
-                        date: transaction.date,
-                        amount: formatAmountForTextField(
+                        date: transaction.date, amount: formatAmountForTextField(
                             transaction.amount ?? "0",
-                            decimalPlace: transaction.currencyDecimalPlaces ?? 0),
-                        description: transaction.description,
+                            decimalPlace: transaction.currencyDecimalPlaces ?? 0), description: transaction.description, type: transaction.type?.lowercased(),
                         categoryID: transaction.categoryID,
                         categoryName: transaction.categoryName,
                         sourceID: transaction.sourceID,
