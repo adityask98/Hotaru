@@ -264,7 +264,7 @@ struct TransactionDetail: View {
                             }
                         ).padding(.vertical, 8)
                     }
-
+                    TransactionDetailMoreInfo(transactionID: transactionData.transaction?.data?.id)
                 }
             }
             .sheet(
@@ -458,6 +458,37 @@ struct TransactionDetailHeader: View {
             }
             Spacer()
         }.padding()
+    }
+}
+
+struct TransactionDetailMoreInfo: View {
+
+    @State private var showDetails: Bool = false
+
+    let transactionID: String?
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            HStack {
+                Text("More Info")
+                Spacer()
+                Image(systemName: showDetails ? "eye.fill" : "eye.slash.fill").contentTransition(
+                    .symbolEffect(.automatic))
+            }.highPriorityGesture(
+                TapGesture().onEnded {
+                    withAnimation {
+                        showDetails.toggle()
+                    }
+                }
+            )
+
+            if showDetails {
+                Text("Transaction ID: \(transactionID ?? "N/A")")
+                Spacer()
+            }
+        }
+        .foregroundStyle(Color.gray)
+        .padding(.horizontal)
     }
 }
 
