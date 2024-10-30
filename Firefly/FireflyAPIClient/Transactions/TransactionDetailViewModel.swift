@@ -5,7 +5,9 @@
 //  Created by Aditya Srinivasa on 2024/07/28.
 //
 
+import AlertToast
 import Foundation
+import SwiftUICore
 
 struct TransactionDetailDatum: Codable {
     var data: TransactionsDatum?
@@ -14,16 +16,25 @@ struct TransactionDetailDatum: Codable {
 @MainActor
 final class TransactionDetailViewModel: ObservableObject {
     @Published var transaction: TransactionDetailDatum?
-    @Published var isLoading: Bool = false
-    @Published var errorMessage: String = ""
+    @Published var isLoading: Bool = true
+    @Published var errorMessage: String?
+    @Published var showDeleteAlert = false
+    @Published var showToast: Bool = false
+    @Published var toastParams: AlertToast = AlertToast(displayMode: .hud, type: .error(Color.red))
 
     func fetchTransaction(transactionID: String) async {
         self.isLoading = true
         do {
             self.transaction = try await getTransaction(transactionID: transactionID)
         } catch {
+            toastParams = AlertToast(
+                displayMode: .alert,
+                type: .systemImage("exclamationmark.triangle.fill", Color.red),
+                title: self.errorMessage)
+            showToast = true
             print(error)
         }
+        self.isLoading = false
     }
 
     func refreshTransaction(transactionID: String) async {
@@ -40,7 +51,7 @@ final class TransactionDetailViewModel: ObservableObject {
 
         guard let response = response as? HTTPURLResponse, response.statusCode == 204 else {
             let commonError = try ErrorDecoder(data)
-            errorMessage = commonError.message ?? "No message"
+            errorMessage = commonError.message ?? "Something went wrong"
             print(errorMessage)
             throw TransactionsModelError.invalidResponse
         }

@@ -112,7 +112,9 @@ struct TransactionsView: View {
                     Text("Filter")
                         .font(.subheadline)
                     Spacer()
-                    Image(systemName: filterExpanded ? "chevron.up" : "chevron.down")
+                    Image(systemName: "chevron.down")
+                        .rotationEffect(Angle.degrees(filterExpanded ? 180 : 0))
+                        .animation(.bouncy, value: filterExpanded)
                 }
                 .contentShape(Rectangle())  // This ensures the entire HStack is tappable
             }
@@ -151,7 +153,6 @@ struct TransactionsView: View {
                         }
                     }
                 }
-
                 .padding(.top)
             }
         }
@@ -181,9 +182,9 @@ struct TransactionsRow: View {
 
     var body: some View {
         NavigationLink(
-            destination: TransactionDetail(transaction: transaction)
+            destination: TransactionDetail(transactionID: transaction.id!)
         ) {
-            VStack {
+            VStack {	
                 HStack {
                     Image(
                         systemName: transactionTypeIcon(
