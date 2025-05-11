@@ -13,7 +13,6 @@ struct SearchPage: View {
   @State private var searchText = ""
 
   var body: some View {
-    NavigationView {
       Group {
         if searchVM.searchText.isEmpty {
           // Show centered search symbol when no search text
@@ -37,6 +36,32 @@ struct SearchPage: View {
           .padding()
         } else if searchVM.isLoading {
           LoadingSpinner()
+        } else if let errorMessage = searchVM.errorMessage {
+          // Show error state
+          VStack {
+            Image(systemName: "exclamationmark.triangle")
+              .font(.system(size: 50))
+              .foregroundColor(.orange)
+              .padding()
+
+            Text("Error")
+              .font(.headline)
+              .foregroundColor(.primary)
+              .padding(.bottom, 4)
+
+            Text(errorMessage)
+              .font(.subheadline)
+              .foregroundColor(.secondary)
+              .multilineTextAlignment(.center)
+              .padding(.horizontal)
+
+            Button("Try Again") {
+              searchVM.search()
+            }
+            .buttonStyle(.bordered)
+            .padding(.top)
+          }
+          .padding()
         } else {
           // Show search results when text is entered
           Text("Results for \"\(searchVM.searchDebouncedText)\"")
