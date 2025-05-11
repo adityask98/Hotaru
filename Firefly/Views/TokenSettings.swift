@@ -66,6 +66,7 @@ struct TokenSettings: View {
       .overlay(RoundedRectangle(cornerRadius: 16).stroke(.gray))
     }
   }
+
   private var credentialsForm: some View {
     VStack(alignment: .leading, spacing: 8) {
       VStack(alignment: .leading, spacing: 8) {
