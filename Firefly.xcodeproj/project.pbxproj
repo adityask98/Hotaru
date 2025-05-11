@@ -3,17 +3,19 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		480EAAD82C158F2D0038ADF7 /* RequestBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 480EAAD72C158F2D0038ADF7 /* RequestBuilder.swift */; };
+		48177F5F2DD0499C00358BC8 /* AddFloatingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48177F5E2DD0499C00358BC8 /* AddFloatingButton.swift */; };
+		48177F612DD04BD000358BC8 /* SearchPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48177F602DD04BD000358BC8 /* SearchPage.swift */; };
+		48177F642DD05C1D00358BC8 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48177F632DD05C1D00358BC8 /* SearchViewModel.swift */; };
 		482139282C10652600D8D1C6 /* TokenSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 482139272C10652600D8D1C6 /* TokenSettings.swift */; };
 		4836BEC12C1AFD2E0039D219 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4836BEC02C1AFD2E0039D219 /* Settings.swift */; };
 		4836BEC42C1B10F20039D219 /* AlertToast in Frameworks */ = {isa = PBXBuildFile; productRef = 4836BEC32C1B10F20039D219 /* AlertToast */; };
 		4836BEC62C1B29B90039D219 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4836BEC52C1B29B90039D219 /* KeychainHelper.swift */; };
 		4839B4132ADE3AD3001A4F8F /* AccountsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4839B4122ADE3AD3001A4F8F /* AccountsViewModel.swift */; };
-		4843D2372B13844A00D1A131 /* Menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4843D2362B13844A00D1A131 /* Menu.swift */; };
 		485467AC2C37C8CB00C40E92 /* TransactionCreate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485467AB2C37C8CB00C40E92 /* TransactionCreate.swift */; };
 		485467B02C37FBC400C40E92 /* CategoriesAutocomplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485467AF2C37FBC400C40E92 /* CategoriesAutocomplete.swift */; };
 		48552BA32C1C545E002ED3CF /* ToastHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48552BA22C1C545E002ED3CF /* ToastHandler.swift */; };
@@ -62,11 +64,13 @@
 
 /* Begin PBXFileReference section */
 		480EAAD72C158F2D0038ADF7 /* RequestBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestBuilder.swift; sourceTree = "<group>"; };
+		48177F5E2DD0499C00358BC8 /* AddFloatingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFloatingButton.swift; sourceTree = "<group>"; };
+		48177F602DD04BD000358BC8 /* SearchPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchPage.swift; sourceTree = "<group>"; };
+		48177F632DD05C1D00358BC8 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		482139272C10652600D8D1C6 /* TokenSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenSettings.swift; sourceTree = "<group>"; };
 		4836BEC02C1AFD2E0039D219 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		4836BEC52C1B29B90039D219 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 		4839B4122ADE3AD3001A4F8F /* AccountsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsViewModel.swift; sourceTree = "<group>"; };
-		4843D2362B13844A00D1A131 /* Menu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Menu.swift; sourceTree = "<group>"; };
 		485467AB2C37C8CB00C40E92 /* TransactionCreate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCreate.swift; sourceTree = "<group>"; };
 		485467AF2C37FBC400C40E92 /* CategoriesAutocomplete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesAutocomplete.swift; sourceTree = "<group>"; };
 		48552BA22C1C545E002ED3CF /* ToastHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastHandler.swift; sourceTree = "<group>"; };
@@ -115,6 +119,10 @@
 		48E9195A2AE2C1E60074B904 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		4836FB282DBC79C500719673 /* Menu */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Menu; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
 		48DF33F82AD3E31900F6F215 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
@@ -128,6 +136,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		48177F622DD05BF200358BC8 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				48177F602DD04BD000358BC8 /* SearchPage.swift */,
+				48177F632DD05C1D00358BC8 /* SearchViewModel.swift */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
 		482139292C10692B00D8D1C6 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
@@ -148,11 +165,12 @@
 		4843D2352B13843C00D1A131 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				48177F622DD05BF200358BC8 /* Search */,
 				4890B2792C561A580032BE86 /* Charts */,
 				48BB088C2C411B0E006D32E3 /* Accounts */,
 				485467AA2C37C89B00C40E92 /* Transactions */,
 				486E1D7E2C354A170038BB4F /* Shared */,
-				4843D2362B13844A00D1A131 /* Menu.swift */,
+				4836FB282DBC79C500719673 /* Menu */,
 				48DF34002AD3E31900F6F215 /* AboutView.swift */,
 				482139272C10652600D8D1C6 /* TokenSettings.swift */,
 				4836BEC02C1AFD2E0039D219 /* Settings.swift */,
@@ -233,6 +251,7 @@
 			isa = PBXGroup;
 			children = (
 				48831AE72C71E724005DBBF4 /* MasterButton.swift */,
+				48177F5E2DD0499C00358BC8 /* AddFloatingButton.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -370,6 +389,9 @@
 			);
 			dependencies = (
 			);
+			fileSystemSynchronizedGroups = (
+				4836FB282DBC79C500719673 /* Menu */,
+			);
 			name = Firefly;
 			packageProductDependencies = (
 				4836BEC32C1B10F20039D219 /* AlertToast */,
@@ -457,9 +479,9 @@
 				4890B2822C5639A00032BE86 /* BalanceCharts.swift in Sources */,
 				48831AE82C71E724005DBBF4 /* MasterButton.swift in Sources */,
 				48E9195B2AE2C1E60074B904 /* Constants.swift in Sources */,
+				48177F612DD04BD000358BC8 /* SearchPage.swift in Sources */,
 				486742552C89CBA700D31B76 /* DebugHelpers.swift in Sources */,
 				4890B27B2C561A690032BE86 /* CategoriesDonut.swift in Sources */,
-				4843D2372B13844A00D1A131 /* Menu.swift in Sources */,
 				489EB28E2B46EB2800414CCB /* AccountsView.swift in Sources */,
 				482139282C10652600D8D1C6 /* TokenSettings.swift in Sources */,
 				48552BA62C1C6B20002ED3CF /* Transactions.swift in Sources */,
@@ -470,6 +492,7 @@
 				48B9CE702C3D182F00AF7BA8 /* AccountsAutocomplete.swift in Sources */,
 				485467AC2C37C8CB00C40E92 /* TransactionCreate.swift in Sources */,
 				4890B2782C56141F0032BE86 /* TransactionDetailViewModel.swift in Sources */,
+				48177F5F2DD0499C00358BC8 /* AddFloatingButton.swift in Sources */,
 				4836BEC62C1B29B90039D219 /* KeychainHelper.swift in Sources */,
 				48831AEB2C71E9C0005DBBF4 /* fontSize.swift in Sources */,
 				4839B4132ADE3AD3001A4F8F /* AccountsViewModel.swift in Sources */,
@@ -478,6 +501,7 @@
 				486E1D802C354A2F0038BB4F /* SearchOption.swift in Sources */,
 				485467B02C37FBC400C40E92 /* CategoriesAutocomplete.swift in Sources */,
 				4890B2762C4643120032BE86 /* Loading.swift in Sources */,
+				48177F642DD05C1D00358BC8 /* SearchViewModel.swift in Sources */,
 				48B9CE6E2C3CF88D00AF7BA8 /* Categories.swift in Sources */,
 				48BB08842C40D4EA006D32E3 /* Autocomplete.swift in Sources */,
 			);
@@ -522,6 +546,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				EMIT_FRONTEND_COMMAND_LINES = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -586,6 +611,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EMIT_FRONTEND_COMMAND_LINES = "";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
