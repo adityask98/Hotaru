@@ -1,0 +1,13 @@
+{
+    "sweetpad.build.xcodeWorkspacePath": "Firefly.xcodeproj/project.xcworkspace",
+    "editor.defaultFormatter": "sweetpad.sweetpad",
+    "editor.formatOnSave": true,
+    "[swift]": {
+        "editor.defaultFormatter": "sweetpad.sweetpad"
+    },
+    "cSpell.words": [
+        "Aditya",
+        "Srinivasa",
+        "refreshable",
+    ],
+}
