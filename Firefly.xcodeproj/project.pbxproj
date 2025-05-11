@@ -11,6 +11,8 @@
 		48177F5F2DD0499C00358BC8 /* AddFloatingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48177F5E2DD0499C00358BC8 /* AddFloatingButton.swift */; };
 		48177F612DD04BD000358BC8 /* SearchPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48177F602DD04BD000358BC8 /* SearchPage.swift */; };
 		48177F642DD05C1D00358BC8 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48177F632DD05C1D00358BC8 /* SearchViewModel.swift */; };
+		48177F6B2DD0779F00358BC8 /* SystemAbout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48177F6A2DD0779F00358BC8 /* SystemAbout.swift */; };
+		48177F6E2DD078FF00358BC8 /* SystemAboutViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48177F6D2DD078FF00358BC8 /* SystemAboutViewModel.swift */; };
 		482139282C10652600D8D1C6 /* TokenSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 482139272C10652600D8D1C6 /* TokenSettings.swift */; };
 		4836BEC12C1AFD2E0039D219 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4836BEC02C1AFD2E0039D219 /* Settings.swift */; };
 		4836BEC42C1B10F20039D219 /* AlertToast in Frameworks */ = {isa = PBXBuildFile; productRef = 4836BEC32C1B10F20039D219 /* AlertToast */; };
@@ -67,6 +69,8 @@
 		48177F5E2DD0499C00358BC8 /* AddFloatingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFloatingButton.swift; sourceTree = "<group>"; };
 		48177F602DD04BD000358BC8 /* SearchPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchPage.swift; sourceTree = "<group>"; };
 		48177F632DD05C1D00358BC8 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
+		48177F6A2DD0779F00358BC8 /* SystemAbout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemAbout.swift; sourceTree = "<group>"; };
+		48177F6D2DD078FF00358BC8 /* SystemAboutViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemAboutViewModel.swift; sourceTree = "<group>"; };
 		482139272C10652600D8D1C6 /* TokenSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenSettings.swift; sourceTree = "<group>"; };
 		4836BEC02C1AFD2E0039D219 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		4836BEC52C1B29B90039D219 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
@@ -145,6 +149,24 @@
 			path = Search;
 			sourceTree = "<group>";
 		};
+		48177F692DD0775F00358BC8 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				4836BEC02C1AFD2E0039D219 /* Settings.swift */,
+				48177F6C2DD077B400358BC8 /* About */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		48177F6C2DD077B400358BC8 /* About */ = {
+			isa = PBXGroup;
+			children = (
+				48177F6A2DD0779F00358BC8 /* SystemAbout.swift */,
+				48177F6D2DD078FF00358BC8 /* SystemAboutViewModel.swift */,
+			);
+			path = About;
+			sourceTree = "<group>";
+		};
 		482139292C10692B00D8D1C6 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
@@ -165,6 +187,7 @@
 		4843D2352B13843C00D1A131 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				48177F692DD0775F00358BC8 /* Settings */,
 				48177F622DD05BF200358BC8 /* Search */,
 				4890B2792C561A580032BE86 /* Charts */,
 				48BB088C2C411B0E006D32E3 /* Accounts */,
@@ -173,7 +196,6 @@
 				4836FB282DBC79C500719673 /* Menu */,
 				48DF34002AD3E31900F6F215 /* AboutView.swift */,
 				482139272C10652600D8D1C6 /* TokenSettings.swift */,
-				4836BEC02C1AFD2E0039D219 /* Settings.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -481,6 +503,7 @@
 				48E9195B2AE2C1E60074B904 /* Constants.swift in Sources */,
 				48177F612DD04BD000358BC8 /* SearchPage.swift in Sources */,
 				486742552C89CBA700D31B76 /* DebugHelpers.swift in Sources */,
+				48177F6B2DD0779F00358BC8 /* SystemAbout.swift in Sources */,
 				4890B27B2C561A690032BE86 /* CategoriesDonut.swift in Sources */,
 				489EB28E2B46EB2800414CCB /* AccountsView.swift in Sources */,
 				482139282C10652600D8D1C6 /* TokenSettings.swift in Sources */,
@@ -493,6 +516,7 @@
 				485467AC2C37C8CB00C40E92 /* TransactionCreate.swift in Sources */,
 				4890B2782C56141F0032BE86 /* TransactionDetailViewModel.swift in Sources */,
 				48177F5F2DD0499C00358BC8 /* AddFloatingButton.swift in Sources */,
+				48177F6E2DD078FF00358BC8 /* SystemAboutViewModel.swift in Sources */,
 				4836BEC62C1B29B90039D219 /* KeychainHelper.swift in Sources */,
 				48831AEB2C71E9C0005DBBF4 /* fontSize.swift in Sources */,
 				4839B4132ADE3AD3001A4F8F /* AccountsViewModel.swift in Sources */,
