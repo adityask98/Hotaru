@@ -16,6 +16,9 @@ public struct AddFloatingButton: View {
   public var fontSize: CGFloat = 20
   public var fontWeight: Font.Weight = .medium
   public var shadowRadius: CGFloat = 4
+  public var accessibilityLabel: String = "Add"
+
+  @State private var isTapped = false
 
   public init(
     action: @escaping () -> Void,
@@ -25,7 +28,8 @@ public struct AddFloatingButton: View {
     backgroundColor: Color = .blue,
     fontSize: CGFloat = 20,
     fontWeight: Font.Weight = .medium,
-    shadowRadius: CGFloat = 4
+    shadowRadius: CGFloat = 4,
+    accessibilityLabel: String = "Add"
   ) {
     self.action = action
     self.imageSystemName = imageSystemName
@@ -35,6 +39,7 @@ public struct AddFloatingButton: View {
     self.fontSize = fontSize
     self.fontWeight = fontWeight
     self.shadowRadius = shadowRadius
+    self.accessibilityLabel = accessibilityLabel
   }
 
   public var body: some View {
@@ -51,6 +56,9 @@ public struct AddFloatingButton: View {
     }
     .buttonStyle(PlainButtonStyle())
     .padding()
+    .accessibilityLabel(accessibilityLabel)
+    .hoverEffect(.highlight)
+    .sensoryFeedback(.impact, trigger: isTapped)
   }
 }
 

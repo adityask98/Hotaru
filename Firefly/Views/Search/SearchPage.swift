@@ -13,6 +13,7 @@ struct SearchPage: View {
   @State private var searchText = ""
 
   var body: some View {
+    NavigationStack {
       Group {
         if searchVM.searchText.isEmpty {
           // Show centered search symbol when no search text
@@ -64,9 +65,10 @@ struct SearchPage: View {
           .padding()
         } else {
           // Show search results when text is entered
-          Text("Results for \"\(searchVM.searchDebouncedText)\"")
-            .font(.headline)
+
           if let searchResults = searchVM.searchResults {
+            Text("Results for \"\(searchVM.searchDebouncedText)\"")
+              .font(.headline)
             SearchTransactionsView(transactions: searchResults)
           } else {
             Text("No results found")

@@ -13,6 +13,7 @@ class SearchViewModel: ObservableObject {
   @Published var searchResults: Transactions?
   @Published var isLoading: Bool = false
   @Published var errorMessage: String?
+  private var searchTask: Task<Void, Never>?
 
   init() {
     setupSearchTextDebounce()
@@ -28,6 +29,7 @@ class SearchViewModel: ObservableObject {
 
   func search() {
     errorMessage = nil
+    searchTask?.cancel()
 
     if searchDebouncedText.isEmpty {
       searchResults = nil
@@ -36,10 +38,12 @@ class SearchViewModel: ObservableObject {
 
     isLoading = true
 
-    Task {
+    searchTask = Task {
       do {
         try await performSearch()
+        if Task.isCancelled { return }
       } catch {
+        if Task.isCancelled { return }
         await MainActor.run {
           self.errorMessage = "Search failed: \(error.localizedDescription)"
           self.isLoading = false
