@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public struct AddFloatingButton: View {
+public struct FloatingButton: View {
   public var action: () -> Void
   public var imageSystemName: String = "plus"
   public var padding: CGFloat = 16
@@ -19,6 +19,7 @@ public struct AddFloatingButton: View {
   public var accessibilityLabel: String = "Add"
 
   @State private var isTapped = false
+  @State private var feedbackTrigger = 0
 
   public init(
     action: @escaping () -> Void,
@@ -43,7 +44,10 @@ public struct AddFloatingButton: View {
   }
 
   public var body: some View {
-    Button(action: action) {
+    Button(action: {
+      feedbackTrigger += 1
+      action()
+    }) {
       Image(systemName: imageSystemName)
         .font(.system(size: fontSize))
         .fontWeight(fontWeight)
@@ -58,7 +62,7 @@ public struct AddFloatingButton: View {
     .padding()
     .accessibilityLabel(accessibilityLabel)
     .hoverEffect(.highlight)
-    .sensoryFeedback(.impact, trigger: isTapped)
+    .sensoryFeedback(.impact, trigger: feedbackTrigger)
   }
 }
 
@@ -70,7 +74,7 @@ public struct AddFloatingButton: View {
       Spacer()
       HStack {
         Spacer()
-        AddFloatingButton(action: {})
+        FloatingButton(action: {})
           .padding()
       }
     }

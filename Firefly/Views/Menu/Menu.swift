@@ -58,7 +58,6 @@ struct Menu: View {
           Label("Settings", systemImage: "gearshape.fill")
         }
         .tag(4)
-
     }
     .sheet(isPresented: $tokenSheetShown) {
       TokenSettings().environmentObject(AlertViewModel())
@@ -69,6 +68,10 @@ struct Menu: View {
     }
     .sheet(isPresented: $menuViewModel.searchSheetShown) {
       SearchPage()
+    }
+    .onContinueUserActivity("addTransaction") { _ in
+      print("Add transactions shortcut")
+      menuViewModel.openTransactionSheet()
     }
     .task {
       if !hasCheckedToken {

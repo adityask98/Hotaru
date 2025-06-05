@@ -29,7 +29,7 @@ struct SystemAbout: View {
           ) {
             Text("About Firefly").fontDesign(.default).foregroundStyle(.blue)
           }
-            Spacer()
+          Spacer()
         }
         .fontDesign(.monospaced)
       } else {

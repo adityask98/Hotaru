@@ -40,14 +40,24 @@ struct AccountsView: View {
       }
       .navigationTitle(Text("Accounts"))
 
-      .toolbar {
-        Button(action: { accounts.toggleAmountVisibility() }) {
-          Image(systemName: accounts.amountHidden ? "eye.slash.fill" : "eye.fill")
-            .contentTransition(.symbolEffect(.automatic))
-            .padding(6)
-            .fontWeight(.heavy)
+      //      .toolbar {
+      //        Button(action: { accounts.toggleAmountVisibility() }) {
+      //          Image(systemName: accounts.amountHidden ? "eye.slash.fill" : "eye.fill")
+      //            .contentTransition(.symbolEffect(.automatic))
+      //            .padding(6)
+      //            .fontWeight(.heavy)
+      //        }
+      //      }
+      .overlay(
+        alignment: .bottomTrailing,
+        content: {
+          FloatingButton(
+            action: {
+              accounts.toggleAmountVisibility()
+            }, imageSystemName: accounts.amountHidden ? "eye.slash.fill" : "eye.fill"
+          ).contentTransition(.symbolEffect(.automatic))
         }
-      }
+      )
 
       .background(Color.clear)
       .refreshable {

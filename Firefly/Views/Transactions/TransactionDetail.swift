@@ -67,7 +67,8 @@ struct TransactionDetail: View {
             ).padding(.vertical, 8)
           }
 
-          TransactionDetailMoreInfo(transactionID: transaction.data?.id)
+          TransactionDetailMoreInfo(
+            transactionID: transaction.data?.id, transaction: transaction.data)
 
         }
       }
@@ -256,6 +257,7 @@ struct TransactionDetailMoreInfo: View {
   @State private var showDetails: Bool = false
 
   let transactionID: String?
+  let transaction: TransactionsDatum?
 
   var body: some View {
     VStack(alignment: .leading) {
@@ -274,6 +276,7 @@ struct TransactionDetailMoreInfo: View {
 
       if showDetails {
         Text("Transaction ID: \(transactionID ?? "N/A")")
+        Text("Location: \(transaction?.attributes?.transactions?[0].latitude)")
         Spacer()
       }
     }

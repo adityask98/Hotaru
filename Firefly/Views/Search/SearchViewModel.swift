@@ -5,8 +5,8 @@
 //  Created by Aditya Srinivasa on 2025/05/11.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 class SearchViewModel: ObservableObject {
   @Published var searchText: String = ""

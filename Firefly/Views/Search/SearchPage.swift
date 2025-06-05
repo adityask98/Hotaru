@@ -11,6 +11,7 @@ struct SearchPage: View {
   @Environment(\.dismiss) var dismiss
   @StateObject var searchVM = SearchViewModel()
   @State private var searchText = ""
+  @FocusState private var isSearchFieldFocused: Bool
 
   var body: some View {
     NavigationStack {
@@ -77,8 +78,9 @@ struct SearchPage: View {
           }
         }
       }
-      .scrollDismissesKeyboard(.automatic)
+      .scrollDismissesKeyboard(.immediately)
       .searchable(text: $searchVM.searchText, placement: .toolbar, prompt: "Search...")
+      .focused($isSearchFieldFocused)
       .onChange(of: searchVM.searchDebouncedText) { oldValue, newValue in
         searchVM.search()
         print("Searching")
@@ -88,6 +90,7 @@ struct SearchPage: View {
       .toolbar {
         ToolbarItem(placement: .navigationBarTrailing) {
           Button("Done") {
+            isSearchFieldFocused = false
             dismiss()
           }
         }

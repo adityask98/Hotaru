@@ -10,11 +10,23 @@ import SwiftUI
 struct AccountDetail: View {
 
   @State var account: AccountsDatum
+  //var accountID: String
   var accountTransactions: Transactions = Transactions()
+
+  @StateObject private var viewModel: AccountDetailViewModel
+
+  init(account: AccountsDatum) {
+    _account = .init(initialValue: account)
+    _viewModel = StateObject(wrappedValue: AccountDetailViewModel(accountID: account.id ?? "1"))
+  }
+
   var body: some View {
 
     ScrollView {
       VStack {
+        Text("DEBUG").onTapGesture {
+          print(viewModel.accountID)
+        }
         Text("Current balance")
         Text(
           formatAmount(

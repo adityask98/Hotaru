@@ -16,6 +16,20 @@ struct Settings: View {
         List {
           Group {
             Section {
+              NavigationLink(destination: CategoriesView()) {
+                HStack {
+                  Image(systemName: "tray.full.fill")
+                  Text("Categories")
+                  Spacer()
+                }
+              }
+              NavigationLink(destination: ThemeView()) {
+                HStack {
+                  Image(systemName: "paintpalette.fill")
+                  Text("Theme")
+                  Spacer()
+                }
+              }
               NavigationLink(destination: TokenSettings()) {
                 HStack {
                   Image(systemName: "key.horizontal.fill")

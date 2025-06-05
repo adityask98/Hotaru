@@ -16,6 +16,12 @@ final class AccountDetailViewModel: ObservableObject {
   @Published var hasMorePages: Bool = true
   @Published var accountTransactions: Transactions?
 
+  let accountID: String
+
+  init(accountID: String) {
+    self.accountID = accountID
+  }
+
   func fetchAccount(accountID: String) async {
     self.isLoading = true
     do {
@@ -45,6 +51,10 @@ final class AccountDetailViewModel: ObservableObject {
       print(error)
       throw AccountsModelError.invalidData
     }
+  }
+
+  func fetchTransactions(loadMore: Bool = false) async {
+
   }
 
 }
@@ -81,9 +91,18 @@ func fetchAccountDetailNew(_ accountID: String) async throws -> AccountsDatum {
   }
 }
 
-func getTransactionsForAccount(_ id: String) async throws -> Transactions {
+//Get initial transactions
+func getTransactionsForAccount(_ id: String, limit: Int = 10, type: String = "all", page: Int = 1)
+  async throws -> Transactions
+{
   let url = apiPaths.accountTransactions(id)
-  let request = try RequestBuilder(apiURL: url)
+  var request = try RequestBuilder(apiURL: url)
+  request.url?.append(queryItems: [
+    URLQueryItem(name: "limit", value: String(limit)),
+    URLQueryItem(name: "type", value: String(type)),
+    URLQueryItem(name: "page", value: String(page)),
+
+  ])
 
   let (data, response) = try await URLSession.shared.data(for: request)
 
@@ -99,5 +118,27 @@ func getTransactionsForAccount(_ id: String) async throws -> Transactions {
   } catch {
     print(error)
     throw TransactionsModelError.invalidData
+  }
+
+  func getTransactionsFromURL(_ urlString: String) async throws -> Transactions {
+    let request = try RequestBuilder(apiURL: urlString, ignoreBaseURL: true)
+
+    return try await performRequest(request)
+  }
+
+  func performRequest(_ request: URLRequest) async throws -> Transactions {
+    let (data, response) = try await URLSession.shared.data(for: request)
+    guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+      throw TransactionsModelError.invalidResponse
+    }
+
+    do {
+      let decoder = JSONDecoder()
+      let result = try decoder.decode(Transactions.self, from: data)
+      return result
+    } catch {
+      print(error)
+      throw TransactionsModelError.invalidData
+    }
   }
 }

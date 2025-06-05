@@ -50,7 +50,7 @@ final class TransactionDetailViewModel: ObservableObject {
     guard let response = response as? HTTPURLResponse, response.statusCode == 204 else {
       let commonError = try ErrorDecoder(data)
       errorMessage = commonError.message ?? "Something went wrong"
-      print(errorMessage)
+      print(errorMessage as Any)
       throw TransactionsModelError.invalidResponse
     }
     print(response)

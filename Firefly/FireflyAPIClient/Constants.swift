@@ -18,7 +18,7 @@ struct UserDefaultKeys {
 }
 
 struct apiPaths {
-    static let systemAbout = "api/v1/about"
+  static let systemAbout = "api/v1/about"
   static let userAbout = "api/v1/about/user"
   static let transactions = "api/v1/transactions"
   static let accounts = "api/v1/accounts"
