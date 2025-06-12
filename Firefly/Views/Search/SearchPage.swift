@@ -78,6 +78,7 @@ struct SearchPage: View {
           }
         }
       }
+      .interactiveDismissDisabled(!searchVM.searchText.isEmpty)
       .scrollDismissesKeyboard(.immediately)
       .searchable(text: $searchVM.searchText, placement: .toolbar, prompt: "Search...")
       .focused($isSearchFieldFocused)

@@ -15,10 +15,19 @@ enum TransactionsModelError: Error {
 
 enum TransactionTypes: String, CaseIterable, Identifiable {
   case all = "all"
+  case withdrawal = "withdrawal"
   case withdrawals = "withdrawals"
-  case transfers = "transfers"
+  case expense = "expense"
+  case deposit = "deposit"
   case deposits = "deposits"
-
+  case income = "income"
+  case transfer = "transfer"
+  case transfers = "transfers"
+  case opening_balance = "opening_balance"
+  case reconciliation = "reconciliation"
+  case special = "special"
+  case specials = "specials"
+  //case default = "default"
   var id: String { self.rawValue }
 }
 

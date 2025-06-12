@@ -50,7 +50,7 @@ struct Menu: View {
         .tag(2)
       AccountsView()
         .tabItem {
-          Label("Accounts", systemImage: "banknote.fill")
+          Label("Accounts", systemImage: "creditcard.fill")
         }
         .tag(3)
       Settings()

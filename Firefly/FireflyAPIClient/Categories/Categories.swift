@@ -52,27 +52,53 @@ struct CategoriesAttributes: Codable {
   let createdAt, updatedAt, name: String?
   let notes: String?
   let spent, earned: [CategoriesEarned]?
+  let nativeCurrencyID: String?
+  let nativeCurrencyCode: String?
+  let nativeCurrencySymbol: String?
+  let nativeCurrencyDecimalPlaces: Int?
 
   enum CodingKeys: String, CodingKey {
     case createdAt = "created_at"
     case updatedAt = "updated_at"
     case name, notes, spent, earned
+    case nativeCurrencyID = "native_currency_id"
+    case nativeCurrencyCode = "native_currency_code"
+    case nativeCurrencySymbol = "native_currency_symbol"
+    case nativeCurrencyDecimalPlaces = "native_currency_decimal_places"
   }
 }
 
 // MARK: - CategoriesEarned
 struct CategoriesEarned: Codable {
-  let currencyID, currencyCode, currencySymbol: String?
-  let currencyDecimalPlaces: Int?
-  let sum: String?
+    let currencyID: String?
+    let currencyCode, currencySymbol: String?
+    let currencyDecimalPlaces: Int?
+    let sum: String?
 
-  enum CodingKeys: String, CodingKey {
-    case currencyID = "currency_id"
-    case currencyCode = "currency_code"
-    case currencySymbol = "currency_symbol"
-    case currencyDecimalPlaces = "currency_decimal_places"
-    case sum
-  }
+    enum CodingKeys: String, CodingKey {
+        case currencyID = "currency_id"
+        case currencyCode = "currency_code"
+        case currencySymbol = "currency_symbol"
+        case currencyDecimalPlaces = "currency_decimal_places"
+        case sum
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        if let stringValue = try? container.decode(String.self, forKey: .currencyID) {
+            currencyID = stringValue
+        } else if let intValue = try? container.decode(Int.self, forKey: .currencyID) {
+            currencyID = String(intValue)
+        } else {
+            currencyID = nil
+        }
+
+        currencyCode = try container.decodeIfPresent(String.self, forKey: .currencyCode)
+        currencySymbol = try container.decodeIfPresent(String.self, forKey: .currencySymbol)
+        currencyDecimalPlaces = try container.decodeIfPresent(Int.self, forKey: .currencyDecimalPlaces)
+        sum = try container.decodeIfPresent(String.self, forKey: .sum)
+    }
 }
 
 // MARK: - CategoriesDatumLinks
@@ -118,3 +144,4 @@ struct CategoriesPagination: Codable {
     case totalPages = "total_pages"
   }
 }
+

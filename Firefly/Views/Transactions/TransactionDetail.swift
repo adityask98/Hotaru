@@ -9,9 +9,16 @@ import AlertToast
 import SwiftUI
 
 struct TransactionDetail: View {
-  //@State var transaction: TransactionsDatum
-  var transactionID: String
-  @StateObject private var viewModel = TransactionDetailViewModel()
+
+  @State var transactionID: String
+  @StateObject private var viewModel: TransactionDetailViewModel
+
+  init(transactionID: String) {
+    _transactionID = .init(initialValue: transactionID)
+    _viewModel = StateObject(
+      wrappedValue: TransactionDetailViewModel(transactionId: transactionID)
+    )
+  }
 
   //Toasts and controllers
   @Environment(\.dismiss) var dismiss
@@ -31,55 +38,18 @@ struct TransactionDetail: View {
         } else if let errorMessage = viewModel.errorMessage {
           Text("Something went wrong")
         } else if let transaction = viewModel.transaction {
-          TransactionDetailHeader(data: transaction.data!)
-          TransactionDetailSectionHeader(title: "Details")
-
-          TransactionInfoCard(transaction: transaction.data!)
-
-          // Split transactions if any
-          if isSplitTransaction(transaction.data!) {
-            if let transactions = transaction.data?.attributes?.transactions {
-              ForEach(
-                Array(transactions.enumerated()), id: \.element.transactionJournalID
-              ) { index, splitTransaction in
-                TransactionDetailSectionHeader(
-                  title: splitTransaction.description ?? "Unknown",
-                  subTitle: "Split Transaction #\(index + 1)")
-
-                SplitTransactionCard(transaction: splitTransaction)
-              }
-            }
-          }
-          if let notes = transaction.data?.attributes?.transactions?.first?.notes {
-            TransactionDetailSectionHeader(title: "Notes")
-              .padding(.bottom, -10)
-
-            NotesCard(notes: notes)
-          }
-
-          VStack {
-            MasterButton(
-              icon: "trash.fill",
-              label: "Delete Transaction",
-              color: Color.red,
-              fullWidth: true,
-              action: { viewModel.showDeleteAlert = true }
-            ).padding(.vertical, 8)
-          }
-
-          TransactionDetailMoreInfo(
-            transactionID: transaction.data?.id, transaction: transaction.data)
-
+          TransactionBodyView(
+            transaction: transaction,
+            onDelete: { viewModel.showDeleteAlert = true })
         }
       }
-
     }
     .scrollIndicators(.hidden)
     .task {
-      await viewModel.fetchTransaction(transactionID: transactionID)
+      await viewModel.fetchTransaction()
     }
     .refreshable {
-      await viewModel.refreshTransaction(transactionID: transactionID)
+      await viewModel.refreshTransaction()
     }.toolbar {
       Button(action: {
         editSheetShown = true
@@ -162,6 +132,64 @@ struct TransactionDetail: View {
     return formatter.string(from: date)
   }
 }
+
+struct TransactionBodyView: View {
+  @State var transaction: TransactionDetailDatum
+  let onDelete: () -> Void
+
+  @State private var opacity: Double = 0.1
+
+  var body: some View {
+    Group {
+
+      TransactionDetailHeader(data: transaction.data!)
+      TransactionDetailSectionHeader(title: "Details")
+
+      TransactionInfoCard(transaction: transaction.data!)
+
+      // Split transactions if any
+      if isSplitTransaction(transaction.data!) {
+        if let transactions = transaction.data?.attributes?.transactions {
+          ForEach(
+            Array(transactions.enumerated()), id: \.element.transactionJournalID
+          ) { index, splitTransaction in
+            TransactionDetailSectionHeader(
+              title: splitTransaction.description ?? "Unknown",
+              subTitle: "Split Transaction #\(index + 1)")
+
+            SplitTransactionCard(transaction: splitTransaction)
+          }
+        }
+      }
+      if let notes = transaction.data?.attributes?.transactions?.first?.notes {
+        TransactionDetailSectionHeader(title: "Notes")
+          .padding(.bottom, -10)
+
+        NotesCard(notes: notes)
+      }
+
+      VStack {
+        MasterButton(
+          icon: "trash.fill",
+          label: "Delete Transaction",
+          color: Color.red,
+          fullWidth: true,
+          action: { onDelete() }
+        ).padding(.vertical, 8)
+      }
+
+      TransactionDetailMoreInfo(
+        transactionID: transaction.data?.id, transaction: transaction.data)
+    }
+    .opacity(opacity)
+    .onAppear {
+      withAnimation(.easeInOut(duration: 0.2)) {
+        opacity = 1.0
+      }
+    }
+  }
+}
+
 struct TagView: View {
   let tag: String
 
@@ -205,7 +233,7 @@ struct TransactionDetailSectionHeader: View {
 
 struct TransactionDetailHeader: View {
 
-  let data: TransactionsDatum
+  var data: TransactionsDatum
   var body: some View {
     HStack {
       Image(
@@ -286,7 +314,7 @@ struct TransactionDetailMoreInfo: View {
 }
 
 struct TransactionInfoCard: View {
-  let transaction: TransactionsDatum
+  var transaction: TransactionsDatum
 
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
@@ -308,7 +336,7 @@ struct TransactionInfoCard: View {
 }
 
 struct AmountSection: View {
-  let transaction: TransactionsDatum
+  var transaction: TransactionsDatum
 
   var body: some View {
     HStack(alignment: .top) {
@@ -332,6 +360,7 @@ struct AmountSection: View {
             type: transaction.attributes?.transactions?.first?.type ?? "unknown"
           )
         )
+        .contentTransition(.numericText(countsDown: true))
       }
       .padding()
       Spacer()

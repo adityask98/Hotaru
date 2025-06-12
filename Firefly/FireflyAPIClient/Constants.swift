@@ -22,6 +22,7 @@ struct apiPaths {
   static let userAbout = "api/v1/about/user"
   static let transactions = "api/v1/transactions"
   static let accounts = "api/v1/accounts"
+  static let categories = "api/v1/categories"
   static func account(_ id: String) -> String {
     return "api/v1/accounts/\(id)"
   }
@@ -31,6 +32,9 @@ struct apiPaths {
   static let charts = "api/v1/chart/account/overview"
   static func transaction(_ id: String) -> String {
     return "api/v1/transactions/\(id)"
+  }
+  static func category(_ id: String) -> String {
+    return "api/v1/categories/\(id)"
   }
   static func categoryTransactions(_ id: String) -> String {
     return "api/v1/categories/\(id)/transactions"

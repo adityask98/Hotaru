@@ -11,6 +11,7 @@ struct TransactionsList: View {
   var transactions: Transactions?
   var hasMorePages: Bool
   let onLoadMore: () -> Void
+  @State private var opacity: Double = 0.1
 
   var body: some View {
     LazyVStack {
@@ -25,6 +26,12 @@ struct TransactionsList: View {
           .onAppear {
             onLoadMore()
           }
+      }
+    }
+    .opacity(opacity)
+    .onAppear {
+      withAnimation(.easeInOut(duration: 0.1)) {
+        opacity = 1.0
       }
     }
     //    .listStyle(PlainListStyle())
