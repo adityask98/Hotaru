@@ -20,15 +20,15 @@ class CategoriesViewModel: ObservableObject {
 
   func fetchCategories() {
     isLoading = true
-    Task {
+    Task { @MainActor in
       do {
         categories = try await getCategories()
+        isLoading = false
       } catch {
         print(error)
+        isLoading = false
       }
     }
-
-    isLoading = false
   }
 
   func getCategories() async throws -> Categories {
@@ -56,7 +56,7 @@ class CategoriesViewModel: ObservableObject {
       return result
     } catch {
       print(error)
-      throw AccountsModelError.invalidData
+      throw CategoriesModelError.invalidData
     }
   }
 }

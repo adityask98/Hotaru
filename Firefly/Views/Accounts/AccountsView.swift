@@ -54,7 +54,9 @@ struct AccountsView: View {
           FloatingButton(
             action: {
               accounts.toggleAmountVisibility()
-            }, imageSystemName: accounts.amountHidden ? "eye.slash.fill" : "eye.fill"
+            },
+            imageSystemName: accounts.amountHidden ? "eye.slash.fill" : "eye.fill",
+            accessibilityLabel: accounts.amountHidden ? "Show balances" : "Hide balances"
           ).contentTransition(.symbolEffect(.automatic))
         }
       )

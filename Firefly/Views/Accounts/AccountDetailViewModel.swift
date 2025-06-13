@@ -14,21 +14,8 @@ final class AccountDetailViewModel: ObservableObject {
   @Published var transactions: Transactions?
   @Published var transactionsIsLoading: Bool = false
   @Published var hasMorePages: Bool = true
-  @Published var accountTransactions: Transactions?
 
   private var paginationManager: TransactionsPaginationManager?
-
-  //  var transactions: Transactions? {
-  //    paginationManager?.transactions
-  //  }
-
-  //  var transactionsIsLoading: Bool {
-  //    paginationManager?.isLoading ?? false
-  //  }
-
-  //  var hasMorePages: Bool {
-  //    paginationManager?.hasMorePages ?? true
-  //  }
 
   let accountID: String
 
@@ -44,7 +31,7 @@ final class AccountDetailViewModel: ObservableObject {
       //endDate: formatDateToYYYYMMDD(endDate)
     )
     paginationManager = TransactionsPaginationManager(apiProvider: apiProvider)
-    
+
     setupBindings()
   }
 
@@ -136,4 +123,3 @@ func fetchAccountDetailNew(_ accountID: String) async throws -> AccountsDatum {
     return result
   }
 }
-

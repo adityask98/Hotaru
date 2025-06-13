@@ -39,9 +39,7 @@ struct TransactionsView: View {
               hasMorePages: transactions.hasMorePages,
               onLoadMore: {
                 Task {
-                  await doThisAfter(2) {
-                    await transactions.fetchTransactions(loadMore: true)
-                  }
+                  await transactions.fetchTransactions(loadMore: true)
                 }
               }
             )

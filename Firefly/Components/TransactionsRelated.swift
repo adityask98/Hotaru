@@ -21,7 +21,7 @@ struct TransactionsList: View {
           .listRowInsets(EdgeInsets())
           .listRowSeparator(.hidden)
       }
-      if hasMorePages || ((transactions?.data?.isEmpty) != nil) {
+      if hasMorePages || (transactions?.data?.isEmpty == true) {
         LoadingSpinner()
           .onAppear {
             onLoadMore()

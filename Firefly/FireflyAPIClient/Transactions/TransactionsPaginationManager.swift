@@ -13,7 +13,7 @@ protocol TransactionsPaginationProtocol: ObservableObject {
   var currentPage: Int { get set }
   var hasMorePages: Bool { get set }
 
-  func fetchTransactions(loadMode: Bool) async
+  func fetchTransactions(loadMore: Bool) async
   func resetPagination()
 }
 

@@ -330,9 +330,8 @@ struct DescriptionInput: View {
         viewModel.text = newValue
       }
     }
-    .onChange(of: viewModel.debouncedText) { oldValue, newValue in
+    .onChange(of: viewModel.debouncedText) { _, _ in
       viewModel.fetch()
-      print("fetching description autocomplete")
     }
     .onChange(of: focused) { _, newValue in
       withAnimation(.default) {
