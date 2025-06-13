@@ -63,7 +63,7 @@ struct AboutView: View {
       //            .navigationBarTitleDisplayMode(.large)
     }
     .overlay(alignment: .bottomTrailing) {
-      AddFloatingButton(action: {
+      FloatingButton(action: {
         menuViewModel.openTransactionSheet()
       })
     }

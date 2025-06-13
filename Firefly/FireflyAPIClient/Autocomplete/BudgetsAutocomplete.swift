@@ -8,11 +8,11 @@
 import Foundation
 
 struct AutoBudgetElement: Codable {
-    let id, name: String?
+  let id, name: String?
 }
 
 typealias AutoBudget = [AutoBudgetElement]
 
 func fetchBudgetsAutocomplete() async throws -> AutoBudget {
-    try await fetchAutocomplete(for: autocompleteApiPaths.budgets)
+  try await fetchAutocomplete(for: autocompleteApiPaths.budgets)
 }

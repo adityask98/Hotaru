@@ -7,22 +7,42 @@
 
 import AlertToast
 import Foundation
-import SwiftUICore
+import SwiftUI
 
 struct TransactionDetailDatum: Codable {
   var data: TransactionsDatum?
 }
 
-@MainActor
 final class TransactionDetailViewModel: ObservableObject {
   @Published var transaction: TransactionDetailDatum?
   @Published var isLoading: Bool = true
+  @Published var isError: Bool = false
   @Published var errorMessage: String?
   @Published var showDeleteAlert = false
   @Published var showToast: Bool = false
   @Published var toastParams: AlertToast = AlertToast(displayMode: .hud, type: .error(Color.red))
 
-  func fetchTransaction(transactionID: String) async {
+  let transactionId: String
+
+  init(transactionId: String) {
+    self.transactionId = transactionId
+  }
+
+  func fetchTransaction() async {
+    self.isLoading = true
+
+    //Fetch single transaction
+    do {
+      self.transaction = try await getTransaction(transactionID: transactionId)
+      self.isError = false
+    } catch {
+      self.isError = true
+      self.errorMessage = error.localizedDescription
+    }
+    self.isLoading = false
+  }
+
+  func fetchTransactionOld(transactionID: String) async {
     self.isLoading = true
     do {
       self.transaction = try await getTransaction(transactionID: transactionID)
@@ -37,8 +57,18 @@ final class TransactionDetailViewModel: ObservableObject {
     self.isLoading = false
   }
 
+  func refreshTransaction() async {
+    do {
+      self.transaction = try await getTransaction(transactionID: transactionId)
+      self.isError = false
+    } catch {
+      self.isError = true
+      self.errorMessage = error.localizedDescription
+    }
+  }
+
   func refreshTransaction(transactionID: String) async {
-    await fetchTransaction(transactionID: transactionID)
+    await fetchTransactionOld(transactionID: transactionID)
   }
 
   func deleteTransaction(transactionID: String) async throws {
@@ -50,7 +80,7 @@ final class TransactionDetailViewModel: ObservableObject {
     guard let response = response as? HTTPURLResponse, response.statusCode == 204 else {
       let commonError = try ErrorDecoder(data)
       errorMessage = commonError.message ?? "Something went wrong"
-      print(errorMessage)
+      print(errorMessage as Any)
       throw TransactionsModelError.invalidResponse
     }
     print(response)
