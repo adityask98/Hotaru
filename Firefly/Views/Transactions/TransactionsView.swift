@@ -63,21 +63,13 @@ struct TransactionsView: View {
         applyDateFilter()
       }
       .navigationTitle("Transactions")
+      .navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem {
           Button(action: {
-            menuViewModel.openSearchSheet()
+            menuViewModel.openTransactionAddSheet()
           }) {
             Image(systemName: "line.3.horizontal.decrease.circle.fill")
-              .padding(6)
-              .fontWeight(.heavy)
-          }
-        }
-        ToolbarItem {
-          Button(action: {
-            menuViewModel.openSearchSheet()
-          }) {
-            Image(systemName: "magnifyingglass.circle.fill")
               .padding(6)
               .fontWeight(.heavy)
           }

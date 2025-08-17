@@ -52,6 +52,11 @@
 		489EB28E2B46EB2800414CCB /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489EB28D2B46EB2800414CCB /* AccountsView.swift */; };
 		48A66F6F2DFB0208007E6F7A /* CategoryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A66F6E2DFB0208007E6F7A /* CategoryDetailView.swift */; };
 		48A66F712DFB0215007E6F7A /* CategoryDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A66F702DFB0215007E6F7A /* CategoryDetailViewModel.swift */; };
+		48A66F802DFC685B007E6F7A /* TransactionAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A66F7F2DFC685B007E6F7A /* TransactionAddView.swift */; };
+		48A66F832DFC6A1A007E6F7A /* TransactionsAddEditRelated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A66F822DFC6A1A007E6F7A /* TransactionsAddEditRelated.swift */; };
+		48A66F852DFC6C9E007E6F7A /* TransactionAddViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A66F842DFC6C9E007E6F7A /* TransactionAddViewModel.swift */; };
+		48A66F872DFC71D7007E6F7A /* TransactionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A66F862DFC71D7007E6F7A /* TransactionStore.swift */; };
+		48A66F8B2E02FD53007E6F7A /* TransactionTitleInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A66F8A2E02FD53007E6F7A /* TransactionTitleInput.swift */; };
 		48B9CE6E2C3CF88D00AF7BA8 /* Categories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B9CE6D2C3CF88D00AF7BA8 /* Categories.swift */; };
 		48B9CE702C3D182F00AF7BA8 /* AccountsAutocomplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B9CE6F2C3D182F00AF7BA8 /* AccountsAutocomplete.swift */; };
 		48B9CE722C3D2A4E00AF7BA8 /* TransactionPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B9CE712C3D2A4E00AF7BA8 /* TransactionPost.swift */; };
@@ -117,6 +122,11 @@
 		489EB28D2B46EB2800414CCB /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		48A66F6E2DFB0208007E6F7A /* CategoryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDetailView.swift; sourceTree = "<group>"; };
 		48A66F702DFB0215007E6F7A /* CategoryDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryDetailViewModel.swift; sourceTree = "<group>"; };
+		48A66F7F2DFC685B007E6F7A /* TransactionAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionAddView.swift; sourceTree = "<group>"; };
+		48A66F822DFC6A1A007E6F7A /* TransactionsAddEditRelated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsAddEditRelated.swift; sourceTree = "<group>"; };
+		48A66F842DFC6C9E007E6F7A /* TransactionAddViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionAddViewModel.swift; sourceTree = "<group>"; };
+		48A66F862DFC71D7007E6F7A /* TransactionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionStore.swift; sourceTree = "<group>"; };
+		48A66F8A2E02FD53007E6F7A /* TransactionTitleInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionTitleInput.swift; sourceTree = "<group>"; };
 		48B9CE6D2C3CF88D00AF7BA8 /* Categories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Categories.swift; sourceTree = "<group>"; };
 		48B9CE6F2C3D182F00AF7BA8 /* AccountsAutocomplete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsAutocomplete.swift; sourceTree = "<group>"; };
 		48B9CE712C3D2A4E00AF7BA8 /* TransactionPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionPost.swift; sourceTree = "<group>"; };
@@ -222,6 +232,7 @@
 		485467AA2C37C89B00C40E92 /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
+				48A66F7E2DFC6845007E6F7A /* TransactionAdd */,
 				48552BA92C1D2D12002ED3CF /* TransactionsView.swift */,
 				48177F6F2DD1673C00358BC8 /* TransactionCreate */,
 				48BB087D2C3E6C2B006D32E3 /* TransactionDetail.swift */,
@@ -260,6 +271,7 @@
 				4890B2772C56141F0032BE86 /* TransactionDetailViewModel.swift */,
 				485B05A62DF497BC007D3158 /* TransactionsPaginationManager.swift */,
 				485B05A82DF49A1B007D3158 /* TransactionsAPIProviders.swift */,
+				48A66F862DFC71D7007E6F7A /* TransactionStore.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -321,6 +333,7 @@
 				48831AE72C71E724005DBBF4 /* MasterButton.swift */,
 				48177F5E2DD0499C00358BC8 /* FloatingButton.swift */,
 				48985AD32DE5EBFF00F79BC9 /* TransactionsRelated.swift */,
+				48A66F822DFC6A1A007E6F7A /* TransactionsAddEditRelated.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -356,6 +369,24 @@
 			children = (
 			);
 			path = Common;
+			sourceTree = "<group>";
+		};
+		48A66F7E2DFC6845007E6F7A /* TransactionAdd */ = {
+			isa = PBXGroup;
+			children = (
+				48A66F882E02FD28007E6F7A /* Components */,
+				48A66F7F2DFC685B007E6F7A /* TransactionAddView.swift */,
+				48A66F842DFC6C9E007E6F7A /* TransactionAddViewModel.swift */,
+			);
+			path = TransactionAdd;
+			sourceTree = "<group>";
+		};
+		48A66F882E02FD28007E6F7A /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				48A66F8A2E02FD53007E6F7A /* TransactionTitleInput.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		48BB08892C411A26006D32E3 /* Charts */ = {
@@ -530,6 +561,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				48A66F872DFC71D7007E6F7A /* TransactionStore.swift in Sources */,
 				48B9CE722C3D2A4E00AF7BA8 /* TransactionPost.swift in Sources */,
 				485B059E2DF1CB06007D3158 /* CategoriesView.swift in Sources */,
 				48DF34012AD3E31900F6F215 /* AboutView.swift in Sources */,
@@ -538,6 +570,7 @@
 				48831AE52C70BFAA005DBBF4 /* TransactionEdit.swift in Sources */,
 				48BB087E2C3E6C2C006D32E3 /* TransactionDetail.swift in Sources */,
 				48A66F712DFB0215007E6F7A /* CategoryDetailViewModel.swift in Sources */,
+				48A66F832DFC6A1A007E6F7A /* TransactionsAddEditRelated.swift in Sources */,
 				480EAAD82C158F2D0038ADF7 /* RequestBuilder.swift in Sources */,
 				48552BA32C1C545E002ED3CF /* ToastHandler.swift in Sources */,
 				48552BAA2C1D2D12002ED3CF /* TransactionsView.swift in Sources */,
@@ -562,6 +595,7 @@
 				486742552C89CBA700D31B76 /* DebugHelpers.swift in Sources */,
 				48177F6B2DD0779F00358BC8 /* SystemAbout.swift in Sources */,
 				4890B27B2C561A690032BE86 /* CategoriesDonut.swift in Sources */,
+				48A66F802DFC685B007E6F7A /* TransactionAddView.swift in Sources */,
 				489EB28E2B46EB2800414CCB /* AccountsView.swift in Sources */,
 				482139282C10652600D8D1C6 /* TokenSettings.swift in Sources */,
 				48552BA62C1C6B20002ED3CF /* Transactions.swift in Sources */,
@@ -576,6 +610,7 @@
 				485B05A92DF49A1B007D3158 /* TransactionsAPIProviders.swift in Sources */,
 				4836BEC62C1B29B90039D219 /* KeychainHelper.swift in Sources */,
 				48831AEB2C71E9C0005DBBF4 /* fontSize.swift in Sources */,
+				48A66F8B2E02FD53007E6F7A /* TransactionTitleInput.swift in Sources */,
 				4839B4132ADE3AD3001A4F8F /* AccountsViewModel.swift in Sources */,
 				485B05A52DF1D3E6007D3158 /* ThemeView.swift in Sources */,
 				4890B27E2C5626A60032BE86 /* Insights.swift in Sources */,
@@ -586,6 +621,7 @@
 				48985AD42DE5EBFF00F79BC9 /* TransactionsRelated.swift in Sources */,
 				48177F642DD05C1D00358BC8 /* SearchViewModel.swift in Sources */,
 				48B9CE6E2C3CF88D00AF7BA8 /* Categories.swift in Sources */,
+				48A66F852DFC6C9E007E6F7A /* TransactionAddViewModel.swift in Sources */,
 				485B05A72DF497BC007D3158 /* TransactionsPaginationManager.swift in Sources */,
 				48BB08842C40D4EA006D32E3 /* Autocomplete.swift in Sources */,
 			);
@@ -742,7 +778,7 @@
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -790,7 +826,7 @@
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

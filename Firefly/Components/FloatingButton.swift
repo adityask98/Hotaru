@@ -58,6 +58,7 @@ public struct FloatingButton: View {
         .clipShape(Circle())
         .shadow(radius: shadowRadius)
     }
+    .glassEffect(.regular.interactive())
     .buttonStyle(PlainButtonStyle())
     .padding()
     .accessibilityLabel(accessibilityLabel)

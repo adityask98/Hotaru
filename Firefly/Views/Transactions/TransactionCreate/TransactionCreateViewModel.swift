@@ -18,10 +18,14 @@ class DescriptionInputViewModel: ObservableObject {
   @Published var text: String = ""
   @Published var debouncedText: String = ""
   @Published var transactionsAutocomplete: [AutoTransactionElement] = []
+  @Published var transactionsAutocompleteEmptyQuery: [AutoTransactionElement] = []
   private var fetchTask: Task<Void, Never>?
 
   init() {
     setupTextDebounce()
+    Task {
+        try? await self.performFetch()
+    }
   }
 
   func setupTextDebounce() {
@@ -48,7 +52,7 @@ class DescriptionInputViewModel: ObservableObject {
   }
 
   @MainActor
-  func performFetch() async throws {
+  func performFetch(onlyForInit: Bool = false) async throws {
     var request = try RequestBuilder(apiURL: autocompleteApiPaths.transactions)
     request.url?.append(queryItems: [
       URLQueryItem(name: "query", value: String(debouncedText))
@@ -64,6 +68,9 @@ class DescriptionInputViewModel: ObservableObject {
       let decoder = JSONDecoder()
       let result = try decoder.decode(AutoTransactions.self, from: data)
 
+      if onlyForInit {
+        self.transactionsAutocompleteEmptyQuery = result
+      }
       self.transactionsAutocomplete = result
       #if DEBUG
         print("Search Results: \(String(describing: self.transactionsAutocomplete))")

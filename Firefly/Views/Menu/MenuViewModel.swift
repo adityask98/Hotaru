@@ -14,6 +14,7 @@ class MenuViewModel: ObservableObject {
   @Published var transactionSheetShown = false
   @Published var shouldRefresh = false
   @Published var searchSheetShown: Bool = false
+  @Published var transactionAddSheetShown: Bool = false // New transction add page
 
   //private var tokenSettingsValue = TokenSettingsViewModel()
 
@@ -23,6 +24,10 @@ class MenuViewModel: ObservableObject {
 
   func openSearchSheet() {
     searchSheetShown = true
+  }
+  
+  func openTransactionAddSheet() {
+    transactionAddSheetShown = true
   }
 
 }

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CategoriesView: View {
   @StateObject private var viewMModel = CategoriesViewModel()
+  @State private var didLoadOnce = false
 
   var body: some View {
     NavigationStack {
@@ -22,10 +23,10 @@ struct CategoriesView: View {
         }
       }
     }
-    .onAppear {
-      Task {
-        viewMModel.fetchCategories()
-      }
+    .task {
+      guard !didLoadOnce else { return }
+      didLoadOnce = true
+      viewMModel.fetchCategories()
     }
     .navigationTitle("Categories")
     .navigationBarTitleDisplayMode(.large)

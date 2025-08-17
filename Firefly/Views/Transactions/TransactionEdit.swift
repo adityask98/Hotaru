@@ -79,7 +79,7 @@ struct TransactionEdit: View {
                 set: { newValue in
                   postTransactionData.transactions?[index].description =
                     newValue
-                }), transactionsAutocomplete: descriptions)
+                }))
             TextField(
               "Amount",
               text: Binding(

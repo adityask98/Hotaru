@@ -105,6 +105,7 @@ struct AccountItem: View {
         )
         .redacted(reason: amountHidden ? .placeholder : [])
         .contentTransition(.numericText())
+        .animation(.default, value: account.attributes?.currentBalance)
         .font(.title)
         .minimumScaleFactor(0.5)
         .lineLimit(1)

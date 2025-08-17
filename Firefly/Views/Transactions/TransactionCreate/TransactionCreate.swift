@@ -21,7 +21,7 @@ struct TransactionCreate: View {
   @State private var budgets: AutoBudget = AutoBudget()
   @State private var accounts: AutoAccounts = AutoAccounts()
   @State private var currencies: AutoCurrency = AutoCurrency()
-  @State private var descriptions: AutoTransactions = AutoTransactions()
+//  @State private var descriptions: AutoTransactions = AutoTransactions()
 
   //Selections
   @State private var transactionDescription: String = ""
@@ -71,8 +71,7 @@ struct TransactionCreate: View {
 
           Section("Details") {
             DescriptionInput(
-              bindingText: $transactionDescription,
-              transactionsAutocomplete: descriptions)
+              bindingText: $transactionDescription)
 
             Picker("Category", selection: $selectedCategory) {
               Text("Uncategorized").tag("")
@@ -226,7 +225,7 @@ struct TransactionCreate: View {
         //currencies = try await fetchCurrenciesAutoComplete()
 
         //Transactions (for Description Autocomplete)
-        descriptions = try await fetchTransactionAutocomplete()
+//        descriptions = try await fetchTransactionAutocomplete()
 
       } catch {
         print("Error loading categories: \(error)")
@@ -263,11 +262,11 @@ struct DescriptionInput: View {
   @FocusState private var focused: Bool
   @State private var showSuggestions = false
   @StateObject private var viewModel = DescriptionInputViewModel()
-  var transactionsAutocomplete: [AutoTransactionElement]
+//  var transactionsAutocomplete: [AutoTransactionElement]
 
   private var filteredAutocomplete: [AutoTransactionElement] {
     if bindingText.wrappedValue.isEmpty {
-      return transactionsAutocomplete
+      return viewModel.transactionsAutocomplete
     } else {
       return viewModel.transactionsAutocomplete.filter {
         $0.description!.lowercased().contains(bindingText.wrappedValue.lowercased())
@@ -301,10 +300,11 @@ struct DescriptionInput: View {
             HStack {
               ForEach(filteredAutocomplete, id: \.id) {
                 data in
-                SuggestionChip(label: data.description ?? "Unknown").onTapGesture {
-                  bindingText.wrappedValue = data.description ?? ""
-                  focused = false
-                }
+                SuggestionChip(label: data.description ?? "Unknown")
+                  .onTapGesture {
+                    bindingText.wrappedValue = data.description ?? ""
+                    focused = false
+                  }
               }
             }
             .frame(maxWidth: .infinity)
@@ -343,11 +343,21 @@ struct DescriptionInput: View {
 
 struct SuggestionChip: View {
   let label: String
+  var backgroundColor: Color = Color.gray.opacity(0.2)
+  var textColor: Color = .primary
+  var borderColor: Color = .gray.opacity(0.5)
+  var cornerRadius: CGFloat = 16
   var body: some View {
     Text(label)
-      .font(.subheadline).foregroundStyle(.white).padding(.vertical, 1)
-      .padding(.horizontal, 10).background(.gray)
-      .clipShape(RoundedRectangle(cornerSize: CGSize(width: 5, height: 10)))
+      .font(.subheadline)
+      .foregroundStyle(textColor)
+      .padding(.vertical, 6)
+      .padding(.horizontal, 14)
+      .background(
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+          .fill(backgroundColor)
+      )
+      .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
   }
 
 }

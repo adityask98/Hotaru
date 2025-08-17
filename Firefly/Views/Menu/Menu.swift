@@ -38,41 +38,72 @@ struct Menu: View {
   @State private var tokenSheetShown = false
   @State private var hasCheckedToken = false
   @State private var shouldRefresh: Bool? = false  //Used to refresh after the create page is dismissed.
+  @State private var searchText: String = ""
   @AppStorage("tabViewLast") var tabViewLast: Int = 1
 
   var body: some View {
-    TabView(selection: $tabViewLast) {
-      AboutView()
-        .tabItem { Label("Home", systemImage: "house") }
-        .tag(1)
-      TransactionsView()
-        .tabItem { Label("Transactions", systemImage: "list.bullet.circle.fill") }
-        .tag(2)
-      AccountsView()
-        .tabItem {
-          Label("Accounts", systemImage: "creditcard.fill")
+    //    TabView(selection: $tabViewLast) {
+    //      AboutView()
+    //        .tabItem { Label("Home", systemImage: "house") }
+    //        .tag(1)
+    //      TransactionsView()
+    //        .tabItem { Label("Transactions", systemImage: "list.bullet.circle.fill") }
+    //        .tag(2)
+    //      AccountsView()
+    //        .tabItem {
+    //          Label("Accounts", systemImage: "creditcard.fill")
+    //        }
+    //        .tag(3)
+    //      Settings()
+    //        .tabItem {
+    //          Label("Settings", systemImage: "gearshape.fill")
+    //        }
+    //        .tag(4)
+    //      // iOS 18+: Search tab needs a selection value when TabView has `selection: $tabViewLast` (Int)
+    //      Tab(value: 5, role: .search) {
+    //        SearchPage()
+    //      }
+    //    }
+    TabView(
+      selection: $tabViewLast,
+      content: {
+        Tab("Home", systemImage: "house", value: 1) {
+          AboutView()
         }
-        .tag(3)
-      Settings()
-        .tabItem {
-          Label("Settings", systemImage: "gearshape.fill")
+        Tab("Transactions", systemImage: "list.bullet.circle.fill", value: 2) {
+          TransactionsView()
         }
-        .tag(4)
-    }
+        Tab("Accounts", systemImage: "creditcard.fill", value: 3) {
+          AccountsView()
+        }
+        Tab("Settings", systemImage: "gearshape.fill", value: 4) {
+          Settings()
+        }
+        Tab(value: 5, role: .search) {
+          SearchPage()
+        }
+
+      }
+    )
+    .searchable(text: $searchText, prompt: "Search transactions")
+    //    .tabBarMinimizeBehavior(.onScrollDown)
     .sheet(isPresented: $tokenSheetShown) {
       TokenSettings().environmentObject(AlertViewModel())
-
     }
     .sheet(isPresented: $menuViewModel.transactionSheetShown) {
       TransactionCreate(shouldRefresh: $shouldRefresh).background(.ultraThinMaterial)
     }
-    .sheet(isPresented: $menuViewModel.searchSheetShown) {
-      SearchPage()
+//    .sheet(isPresented: $menuViewModel.searchSheetShown) {
+//      SearchPage()
+//    }
+    .sheet(isPresented: $menuViewModel.transactionAddSheetShown) {
+      TransactionAdd()
     }
     .onContinueUserActivity("addTransaction") { _ in
       print("Add transactions shortcut")
       menuViewModel.openTransactionSheet()
     }
+
     .task {
       if !hasCheckedToken {
         do {

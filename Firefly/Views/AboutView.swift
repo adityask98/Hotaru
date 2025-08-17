@@ -49,16 +49,16 @@ struct AboutView: View {
       }
 
       .navigationTitle("Home")
-      .toolbar {
-        Button(action: {
-          menuViewModel.openSearchSheet()
-        }) {
-          Image(systemName: "magnifyingglass.circle.fill")
-            .padding(6)
-            .fontWeight(.heavy)
-        }
-      }
-      //            .navigationBarItems(leading: Text("Analytics").font(.subheadline))
+      //      .toolbar {
+      //        Button(action: {
+      //          menuViewModel.openSearchSheet()
+      //        }) {
+      //          Image(systemName: "magnifyingglass.circle.fill")
+      //            .padding(6)
+      //            .fontWeight(.heavy)
+      //        }
+      //      }
+      //      //            .navigationBarItems(leading: Text("Analytics").font(.subheadline))
       //            .navigationTitle("Home")
       //            .navigationBarTitleDisplayMode(.large)
     }

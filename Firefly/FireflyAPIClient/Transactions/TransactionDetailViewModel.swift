@@ -13,6 +13,7 @@ struct TransactionDetailDatum: Codable {
   var data: TransactionsDatum?
 }
 
+@MainActor
 final class TransactionDetailViewModel: ObservableObject {
   @Published var transaction: TransactionDetailDatum?
   @Published var isLoading: Bool = true

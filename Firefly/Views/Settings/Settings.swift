@@ -9,6 +9,7 @@ import SwiftUI
 
 struct Settings: View {
   @State private var startTime = Date.now
+  @State private var showTokenSheet = false
   var body: some View {
     TimelineView(.animation) { timeline in
 
@@ -30,14 +31,16 @@ struct Settings: View {
                   Spacer()
                 }
               }
-              NavigationLink(destination: TokenSettings()) {
+              Button {
+                showTokenSheet = true
+              } label: {
                 HStack {
                   Image(systemName: "key.horizontal.fill")
                   Text("Credentials")
                   Spacer()
                 }
-                .contentShape(Rectangle())
               }
+              .buttonStyle(.plain)
               NavigationLink(destination: SystemAbout()) {
                 HStack {
                   Image(systemName: "info.circle.fill")
@@ -67,6 +70,13 @@ struct Settings: View {
         }
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.large)
+        .sheet(isPresented: $showTokenSheet) {
+          TokenSettings()
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(24)
+            .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+        }
 
       }
     }
