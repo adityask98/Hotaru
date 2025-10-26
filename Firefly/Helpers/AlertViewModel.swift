@@ -21,6 +21,7 @@ class AlertViewModel: ObservableObject {
     /// 4. Call setupMyFeatureNotificationListeners() from this method
     private func setupAllNotificationListeners() {
         setupSafariNotificationListeners()
+        setupTransactionNotificationListeners()
         // Add more notification listeners here as features grow:
         // setupMyFeatureNotificationListeners()
         // setupAnotherFeatureNotificationListeners()
@@ -46,6 +47,15 @@ class AlertViewModel: ObservableObject {
         )
     }
 
+    private func setupTransactionNotificationListeners() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleTransactionEditSuccess(_:)),
+            name: TransactionEditSuccessNotification,
+            object: nil
+        )
+    }
+
     @objc
     private func handleSafariError(_ notification: Notification) {
         if let message = notification.userInfo?["message"] as? String {
@@ -55,6 +65,13 @@ class AlertViewModel: ObservableObject {
 
     @objc
     private func handleSafariSuccess(_ notification: Notification) {
+        if let message = notification.userInfo?["message"] as? String {
+            showSuccess(message: message)
+        }
+    }
+
+    @objc
+    private func handleTransactionEditSuccess(_ notification: Notification) {
         if let message = notification.userInfo?["message"] as? String {
             showSuccess(message: message)
         }
@@ -99,11 +116,17 @@ class AlertViewModel: ObservableObject {
     // MARK: - Alert Display Methods
 
     // Show Success Message
-    func showSuccess(message: String) {
+    func showSuccess(
+        message: String,
+        displayMode: AlertToast.DisplayMode? = .alert,
+        type: AlertToast.AlertType? = .complete(Color.green),
+        subtitle: String? = nil
+    ) {
         alertToast = AlertToast(
-            displayMode: .alert,
-            type: .complete(Color.green),
-            title: message
+            displayMode: displayMode ?? .alert,
+            type: type ?? .complete(Color.green),
+            title: message,
+            subTitle: subtitle
         )
         show = true
     }

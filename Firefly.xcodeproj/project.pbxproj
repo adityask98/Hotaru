@@ -68,6 +68,8 @@
 		48BB08882C40F60E006D32E3 /* AccountDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BB08872C40F60E006D32E3 /* AccountDetail.swift */; };
 		48BB088B2C411A38006D32E3 /* ChartsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BB088A2C411A38006D32E3 /* ChartsModel.swift */; };
 		48C4C47B2EAE24D000E89619 /* NotificationConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C4C47A2EAE24C400E89619 /* NotificationConstants.swift */; };
+		48C4C47D2EAE2F3D00E89619 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C4C47C2EAE2F3500E89619 /* SettingsViewModel.swift */; };
+		48C4C4802EAE34D600E89619 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C4C47F2EAE34D600E89619 /* AppSettings.swift */; };
 		48DF33FF2AD3E31900F6F215 /* FireflyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF33FE2AD3E31900F6F215 /* FireflyApp.swift */; };
 		48DF34012AD3E31900F6F215 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF34002AD3E31900F6F215 /* AboutView.swift */; };
 		48DF34032AD3E31A00F6F215 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48DF34022AD3E31A00F6F215 /* Assets.xcassets */; };
@@ -139,6 +141,8 @@
 		48BB08872C40F60E006D32E3 /* AccountDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AccountDetail.swift; path = Firefly/Views/Accounts/AccountDetail.swift; sourceTree = SOURCE_ROOT; };
 		48BB088A2C411A38006D32E3 /* ChartsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartsModel.swift; sourceTree = "<group>"; };
 		48C4C47A2EAE24C400E89619 /* NotificationConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationConstants.swift; sourceTree = "<group>"; };
+		48C4C47C2EAE2F3500E89619 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		48C4C47F2EAE34D600E89619 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		48DF33FB2AD3E31900F6F215 /* Firefly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Firefly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		48DF33FE2AD3E31900F6F215 /* FireflyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FireflyApp.swift; sourceTree = "<group>"; };
 		48DF34002AD3E31900F6F215 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
@@ -181,6 +185,7 @@
 		48177F692DD0775F00358BC8 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				48C4C47C2EAE2F3500E89619 /* SettingsViewModel.swift */,
 				485B059F2DF1D3CE007D3158 /* Appearence */,
 				485B05992DF1C836007D3158 /* Categories */,
 				4836BEC02C1AFD2E0039D219 /* Settings.swift */,
@@ -206,6 +211,7 @@
 				4836BEC52C1B29B90039D219 /* KeychainHelper.swift */,
 				48552BA22C1C545E002ED3CF /* AlertViewModel.swift */,
 				486E1D7C2C33DAE60038BB4F /* DateHelpers.swift */,
+				48C4C47F2EAE34D600E89619 /* AppSettings.swift */,
 				486E1D812C359A520038BB4F /* effetcs.metal */,
 				486E1D832C359BFB0038BB4F /* GrainGradient.metal */,
 				486E1D852C359E450038BB4F /* BackgroundMaterial.swift */,
@@ -612,6 +618,7 @@
 				48B9CE722C3D2A4E00AF7BA8 /* TransactionPost.swift in Sources */,
 				485B059E2DF1CB06007D3158 /* CategoriesView.swift in Sources */,
 				48DF34012AD3E31900F6F215 /* AboutView.swift in Sources */,
+				48C4C4802EAE34D600E89619 /* AppSettings.swift in Sources */,
 				48DF34102AD3E39B00F6F215 /* UserModel.swift in Sources */,
 				48DF34122AD3E68A00F6F215 /* UserAPIClient.swift in Sources */,
 				48831AE52C70BFAA005DBBF4 /* TransactionEdit.swift in Sources */,
@@ -659,6 +666,7 @@
 				4836BEC62C1B29B90039D219 /* KeychainHelper.swift in Sources */,
 				48831AEB2C71E9C0005DBBF4 /* fontSize.swift in Sources */,
 				48A66F8B2E02FD53007E6F7A /* TransactionTitleInput.swift in Sources */,
+				48C4C47D2EAE2F3D00E89619 /* SettingsViewModel.swift in Sources */,
 				4839B4132ADE3AD3001A4F8F /* AccountsViewModel.swift in Sources */,
 				485B05A52DF1D3E6007D3158 /* ThemeView.swift in Sources */,
 				48C4C47B2EAE24D000E89619 /* NotificationConstants.swift in Sources */,

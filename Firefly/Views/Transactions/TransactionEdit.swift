@@ -1,6 +1,8 @@
 import AlertToast
 import SwiftUI
 
+let TransactionEditSuccessNotification = Notification.Name("TransactionEditSuccessNotification")
+
 struct TransactionEdit: View {
     @Environment(\.dismiss) var dismiss
     @State var transactionData: TransactionsDatum
@@ -248,7 +250,6 @@ struct TransactionEdit: View {
                 // Accounts
                 accounts = try await fetchAccountsAutocomplete()
                 autocompleteLoading = false
-
             } catch {
                 print("Error: \(error)")
             }
@@ -261,14 +262,17 @@ struct TransactionEdit: View {
             try await editTransaction(
                 transactionData: postTransactionData, transactionID: transactionData.id!
             )
-            toastParams = AlertToast(
-                displayMode: .alert, type: .complete(Color.green), title: "Saved Successfully"
+            // toastParams = AlertToast(
+            //     displayMode: .alert, type: .complete(Color.green), title: "Saved Successfully"
+            // )
+            // showToast = true
+            NotificationCenter.default.post(
+                name: TransactionEditSuccessNotification, object: nil, userInfo: ["message": "Saved from edit screen"]
             )
-            showToast = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                dismiss()
-            }
-
+            // DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            //     dismiss()
+            // }
+            dismiss()
         } catch {
             toastParams = AlertToast(
                 displayMode: .alert, type: .error(Color.red), title: "Something went wrong"

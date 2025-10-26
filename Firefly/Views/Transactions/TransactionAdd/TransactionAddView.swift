@@ -16,7 +16,6 @@ struct TransactionAdd: View {
                             viewModel.updateTransaction { $0.type = newValue }
                         }
                     )
-
                 ) {
                     ForEach(TransactionTypeProperty.commonTypes, id: \.self) {
                         Text($0.displayName)
@@ -33,12 +32,13 @@ struct TransactionAdd: View {
                 )
                 List {
                     Section {
-                        TransactionTitleInput(bindingText: Binding(
-                            get: { viewModel.transaction.description },
-                            set: { newValue in
-                                viewModel.updateTransaction { $0.description = newValue }
-                            }
-                        ))
+                        TransactionTitleInput(
+                            bindingText: Binding(
+                                get: { viewModel.transaction.description },
+                                set: { newValue in
+                                    viewModel.updateTransaction { $0.description = newValue }
+                                }
+                            ))
                     }
                 }
 

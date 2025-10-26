@@ -111,10 +111,7 @@ struct TransactionDetail: View {
             // Post notification to refresh TransactionsView
             NotificationCenter.default.post(name: AppNotifications.transactionDeleted, object: nil)
 
-            doThisAfter(2.0) {
-                // shouldRefresh? = true
-                dismiss()
-            }
+            dismiss()
         } catch {
             toastParams = AlertToast(
                 displayMode: .alert,

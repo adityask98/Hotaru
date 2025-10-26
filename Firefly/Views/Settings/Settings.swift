@@ -1,11 +1,12 @@
 import SwiftUI
 
 struct Settings: View {
+    @StateObject private var settings = SettingsViewModel()
     @State private var startTime = Date.now
     @State private var showTokenSheet = false
     var body: some View {
-        TimelineView(.animation) { _ in
-            NavigationStack {
+        NavigationStack {
+            TimelineView(.animation) { _ in
                 List {
                     Group {
                         Section {
@@ -41,6 +42,7 @@ struct Settings: View {
                                 }
                                 .contentShape(Rectangle())
                             }
+                            Toggle(isOn: $settings.webviewsInline, label: { Text("Open Webviews inline") })
                         }
                     }
 

@@ -8,13 +8,22 @@ struct TransactionsList: View {
 
     var body: some View {
         LazyVStack {
-            ForEach(transactions?.data ?? [], id: \.id) {
-                transactionData in
-                TransactionsRow(transaction: transactionData)
-                    .listRowInsets(EdgeInsets())
-                    .listRowSeparator(.hidden)
+            ForEach(transactions?.data ?? [], id: \.id) { transactionData in
+                TransactionsRow(
+                    transaction: transactionData,
+                    contextEditAction: {
+                        print("Edit transaction: \(transactionData.id ?? "unknown")")
+                        // Add your edit logic here
+                    },
+                    contextDeleteAction: {
+                        print("Delete transaction: \(transactionData.id ?? "unknown")")
+                        // Add your delete logic here
+                    }
+                )
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
             }
-            if hasMorePages || (transactions?.data?.isEmpty == true) {
+            if hasMorePages || (transactions?.data?.isEmpty ?? false) {
                 LoadingSpinner()
                     .onAppear {
                         onLoadMore()
@@ -38,9 +47,38 @@ struct TransactionsRow: View {
     var showDate = true
     var showAccount = true
     var animate = true
+    let contextEditAction: (() -> Void)?
+    let contextDeleteAction: (() -> Void)?
+    var showContextEditAction = true
+    var showContextDeleteAction = true
+    var showContextWebviewAction = true
+
+    init(
+        transaction: TransactionsDatum,
+        showDate: Bool = true,
+        showAccount: Bool = true,
+        animate: Bool = true,
+        contextEditAction: (() -> Void)? = nil,
+        contextDeleteAction: (() -> Void)? = nil,
+        showContextEditAction: Bool = true,
+        showContextDeleteAction: Bool = true,
+        showContextWebviewAction: Bool = true
+    ) {
+        self.transaction = transaction
+        self.showDate = showDate
+        self.showAccount = showAccount
+        self.animate = animate
+        self.contextEditAction = contextEditAction
+        self.contextDeleteAction = contextDeleteAction
+        self.showContextEditAction = showContextEditAction
+        self.showContextDeleteAction = showContextDeleteAction
+        self.showContextWebviewAction = showContextWebviewAction
+    }
 
     @State private var opacity = 1.0
     @State private var showingActionSheet = false
+    @State private var editSheetShown = false
+    @State private var deleteAlertShown = false
 
     var body: some View {
         NavigationLink(
@@ -71,7 +109,6 @@ struct TransactionsRow: View {
                                 symbol: transaction.attributes?.transactions?.first?.currencySymbol
                             )
                         )
-                        .contentTransition(.numericText())
                         .font(.largeTitle)
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
@@ -121,22 +158,38 @@ struct TransactionsRow: View {
                 }
             }
         }
-        // .simultaneousGesture(
-        //     LongPressGesture(minimumDuration: 0.5)
-        //         .onEnded { _ in
-        //             showingActionSheet = true
-        //         }
-        // )
-        // .confirmationDialog("Transaction Options", isPresented: $showingActionSheet) {
-        //     Button("Edit") {
-        //         print("edit")
-        //     }
-        //     Button("Delete") {
-        //         print("delete")
-        //     }
-        // }
         .contextMenu {
-            WebviewButton(url: WebviewPaths.transaction(transaction.id!))
+            if showContextEditAction, let editAction = contextEditAction {
+                Button("Edit", systemImage: "pencil.circle.fill") {
+                    editAction()
+                    editSheetShown = true
+                }
+            }
+
+            if showContextDeleteAction, let deleteAction = contextDeleteAction {
+                Button("Delete", systemImage: "trash.fill", role: .destructive) {
+                    deleteAction()
+                    deleteAlertShown = true
+                }
+            }
+
+            if showContextWebviewAction {
+                WebviewButton(url: WebviewPaths.transaction(transaction.id!))
+            }
+        }
+        .sheet(
+            isPresented: $editSheetShown,
+            content: {
+                TransactionEdit(transactionData: transaction)
+            }
+        )
+        .alert(
+            "Are you sure you want to delete the transaction \(transaction.transactionTitle)?",
+            isPresented: $deleteAlertShown
+        ) {
+            Button("Delete", role: .destructive) {
+                print("Deleting...")
+            }
         }
     }
 

@@ -218,7 +218,7 @@ struct TransactionCreate: View {
                 // currencies = try await fetchCurrenciesAutoComplete()
 
                 // Transactions (for Description Autocomplete)
-//        descriptions = try await fetchTransactionAutocomplete()
+                //        descriptions = try await fetchTransactionAutocomplete()
 
             } catch {
                 print("Error loading categories: \(error)")

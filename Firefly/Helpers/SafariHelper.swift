@@ -2,6 +2,11 @@ import Foundation
 import SafariServices
 import SwiftUI
 
+// MARK: - Settings Access
+
+/// Access app settings via AppSettings.swift
+/// AppSettings uses @AppStorage for automatic UserDefaults persistence
+
 // MARK: - Notifications
 
 let SafariErrorNotification = Notification.Name("SafariErrorNotification")
@@ -26,6 +31,9 @@ func SafariBuilder(apiURL: String, openURL: OpenURLAction) -> Bool {
 
     let fullURLString = baseURL + apiURL
 
+    // Read the webviewsInline setting - automatically synced via @AppStorage
+    let prefersInApp = AppSettings.webviewsInline
+
     guard let url = URL(string: fullURLString) else {
         let errorMessage = "Failed to construct valid URL from: \(fullURLString)"
         NotificationCenter.default.post(
@@ -35,11 +43,7 @@ func SafariBuilder(apiURL: String, openURL: OpenURLAction) -> Bool {
         return false
     }
 
-    openURL(url, prefersInApp: true)
-    NotificationCenter.default.post(
-        name: SafariSuccessNotification, object: nil,
-        userInfo: ["message": "Safari opened successfully"]
-    )
+    openURL(url, prefersInApp: prefersInApp)
     return true
 }
 

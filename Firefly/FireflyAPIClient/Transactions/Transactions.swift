@@ -16,6 +16,23 @@ struct TransactionsDatum: Codable {
     var links: TransactionsDatumLinks?
 }
 
+extension TransactionsDatum {
+    var isSplitTransaction: Bool {
+        (attributes?.transactions?.count ?? 1) > 1
+    }
+
+    var transactionTitle: String {
+        if isSplitTransaction {
+            if let groupTitle = attributes?.groupTitle, !groupTitle.isEmpty {
+                return groupTitle
+            }
+            return "Split Transaction"
+        }
+
+        return attributes?.transactions?.first?.description ?? "Unknown"
+    }
+}
+
 // MARK: - TransactionsAttributes
 
 struct TransactionsAttributes: Codable {
@@ -180,11 +197,11 @@ struct TransactionsPagination: Codable {
 
 class JSONNull: Codable, Hashable {
     static func == (lhs: JSONNull, rhs: JSONNull) -> Bool {
-        return true
+        true
     }
 
     var hashValue: Int {
-        return 0
+        0
     }
 
     init() {}
@@ -211,7 +228,7 @@ class JSONCodingKey: CodingKey {
     let key: String
 
     required init?(intValue: Int) {
-        return nil
+        nil
     }
 
     required init?(stringValue: String) {
@@ -219,11 +236,11 @@ class JSONCodingKey: CodingKey {
     }
 
     var intValue: Int? {
-        return nil
+        nil
     }
 
     var stringValue: String {
-        return key
+        key
     }
 }
 
@@ -508,5 +525,5 @@ struct PostTransactionElement: Codable {
 }
 
 func defaultTransactionData() -> PostTransaction {
-    return PostTransaction(transactions: [PostTransactionElement()])
+    PostTransaction(transactions: [PostTransactionElement()])
 }

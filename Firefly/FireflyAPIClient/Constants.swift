@@ -8,6 +8,7 @@ enum UserDefaultKeys {
     static let apiTokenKey = "APIToken"
     static let baseURLKey = "DefaultURL"
     static let fireWebhooks = "FireWebhooks"
+    static let webviewsInline = "WebviewsInline"
 }
 
 enum ApiPaths {
