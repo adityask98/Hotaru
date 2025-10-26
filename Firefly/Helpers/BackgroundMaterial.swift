@@ -1,10 +1,3 @@
-//
-//  BackgroundMaterial.swift
-//  Wallpaper
-//
-//  Created by Nate de Jager on 2024-01-22.
-//
-
 import SwiftUI
 
 // MARK: - Gradient colors
@@ -24,30 +17,30 @@ private let br = Color("bottom_right")
 // MARK: - Grainy gradient
 
 extension ShapeStyle where Self == AnyShapeStyle {
-  static func grainGradient(time: TimeInterval, gridSize: Int = 3) -> Self {
-    return AnyShapeStyle(
-      ShaderLibrary.default.grainGradient(
-        .boundingRect,
-        .float(3),
-        .float(time),
-        .colorArray([
-          tl, tc, tr,
-          ml, mc, mr,
-          bl, bc, br,
-        ])
-      ))
-  }
+    static func grainGradient(time: TimeInterval, gridSize: Int = 3) -> Self {
+        return AnyShapeStyle(
+            ShaderLibrary.default.grainGradient(
+                .boundingRect,
+                .float(3),
+                .float(time),
+                .colorArray([
+                    tl, tc, tr,
+                    ml, mc, mr,
+                    bl, bc, br,
+                ])
+            ))
+    }
 }
 
 // MARK: - Leather
 
 extension ShapeStyle where Self == AnyShapeStyle {
-  static func leather(lightColor: Color, time: TimeInterval) -> Self {
-    return AnyShapeStyle(
-      ShaderLibrary.default.leather(
-        .boundingRect,
-        .color(lightColor),
-        .float(time)
-      ))
-  }
+    static func leather(lightColor: Color, time: TimeInterval) -> Self {
+        return AnyShapeStyle(
+            ShaderLibrary.default.leather(
+                .boundingRect,
+                .color(lightColor),
+                .float(time)
+            ))
+    }
 }
