@@ -9,7 +9,7 @@ struct FireflyApp: App {
 
     var body: some Scene {
         WindowGroup {
-            Menu()
+            RootView()
                 .preferredColorScheme(colorScheme)
                 .environmentObject(alertViewModel)
                 .environmentObject(menuViewModel)

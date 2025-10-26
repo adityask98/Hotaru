@@ -114,7 +114,7 @@ struct TransactionCreate: View {
                 .safeAreaInset(
                     edge: .bottom,
                     content: {
-                        MasterButton(
+                        PrimaryButton(
                             icon: "plus.circle.fill", label: "Add Transaction", fullWidth: true,
                             disabled: submitIsLoading,
                             action: {

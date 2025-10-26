@@ -97,6 +97,9 @@ struct CategoryItem: View {
                 Rectangle().fill(Color.clear).contentShape(Rectangle())
             }
         }
+        .contextMenu {
+            WebviewButton(url: WebviewPaths.category(category.id!))
+        }
     }
 
     private func totalAmountAndSymbol(for attributes: CategoriesAttributes?) -> (Decimal, String?) {

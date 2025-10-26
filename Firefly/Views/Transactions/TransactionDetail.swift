@@ -2,8 +2,13 @@ import AlertToast
 import SafariServices
 import SwiftUI
 
+// MARK: - Notifications
+
+/// Posts transaction-related notifications that other views can listen for
+/// Notifications defined in: Firefly/Helpers/NotificationConstants.swift
+/// Example: AppNotifications.transactionDeleted
+
 struct TransactionDetail: View {
-    @Environment(\.openURL) var openURL
     @State var transactionID: String
     @StateObject private var viewModel: TransactionDetailViewModel
 
@@ -47,25 +52,15 @@ struct TransactionDetail: View {
         .refreshable {
             await viewModel.refreshTransaction()
         }.toolbar {
-            Button(action: {
-                editSheetShown = true
-            }) {
-                Image(systemName: "pencil.circle.fill")
-
-            }.disabled(viewModel.isLoading)
-            Button {
-                let baseURL: String
-                if let savedBaseURL = UserDefaults.standard.string(forKey: UserDefaultKeys.baseURLKey) {
-                    baseURL = savedBaseURL
-                } else {
-                    baseURL = "https://default.url.com"
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button("Edit", systemImage: "pencil.circle.fill") {
+                        editSheetShown = true
+                    }.disabled(viewModel.isLoading)
+                    WebviewButton(url: WebviewPaths.transaction(viewModel.transactionId))
+                } label: {
+                    Image(systemName: "ellipsis")
                 }
-
-                if let url = URL(string: baseURL + WebviewPaths.transaction(viewModel.transactionId)) {
-                    openURL(url, prefersInApp: true)
-                }
-            } label: {
-                Image(systemName: "safari")
             }
         }
         .alert(
@@ -112,6 +107,10 @@ struct TransactionDetail: View {
                 title: "Transaction deleted successfully"
             )
             showToast = true
+
+            // Post notification to refresh TransactionsView
+            NotificationCenter.default.post(name: AppNotifications.transactionDeleted, object: nil)
+
             doThisAfter(2.0) {
                 // shouldRefresh? = true
                 dismiss()
@@ -178,7 +177,7 @@ struct TransactionBodyView: View {
             }
 
             VStack {
-                MasterButton(
+                PrimaryButton(
                     icon: "trash.fill",
                     label: "Delete Transaction",
                     color: Color.red,

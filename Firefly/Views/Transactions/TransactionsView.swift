@@ -1,5 +1,20 @@
 import SwiftUI
 
+// MARK: - Notification Listeners
+
+/// To listen for and handle transaction events from other views,
+/// add observers here using AppNotifications constants defined in NotificationConstants.swift
+/// Example:
+/// ```
+/// NotificationCenter.default.addObserver(
+///     forName: AppNotifications.transactionDeleted,
+///     object: nil,
+///     queue: .main
+/// ) { _ in
+///     // Handle the notification
+/// }
+/// ```
+
 enum TransactionsFilterType: String {
     case all = "All"
     case withdrawal = "Withdrawal"
@@ -19,6 +34,7 @@ struct TransactionsView: View {
     @EnvironmentObject var menuViewModel: MenuViewModel
 
     var body: some View {
+        let _ = setupNotificationListeners()
         NavigationStack {
             VStack(alignment: .leading, spacing: 0) {
                 filterSection
@@ -154,6 +170,45 @@ struct TransactionsView: View {
         }
         withAnimation {
             filterExpanded = false
+        }
+    }
+
+    // MARK: - Notification Listeners
+
+    /// Sets up notification listeners for transaction events
+    /// Call this in the body to ensure listeners are active whenever the view is rendered
+    private func setupNotificationListeners() {
+        NotificationCenter.default.addObserver(
+            forName: AppNotifications.transactionDeleted,
+            object: nil,
+            queue: .main
+        ) { _ in
+            // Silent refresh when a transaction is deleted
+            Task {
+                await transactions.fetchTransactions()
+            }
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: AppNotifications.transactionCreated,
+            object: nil,
+            queue: .main
+        ) { _ in
+            // Refresh transactions when a new one is created
+            Task {
+                await transactions.fetchTransactions()
+            }
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: AppNotifications.transactionUpdated,
+            object: nil,
+            queue: .main
+        ) { _ in
+            // Refresh transactions when one is updated
+            Task {
+                await transactions.fetchTransactions()
+            }
         }
     }
 }

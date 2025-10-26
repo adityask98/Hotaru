@@ -71,6 +71,7 @@ struct TransactionsRow: View {
                                 symbol: transaction.attributes?.transactions?.first?.currencySymbol
                             )
                         )
+                        .contentTransition(.numericText())
                         .font(.largeTitle)
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
@@ -120,19 +121,22 @@ struct TransactionsRow: View {
                 }
             }
         }
-        .simultaneousGesture(
-            LongPressGesture(minimumDuration: 0.5)
-                .onEnded { _ in
-                    showingActionSheet = true
-                }
-        )
-        .confirmationDialog("Transaction Options", isPresented: $showingActionSheet) {
-            Button("Edit") {
-                print("edit")
-            }
-            Button("Delete") {
-                print("delete")
-            }
+        // .simultaneousGesture(
+        //     LongPressGesture(minimumDuration: 0.5)
+        //         .onEnded { _ in
+        //             showingActionSheet = true
+        //         }
+        // )
+        // .confirmationDialog("Transaction Options", isPresented: $showingActionSheet) {
+        //     Button("Edit") {
+        //         print("edit")
+        //     }
+        //     Button("Delete") {
+        //         print("delete")
+        //     }
+        // }
+        .contextMenu {
+            WebviewButton(url: WebviewPaths.transaction(transaction.id!))
         }
     }
 

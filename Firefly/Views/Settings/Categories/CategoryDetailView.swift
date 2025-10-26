@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CategoryDetailView: View {
     @State var category: CategoriesDatum?
+    @Environment(\.openURL) var openURL
     @StateObject private var viewModel: CategoryDetailViewModel
 
     init(category: CategoriesDatum? = nil) {
@@ -44,6 +45,19 @@ struct CategoryDetailView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(category?.attributes?.name ?? "Unknown Category")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button("Open Webview", systemImage: "safari") {
+                        if let categoryID = category?.id {
+                            SafariBuilder(apiURL: WebviewPaths.category(categoryID), openURL: openURL)
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                }
+            }
+        }
     }
 }
 

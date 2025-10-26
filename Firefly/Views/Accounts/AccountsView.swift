@@ -30,14 +30,6 @@ struct AccountsView: View {
                 }
             }
             .navigationTitle(Text("Accounts"))
-            //      .toolbar {
-            //        Button(action: { accounts.toggleAmountVisibility() }) {
-            //          Image(systemName: accounts.amountHidden ? "eye.slash.fill" : "eye.fill")
-            //            .contentTransition(.symbolEffect(.automatic))
-            //            .padding(6)
-            //            .fontWeight(.heavy)
-            //        }
-            //      }
             .overlay(
                 alignment: .bottomTrailing,
                 content: {
@@ -118,6 +110,9 @@ struct AccountItem: View {
                     .fill(Color.clear)
                     .contentShape(Rectangle())
             }
+        }
+        .contextMenu {
+            WebviewButton(url: WebviewPaths.account(account.id!))
         }
     }
 

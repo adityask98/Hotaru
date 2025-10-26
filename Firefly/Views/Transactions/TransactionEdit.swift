@@ -209,7 +209,7 @@ struct TransactionEdit: View {
             .safeAreaInset(
                 edge: .bottom,
                 content: {
-                    MasterButton(
+                    PrimaryButton(
                         icon: "square.and.pencil", label: "Edit Transaction", fullWidth: true,
                         disabled: submitLoading,
                         action: {

@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct MasterButton: View {
+struct PrimaryButton: View {
     var icon: String?
     var label: String? = ""
     var textSize: CGFloat = 16
@@ -49,7 +49,7 @@ struct MasterButton: View {
 
 #Preview {
     @Previewable @State var loading = false
-    MasterButton(
+    PrimaryButton(
         icon: "square.and.pencil", label: "Edit Transaction", disabled: false, loading: loading,
         action: { loading.toggle() }
     )
