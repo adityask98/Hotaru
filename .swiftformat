@@ -1,0 +1,159 @@
+# SwiftFormat Configuration for Hotaru
+# https://github.com/nicklockwood/SwiftFormat
+
+# Version
+--swiftversion 5.0
+
+# File options
+--exclude Pods,Firefly.xcodeproj,Firefly.xcworkspace,.build,DerivedData,"Firefly/Preview Content"
+
+# Format options
+
+# Indentation
+--indent 4
+--indentcase false
+--tabwidth 4
+--smarttabs enabled
+--xcodeindentation enabled
+
+# Wrapping
+--maxwidth 120
+--wraparguments before-first
+--wrapcollections before-first
+--wrapparameters before-first
+--closingparen balanced
+
+# Spacing
+--trimwhitespace always
+--commas always
+--decimalgrouping 3,4
+--exponentgrouping disabled
+--fractiongrouping disabled
+--hexgrouping 4,8
+--hexliteralcase lowercase
+--octalgrouping 4,8
+--binarygrouping 4,8
+
+# Braces
+--allman false
+--elseposition same-line
+--guardelse same-line
+
+# Line breaks
+--emptybraces no-space
+--linebreaks lf
+
+# Redundancy
+--redundanttype inferred
+
+# Blank lines
+--enable blankLinesBetweenScopes
+--enable blankLinesAtStartOfScope
+--enable blankLinesAtEndOfScope
+--enable blankLinesAroundMark
+
+# Organization
+--typeattributes prev-line
+--funcattributes prev-line
+--varattributes prev-line
+--storedvarattributes same-line
+--computedvarattributes prev-line
+
+# Whitespace
+--operatorfunc spaced
+--nospaceoperators ..,..<
+--ranges spaced
+
+# Imports
+--importgrouping testable-bottom
+
+# Control flow
+--extensionacl on-extension
+--patternlet inline
+--self remove
+--selfrequired @autoclosure,@escaping
+
+# Wrapping and alignment
+--wrapconditions preserve
+--wrapternary default
+
+# Other
+--modifierorder private,fileprivate,internal,public,open,override,convenience,required,static,class,final,lazy,weak,unowned
+--stripunusedargs closure-only
+--header strip
+
+# Enable/Disable specific rules
+
+# Enabled rules
+--enable andOperator
+--enable anyObjectProtocol
+--enable blankLinesAroundMark
+--enable blankLinesAtEndOfScope
+--enable blankLinesAtStartOfScope
+--enable blankLinesBetweenScopes
+--enable braces
+--enable consecutiveBlankLines
+--enable consecutiveSpaces
+--enable duplicateImports
+--enable elseOnSameLine
+--enable emptyBraces
+--enable enumNamespaces
+--enable extensionAccessControl
+--enable hoistPatternLet
+--enable indent
+--enable initCoderUnavailable
+--enable leadingDelimiters
+--enable linebreakAtEndOfFile
+--enable linebreaks
+--enable modifierOrder
+--enable numberFormatting
+--enable preferKeyPath
+--enable redundantBreak
+--enable redundantExtensionACL
+--enable redundantFileprivate
+--enable redundantGet
+--enable redundantInit
+--enable redundantLet
+--enable redundantLetError
+--enable redundantNilInit
+--enable redundantObjc
+--enable redundantParens
+--enable redundantPattern
+--enable redundantRawValues
+--enable redundantReturn
+--enable redundantSelf
+--enable redundantType
+--enable redundantVoidReturnType
+--enable semicolons
+--enable sortedImports
+--enable sortedSwitchCases
+--enable spaceAroundBraces
+--enable spaceAroundBrackets
+--enable spaceAroundComments
+--enable spaceAroundGenerics
+--enable spaceAroundOperators
+--enable spaceAroundParens
+--enable spaceInsideBraces
+--enable spaceInsideBrackets
+--enable spaceInsideComments
+--enable spaceInsideGenerics
+--enable spaceInsideParens
+--enable strongOutlets
+--enable strongifiedSelf
+--enable todos
+--enable trailingClosures
+--enable trailingCommas
+--enable trailingSpace
+--enable typeSugar
+--enable unusedArguments
+--enable void
+--enable wrap
+--enable wrapArguments
+--enable wrapAttributes
+--enable yodaConditions
+
+# Disabled rules (optional, can be enabled later)
+--disable isEmpty
+--disable wrapMultilineStatementBraces
+--disable wrapSwitchCases
+--disable wrapEnumCases

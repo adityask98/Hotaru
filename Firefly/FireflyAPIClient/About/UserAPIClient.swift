@@ -5,10 +5,10 @@
 ////  Created by Aditya Srinivasa on 2023/10/09.
 ////
 //
-//import Alamofire
-//import Foundation
+// import Alamofire
+// import Foundation
 //
-//class UserAPIClient: ObservableObject {
+// class UserAPIClient: ObservableObject {
 //    @Published private(set) var user: UserData?
 //
 //    func fetchData() async {
@@ -35,19 +35,19 @@
 //            }
 //
 //    }
-//}
+// }
 //
 //// Transitioning to URLSession
 //
 ////import Foundation
 //
-//enum DataError: Error {
+// enum DataError: Error {
 //    case invalidData
 //    case invalidResponse
 //    case message(_ error: Error?)
-//}
+// }
 //
-//class TempUserAPIClient {
+// class TempUserAPIClient {
 //
 //    let defaultURL = UserDefaults.standard.object(forKey: "DefaultURL")
 //    static let shared = TempUserAPIClient()
@@ -63,4 +63,4 @@
 //            }
 //        }
 //    }
-//}
+// }
