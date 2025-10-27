@@ -118,7 +118,7 @@ struct TransactionsRow: View {
                         Spacer()
 
                         // In case of split Transaction
-                        if isSplitTransaction(transaction) {
+                        if transaction.isSplitTransaction {
                             if showAccount {
                                 SplitBadge()
                             }
@@ -141,11 +141,11 @@ struct TransactionsRow: View {
                     }
                 }
                 .padding(.horizontal, 8)
-                .padding(.vertical, 8) // Add padding inside the HStack
+                .padding(.vertical, 8)  // Add padding inside the HStack
             }
-            .background(.ultraThinMaterial) // Add a background color if needed
-            .cornerRadius(12) // Round the corners
-            .padding(.horizontal) // Add horizontal padding to the entire row
+            .background(.ultraThinMaterial)  // Add a background color if needed
+            .cornerRadius(12)  // Round the corners
+            .padding(.horizontal)  // Add horizontal padding to the entire row
             .padding(.vertical, 2)
         }
         .buttonStyle(PlainButtonStyle())
@@ -196,7 +196,8 @@ struct TransactionsRow: View {
     // date formatter specific to this View
     private func formatDate(_ dateString: String?) -> String {
         guard let dateString = dateString,
-              let date = ISO8601DateFormatter().date(from: dateString) else {
+            let date = ISO8601DateFormatter().date(from: dateString)
+        else {
             return "Unknown Date"
         }
 
@@ -209,7 +210,7 @@ struct TransactionsRow: View {
 
         if calendar.isDate(date, equalTo: now, toGranularity: .weekOfYear) {
             let formatter = DateFormatter()
-            formatter.dateFormat = "EEEE" // Full name of the day
+            formatter.dateFormat = "EEEE"  // Full name of the day
             return formatter.string(from: date)
         } else {
             let formatter = DateFormatter()

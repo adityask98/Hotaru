@@ -152,7 +152,7 @@ struct TransactionBodyView: View {
             TransactionInfoCard(transaction: transaction.data!)
 
             // Split transactions if any
-            if isSplitTransaction(transaction.data!) {
+            if transaction.data!.isSplitTransaction {
                 if let transactions = transaction.data?.attributes?.transactions {
                     ForEach(
                         Array(transactions.enumerated()), id: \.element.transactionJournalID
@@ -257,7 +257,7 @@ struct TransactionDetailHeader: View {
             VStack(alignment: .leading) {
                 HStack {
                     Text(transactionMainTitle(data))
-                    if isSplitTransaction(data) {
+                    if data.isSplitTransaction {
                         SplitBadge()
                     }
                 }
@@ -328,7 +328,7 @@ struct TransactionInfoCard: View {
             AccountsSection(transaction: transaction)
             Divider()
             // Category/Budget section
-            if !isSplitTransaction(transaction) {
+            if transaction.isSplitTransaction {
                 CategorySection(transaction: transaction)
             }
         }
@@ -344,7 +344,7 @@ struct AmountSection: View {
     var body: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading) {
-                if isSplitTransaction(transaction) {
+                if transaction.isSplitTransaction {
                     Text("Total Amount")
                 } else {
                     Text("Amount").font(.title3)

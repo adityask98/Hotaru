@@ -23,16 +23,16 @@ func formatAmount(_ amount: Decimal) -> String {
 
 // Check if a transaction is a split transaction by counting the number of attributes.transactions
 func isSplitTransaction(_ transaction: TransactionsDatum) -> Bool {
-    return transaction.attributes?.transactions?.count ?? 1 > 1
+    transaction.attributes?.transactions?.count ?? 1 > 1
 }
 
 func isSplitTransaction(_ postTransaction: PostTransaction) -> Bool {
-    return postTransaction.transactions?.count ?? 1 > 1
+    postTransaction.transactions?.count ?? 1 > 1
 }
 
 // Title for the transaction.
 func transactionMainTitle(_ transaction: TransactionsDatum) -> String {
-    if isSplitTransaction(transaction) {
+    if transaction.isSplitTransaction {
         if let groupTitle = transaction.attributes?.groupTitle, !groupTitle.isEmpty {
             return groupTitle
         }
