@@ -18,6 +18,12 @@ struct TransactionsList: View {
                     contextDeleteAction: {
                         print("Delete transaction: \(transactionData.id ?? "unknown")")
                         // Add your delete logic here
+                    },
+                    contextCloneAction: {
+                        print("Clone and Save")
+                    },
+                    contextCloneAndEditAction: {
+                        print("Clone and Edit")
                     }
                 )
                 .listRowInsets(EdgeInsets())
@@ -49,6 +55,8 @@ struct TransactionsRow: View {
     var animate = true
     let contextEditAction: (() -> Void)?
     let contextDeleteAction: (() -> Void)?
+    let contextCloneAction: (() -> Void)?
+    let contextCloneAndEditAction: (() -> Void)?
     var showContextEditAction = true
     var showContextDeleteAction = true
     var showContextWebviewAction = true
@@ -60,6 +68,8 @@ struct TransactionsRow: View {
         animate: Bool = true,
         contextEditAction: (() -> Void)? = nil,
         contextDeleteAction: (() -> Void)? = nil,
+        contextCloneAction: (() -> Void)? = nil,
+        contextCloneAndEditAction: (() -> Void)? = nil,
         showContextEditAction: Bool = true,
         showContextDeleteAction: Bool = true,
         showContextWebviewAction: Bool = true
@@ -70,6 +80,8 @@ struct TransactionsRow: View {
         self.animate = animate
         self.contextEditAction = contextEditAction
         self.contextDeleteAction = contextDeleteAction
+        self.contextCloneAction = contextCloneAction
+        self.contextCloneAndEditAction = contextCloneAndEditAction
         self.showContextEditAction = showContextEditAction
         self.showContextDeleteAction = showContextDeleteAction
         self.showContextWebviewAction = showContextWebviewAction
@@ -141,11 +153,11 @@ struct TransactionsRow: View {
                     }
                 }
                 .padding(.horizontal, 8)
-                .padding(.vertical, 8)  // Add padding inside the HStack
+                .padding(.vertical, 8) // Add padding inside the HStack
             }
-            .background(.ultraThinMaterial)  // Add a background color if needed
-            .cornerRadius(12)  // Round the corners
-            .padding(.horizontal)  // Add horizontal padding to the entire row
+            .background(.ultraThinMaterial) // Add a background color if needed
+            .cornerRadius(12) // Round the corners
+            .padding(.horizontal) // Add horizontal padding to the entire row
             .padding(.vertical, 2)
         }
         .buttonStyle(PlainButtonStyle())
@@ -176,6 +188,23 @@ struct TransactionsRow: View {
             if showContextWebviewAction {
                 WebviewButton(url: WebviewPaths.transaction(transaction.id!))
             }
+
+            if contextCloneAction != nil || contextCloneAndEditAction != nil {
+                Menu {
+                    if contextCloneAction != nil {
+                        Button("Clone and Save", systemImage: "document.on.document.fill") {
+                            contextCloneAction!()
+                        }
+                    }
+                    if contextCloneAndEditAction != nil {
+                        Button("Clone and Edit", systemImage: "long.text.page.and.pencil.fill") {
+                            contextCloneAndEditAction!()
+                        }
+                    }
+                } label: {
+                    Label("Clone", systemImage: "document.on.document.fill")
+                }
+            }
         }
         .sheet(
             isPresented: $editSheetShown,
@@ -196,8 +225,7 @@ struct TransactionsRow: View {
     // date formatter specific to this View
     private func formatDate(_ dateString: String?) -> String {
         guard let dateString = dateString,
-            let date = ISO8601DateFormatter().date(from: dateString)
-        else {
+              let date = ISO8601DateFormatter().date(from: dateString) else {
             return "Unknown Date"
         }
 
@@ -210,7 +238,7 @@ struct TransactionsRow: View {
 
         if calendar.isDate(date, equalTo: now, toGranularity: .weekOfYear) {
             let formatter = DateFormatter()
-            formatter.dateFormat = "EEEE"  // Full name of the day
+            formatter.dateFormat = "EEEE" // Full name of the day
             return formatter.string(from: date)
         } else {
             let formatter = DateFormatter()

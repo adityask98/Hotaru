@@ -50,37 +50,37 @@ struct RootView: View {
                 }
             }
         )
-        .searchable(text: $searchText, prompt: "Search transactions")
+        // .searchable(text: $searchText, prompt: "Search transactions")
         //    .tabBarMinimizeBehavior(.onScrollDown)
         .sheet(isPresented: $tokenSheetShown) {
-            TokenSettings().environmentObject(AlertViewModel())
-        }
-        .sheet(isPresented: $menuViewModel.transactionSheetShown) {
-            TransactionCreate(shouldRefresh: $shouldRefresh).background(.ultraThinMaterial)
-        }
-        //    .sheet(isPresented: $menuViewModel.searchSheetShown) {
-        //      SearchPage()
-        //    }
-        .sheet(isPresented: $menuViewModel.transactionAddSheetShown) {
-            TransactionAdd()
-        }
-        .onContinueUserActivity("addTransaction") { _ in
-            print("Add transactions shortcut")
-            menuViewModel.openTransactionSheet()
-        }
+                TokenSettings().environmentObject(AlertViewModel())
+            }
+            .sheet(isPresented: $menuViewModel.transactionSheetShown) {
+                TransactionCreate(shouldRefresh: $shouldRefresh).background(.ultraThinMaterial)
+            }
+            //    .sheet(isPresented: $menuViewModel.searchSheetShown) {
+            //      SearchPage()
+            //    }
+            .sheet(isPresented: $menuViewModel.transactionAddSheetShown) {
+                TransactionAdd()
+            }
+            .onContinueUserActivity("addTransaction") { _ in
+                print("Add transactions shortcut")
+                menuViewModel.openTransactionSheet()
+            }
 
-        .task {
-            if !hasCheckedToken {
-                do {
-                    try await checkToken()
-                } catch {
-                    tokenSheetShown = true
+            .task {
+                if !hasCheckedToken {
+                    do {
+                        try await checkToken()
+                    } catch {
+                        tokenSheetShown = true
+                    }
                 }
             }
-        }
 
-        .transition(.opacity)
-        .ignoresSafeArea(.all)
+            .transition(.opacity)
+            .ignoresSafeArea(.all)
     }
 
     private func checkToken() async throws {

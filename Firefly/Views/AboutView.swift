@@ -4,32 +4,18 @@ struct AboutView: View {
     @ObservedObject private var user = UserModel()
     @State private var transactions = TransactionsViewModel()
     @EnvironmentObject var menuViewModel: MenuViewModel
+    @State private var refreshTrigger = UUID()
+
     var body: some View {
         NavigationView {
-            VStack(alignment: .leading) {
-                //                List {
-                //                    HStack {
-                //                        Text("Email:")
-                //                        Spacer()
-                //                        Text(user.user?.data?.attributes?.email ?? "Email Placeholder")
-                //                    }
-                //                    NavigationLink(destination: TokenSettings()) {
-                //                        Text("Token")
-                //                    }
-                //
-                //                }
-                //                .refreshable {
-                //                    do {
-                //                        print("Refreshing")
-                //                        print(user.user?.data?.attributes?.email ?? "Nothing")
-                //                        try await user.getUser()
-                //                    } catch {
-                //                        print(error)
-                //                    }
-                //                }
-                CategoriesDonut()
-                // .frame(height: 300)
-                Spacer()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    CategoriesBarChart(refreshTrigger: refreshTrigger)
+                    CategoriesDonut(refreshTrigger: refreshTrigger)
+                }
+            }
+            .refreshable {
+                await refreshAllData()
             }
 
             // .frame(width: .infinity, height: .infinity)
@@ -61,6 +47,15 @@ struct AboutView: View {
             })
         }
         .background(.ultraThinMaterial)
+    }
+
+    private func refreshAllData() async {
+        refreshTrigger = UUID()
+        do {
+            try await user.getUser()
+        } catch {
+            print(error)
+        }
     }
 }
 
