@@ -1,22 +1,22 @@
 import AlertToast
 import SwiftUI
 
-struct Menu: View {
+struct RootView: View {
     //  init() {
-//    let appearance = UITabBarAppearance()
-//    appearance.configureWithTransparentBackground()
-//
-//    // If you want a blur effect
-//    appearance.backgroundEffect = UIBlurEffect(style: .systemThinMaterial)
-//
-//    // Customize the color to make it more or less translucent
-//    appearance.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.5)
-//
-//    // Use this appearance for both standard and scrolled content
-//    UITabBar.appearance().standardAppearance = appearance
-//    if #available(iOS 15.0, *) {
-//      UITabBar.appearance().scrollEdgeAppearance = appearance
-//    }
+    //    let appearance = UITabBarAppearance()
+    //    appearance.configureWithTransparentBackground()
+    //
+    //    // If you want a blur effect
+    //    appearance.backgroundEffect = UIBlurEffect(style: .systemThinMaterial)
+    //
+    //    // Customize the color to make it more or less translucent
+    //    appearance.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.5)
+    //
+    //    // Use this appearance for both standard and scrolled content
+    //    UITabBar.appearance().standardAppearance = appearance
+    //    if #available(iOS 15.0, *) {
+    //      UITabBar.appearance().scrollEdgeAppearance = appearance
+    //    }
     //  }
 
     @EnvironmentObject private var alertViewModel: AlertViewModel
@@ -50,37 +50,37 @@ struct Menu: View {
                 }
             }
         )
-        .searchable(text: $searchText, prompt: "Search transactions")
+        // .searchable(text: $searchText, prompt: "Search transactions")
         //    .tabBarMinimizeBehavior(.onScrollDown)
         .sheet(isPresented: $tokenSheetShown) {
-            TokenSettings().environmentObject(AlertViewModel())
-        }
-        .sheet(isPresented: $menuViewModel.transactionSheetShown) {
-            TransactionCreate(shouldRefresh: $shouldRefresh).background(.ultraThinMaterial)
-        }
-//    .sheet(isPresented: $menuViewModel.searchSheetShown) {
-//      SearchPage()
-//    }
-        .sheet(isPresented: $menuViewModel.transactionAddSheetShown) {
-            TransactionAdd()
-        }
-        .onContinueUserActivity("addTransaction") { _ in
-            print("Add transactions shortcut")
-            menuViewModel.openTransactionSheet()
-        }
+                TokenSettings().environmentObject(AlertViewModel())
+            }
+            .sheet(isPresented: $menuViewModel.transactionSheetShown) {
+                TransactionCreate(shouldRefresh: $shouldRefresh).background(.ultraThinMaterial)
+            }
+            //    .sheet(isPresented: $menuViewModel.searchSheetShown) {
+            //      SearchPage()
+            //    }
+            .sheet(isPresented: $menuViewModel.transactionAddSheetShown) {
+                TransactionAdd()
+            }
+            .onContinueUserActivity("addTransaction") { _ in
+                print("Add transactions shortcut")
+                menuViewModel.openTransactionSheet()
+            }
 
-        .task {
-            if !hasCheckedToken {
-                do {
-                    try await checkToken()
-                } catch {
-                    tokenSheetShown = true
+            .task {
+                if !hasCheckedToken {
+                    do {
+                        try await checkToken()
+                    } catch {
+                        tokenSheetShown = true
+                    }
                 }
             }
-        }
 
-        .transition(.opacity)
-        .ignoresSafeArea(.all)
+            .transition(.opacity)
+            .ignoresSafeArea(.all)
     }
 
     private func checkToken() async throws {

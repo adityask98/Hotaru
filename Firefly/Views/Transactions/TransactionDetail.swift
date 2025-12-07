@@ -2,8 +2,13 @@ import AlertToast
 import SafariServices
 import SwiftUI
 
+// MARK: - Notifications
+
+/// Posts transaction-related notifications that other views can listen for
+/// Notifications defined in: Firefly/Helpers/NotificationConstants.swift
+/// Example: AppNotifications.transactionDeleted
+
 struct TransactionDetail: View {
-    @Environment(\.openURL) var openURL
     @State var transactionID: String
     @StateObject private var viewModel: TransactionDetailViewModel
 
@@ -47,25 +52,15 @@ struct TransactionDetail: View {
         .refreshable {
             await viewModel.refreshTransaction()
         }.toolbar {
-            Button(action: {
-                editSheetShown = true
-            }) {
-                Image(systemName: "pencil.circle.fill")
-
-            }.disabled(viewModel.isLoading)
-            Button {
-                let baseURL: String
-                if let savedBaseURL = UserDefaults.standard.string(forKey: UserDefaultKeys.baseURLKey) {
-                    baseURL = savedBaseURL
-                } else {
-                    baseURL = "https://default.url.com"
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button("Edit", systemImage: "pencil.circle.fill") {
+                        editSheetShown = true
+                    }.disabled(viewModel.isLoading)
+                    WebviewButton(url: WebviewPaths.transaction(viewModel.transactionId))
+                } label: {
+                    Image(systemName: "ellipsis")
                 }
-
-                if let url = URL(string: baseURL + WebviewPaths.transaction(viewModel.transactionId)) {
-                    openURL(url, prefersInApp: true)
-                }
-            } label: {
-                Image(systemName: "safari")
             }
         }
         .alert(
@@ -112,10 +107,11 @@ struct TransactionDetail: View {
                 title: "Transaction deleted successfully"
             )
             showToast = true
-            doThisAfter(2.0) {
-                // shouldRefresh? = true
-                dismiss()
-            }
+
+            // Post notification to refresh TransactionsView
+            NotificationCenter.default.post(name: AppNotifications.transactionDeleted, object: nil)
+
+            dismiss()
         } catch {
             toastParams = AlertToast(
                 displayMode: .alert,
@@ -156,7 +152,7 @@ struct TransactionBodyView: View {
             TransactionInfoCard(transaction: transaction.data!)
 
             // Split transactions if any
-            if isSplitTransaction(transaction.data!) {
+            if transaction.data!.isSplitTransaction {
                 if let transactions = transaction.data?.attributes?.transactions {
                     ForEach(
                         Array(transactions.enumerated()), id: \.element.transactionJournalID
@@ -178,7 +174,7 @@ struct TransactionBodyView: View {
             }
 
             VStack {
-                MasterButton(
+                PrimaryButton(
                     icon: "trash.fill",
                     label: "Delete Transaction",
                     color: Color.red,
@@ -261,7 +257,7 @@ struct TransactionDetailHeader: View {
             VStack(alignment: .leading) {
                 HStack {
                     Text(transactionMainTitle(data))
-                    if isSplitTransaction(data) {
+                    if data.isSplitTransaction {
                         SplitBadge()
                     }
                 }
@@ -332,7 +328,7 @@ struct TransactionInfoCard: View {
             AccountsSection(transaction: transaction)
             Divider()
             // Category/Budget section
-            if !isSplitTransaction(transaction) {
+            if transaction.isSplitTransaction {
                 CategorySection(transaction: transaction)
             }
         }
@@ -348,7 +344,7 @@ struct AmountSection: View {
     var body: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading) {
-                if isSplitTransaction(transaction) {
+                if transaction.isSplitTransaction {
                     Text("Total Amount")
                 } else {
                     Text("Amount").font(.title3)

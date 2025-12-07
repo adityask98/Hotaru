@@ -8,6 +8,7 @@ enum UserDefaultKeys {
     static let apiTokenKey = "APIToken"
     static let baseURLKey = "DefaultURL"
     static let fireWebhooks = "FireWebhooks"
+    static let webviewsInline = "WebviewsInline"
 }
 
 enum ApiPaths {
@@ -17,24 +18,24 @@ enum ApiPaths {
     static let accounts = "api/v1/accounts"
     static let categories = "api/v1/categories"
     static func account(_ id: String) -> String {
-        return "api/v1/accounts/\(id)"
+        "api/v1/accounts/\(id)"
     }
 
     static func accountTransactions(_ id: String) -> String {
-        return "api/v1/accounts/\(id)/transactions"
+        "api/v1/accounts/\(id)/transactions"
     }
 
     static let charts = "api/v1/chart/account/overview"
     static func transaction(_ id: String) -> String {
-        return "api/v1/transactions/\(id)"
+        "api/v1/transactions/\(id)"
     }
 
     static func category(_ id: String) -> String {
-        return "api/v1/categories/\(id)"
+        "api/v1/categories/\(id)"
     }
 
     static func categoryTransactions(_ id: String) -> String {
-        return "api/v1/categories/\(id)/transactions"
+        "api/v1/categories/\(id)/transactions"
     }
 
     static let searchTransactions = "api/v1/search/transactions"
@@ -47,7 +48,7 @@ enum PostApiPaths {
 
 enum PutApiPaths {
     static func editTransaction(_ id: String) -> String {
-        return "api/v1/transactions/\(id)"
+        "api/v1/transactions/\(id)"
     }
 }
 
@@ -74,6 +75,14 @@ enum ChartsApiPaths {
 
 enum WebviewPaths {
     static func transaction(_ id: String) -> String {
-        return "transactions/show/\(id)"
+        "transactions/show/\(id)"
+    }
+
+    static func account(_ id: String) -> String {
+        "accounts/show/\(id)"
+    }
+
+    static func category(_ id: String) -> String {
+        "categories/show/\(id)"
     }
 }

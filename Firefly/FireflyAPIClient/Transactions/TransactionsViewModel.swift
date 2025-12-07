@@ -78,7 +78,7 @@ final class TransactionsViewModel: ObservableObject {
         }
     }
 
-    func getTransactions( 
+    func getTransactions(
         limit: Int = 20,
         type: String = "all",
         startDate: String,

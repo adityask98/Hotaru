@@ -3,6 +3,7 @@ import SwiftUI
 struct AccountDetail: View {
     @State var account: AccountsDatum
     @StateObject private var viewModel: AccountDetailViewModel
+    @Environment(\.openURL) var openURL
 
     init(account: AccountsDatum) {
         _account = .init(initialValue: account)
@@ -68,6 +69,17 @@ struct AccountDetail: View {
                 VStack {
                     Text(account.attributes?.name ?? "Unknown").font(.headline)
                     Text("Asset Account")
+                }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button("Open Webview", systemImage: "safari") {
+                        if let accountID = account.id {
+                            SafariBuilder(apiURL: WebviewPaths.account(accountID), openURL: openURL)
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
                 }
             }
         }
@@ -152,6 +164,6 @@ struct NotesDisplayField: View {
 }
 
 //
-////#Preview {
+//// #Preview {
 ////    AccountDetail()
-////}
+//// }

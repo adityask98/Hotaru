@@ -24,7 +24,6 @@ disabled_rules:
 # Opt-in rules (not enabled by default)
 opt_in_rules:
   - array_init
-  - attributes
   - closure_end_indentation
   - closure_spacing
   - collection_alignment
