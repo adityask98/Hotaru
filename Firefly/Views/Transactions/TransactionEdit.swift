@@ -12,6 +12,7 @@ struct TransactionEdit: View {
     @State private var categories = ["Default"]
     @State private var descriptions = AutoTransactions()
     @State private var accounts = AutoAccounts()
+    @State private var budgets = AutoBudget()
 
     // Toasts and UIControllers
     @State private var submitLoading = false
@@ -165,13 +166,29 @@ struct TransactionEdit: View {
                                     Text(category).tag(category)
                                 }
                             }
+
+                            Picker(
+                                "Budget",
+                                selection: Binding(
+                                    get: { postTransactionData.transactions?[index].budgetID },
+                                    set: { newValue in
+                                        postTransactionData.transactions?[index].budgetID = newValue
+                                    }
+                                )
+                            ) {
+                                Text("No Budget").tag(nil as String?)
+                                ForEach(budgets, id: \.id) { budget in
+                                    Text(budget.name ?? "Unnamed Budget")
+                                        .tag(budget.id as String?)
+                                }
+                            }
                         }
 
                         DatePicker(
                             "Date",
                             selection: Binding(
                                 get: {
-                                    formatDateFromJSON(transaction.date ?? "")
+                                    formatDateFromJSON(postTransactionData.transactions?[index].date ?? "")
                                 },
                                 set: { newValue in
                                     let dateFormatter = DateFormatter()
@@ -186,16 +203,13 @@ struct TransactionEdit: View {
                             "Notes",
                             text: Binding(
                                 get: {
-                                    transaction.notes ?? ""
+                                    postTransactionData.transactions?[index].notes ?? ""
                                 },
                                 set: { newValue in
                                     postTransactionData.transactions?[index].notes = newValue
                                 }
                             ), axis: .vertical
                         ).lineLimit(5)
-
-                        // TODO: add category button
-                        // TODO: budget select
 
                     } header: {
                         HStack {
@@ -249,6 +263,8 @@ struct TransactionEdit: View {
                 descriptions = try await fetchTransactionAutocomplete()
                 // Accounts
                 accounts = try await fetchAccountsAutocomplete()
+                // Budgets
+                budgets = try await fetchBudgetsAutocomplete()
                 autocompleteLoading = false
             } catch {
                 print("Error: \(error)")

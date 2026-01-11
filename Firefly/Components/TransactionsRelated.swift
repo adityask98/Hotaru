@@ -5,12 +5,14 @@ struct TransactionsList: View {
     var hasMorePages: Bool
     let onLoadMore: () -> Void
     @State private var opacity = 0.1
+    @Binding var shouldRefresh: Bool?
 
     var body: some View {
         LazyVStack {
             ForEach(transactions?.data ?? [], id: \.id) { transactionData in
                 TransactionsRow(
                     transaction: transactionData,
+                    shouldRefresh: $shouldRefresh,
                     contextEditAction: {
                         print("Edit transaction: \(transactionData.id ?? "unknown")")
                         // Add your edit logic here
@@ -18,12 +20,6 @@ struct TransactionsList: View {
                     contextDeleteAction: {
                         print("Delete transaction: \(transactionData.id ?? "unknown")")
                         // Add your delete logic here
-                    },
-                    contextCloneAction: {
-                        print("Clone and Save")
-                    },
-                    contextCloneAndEditAction: {
-                        print("Clone and Edit")
                     }
                 )
                 .listRowInsets(EdgeInsets())
@@ -49,39 +45,36 @@ struct TransactionsList: View {
 
 struct TransactionsRow: View {
     var transaction: TransactionsDatum
+    @Binding var shouldRefresh: Bool?
     @State private var isActiveNav = true
     var showDate = true
     var showAccount = true
     var animate = true
     let contextEditAction: (() -> Void)?
     let contextDeleteAction: (() -> Void)?
-    let contextCloneAction: (() -> Void)?
-    let contextCloneAndEditAction: (() -> Void)?
     var showContextEditAction = true
     var showContextDeleteAction = true
     var showContextWebviewAction = true
 
     init(
         transaction: TransactionsDatum,
+        shouldRefresh: Binding<Bool?>,
         showDate: Bool = true,
         showAccount: Bool = true,
         animate: Bool = true,
         contextEditAction: (() -> Void)? = nil,
         contextDeleteAction: (() -> Void)? = nil,
-        contextCloneAction: (() -> Void)? = nil,
-        contextCloneAndEditAction: (() -> Void)? = nil,
         showContextEditAction: Bool = true,
         showContextDeleteAction: Bool = true,
         showContextWebviewAction: Bool = true
     ) {
         self.transaction = transaction
+        _shouldRefresh = shouldRefresh
         self.showDate = showDate
         self.showAccount = showAccount
         self.animate = animate
         self.contextEditAction = contextEditAction
         self.contextDeleteAction = contextDeleteAction
-        self.contextCloneAction = contextCloneAction
-        self.contextCloneAndEditAction = contextCloneAndEditAction
         self.showContextEditAction = showContextEditAction
         self.showContextDeleteAction = showContextDeleteAction
         self.showContextWebviewAction = showContextWebviewAction
@@ -90,7 +83,9 @@ struct TransactionsRow: View {
     @State private var opacity = 1.0
     @State private var showingActionSheet = false
     @State private var editSheetShown = false
+    @State private var cloneSheetShown = false
     @State private var deleteAlertShown = false
+    @State private var cloneLoading = false
 
     var body: some View {
         NavigationLink(
@@ -189,27 +184,31 @@ struct TransactionsRow: View {
                 WebviewButton(url: WebviewPaths.transaction(transaction.id!))
             }
 
-            if contextCloneAction != nil || contextCloneAndEditAction != nil {
-                Menu {
-                    if contextCloneAction != nil {
-                        Button("Clone and Save", systemImage: "document.on.document.fill") {
-                            contextCloneAction!()
-                        }
+            // Clone menu
+            Menu {
+                Button("Clone and Save", systemImage: "document.on.document.fill") {
+                    Task {
+                        await cloneAndSave()
                     }
-                    if contextCloneAndEditAction != nil {
-                        Button("Clone and Edit", systemImage: "long.text.page.and.pencil.fill") {
-                            contextCloneAndEditAction!()
-                        }
-                    }
-                } label: {
-                    Label("Clone", systemImage: "document.on.document.fill")
                 }
+                Button("Clone and Edit", systemImage: "long.text.page.and.pencil.fill") {
+                    cloneSheetShown = true
+                }
+            } label: {
+                Label("Clone", systemImage: "document.on.document.fill")
             }
         }
         .sheet(
             isPresented: $editSheetShown,
             content: {
                 TransactionEdit(transactionData: transaction)
+            }
+        )
+        .sheet(
+            isPresented: $cloneSheetShown,
+            content: {
+                TransactionCreate(shouldRefresh: $shouldRefresh, initialTransaction: transaction)
+                    .background(.ultraThinMaterial)
             }
         )
         .alert(
@@ -220,6 +219,43 @@ struct TransactionsRow: View {
                 print("Deleting...")
             }
         }
+    }
+
+    // Clone and save transaction directly
+    private func cloneAndSave() async {
+        guard let trans = transaction.attributes?.transactions?.first else {
+            print("No transaction data to clone")
+            return
+        }
+
+        cloneLoading = true
+        do {
+            try await postTransaction(
+                description: trans.description ?? "",
+                amount: formatAmountForTextField(
+                    trans.amount ?? "0",
+                    decimalPlace: trans.currencyDecimalPlaces ?? 2
+                ),
+                date: Date(), // Use current date and time
+                category: trans.categoryName ?? "",
+                type: convertTypeToDisplay(trans.type ?? "withdrawal"),
+                sourceAccount: (
+                    id: trans.sourceID ?? "",
+                    name: trans.sourceName ?? ""
+                ),
+                destinationAccount: (
+                    id: trans.destinationID ?? "",
+                    name: trans.destinationName ?? ""
+                ),
+                notes: trans.notes ?? "",
+                budgetID: trans.budgetID
+            )
+            // Trigger refresh on success
+            shouldRefresh = true
+        } catch {
+            print("Error cloning transaction: \(error)")
+        }
+        cloneLoading = false
     }
 
     // date formatter specific to this View

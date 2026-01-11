@@ -104,6 +104,20 @@ func transactionTypeColor(type: String) -> Color {
     }
 }
 
+// Converts API transaction type to display type
+func convertTypeToDisplay(_ apiType: String) -> String {
+    switch apiType.lowercased() {
+    case "withdrawal":
+        return "Withdrawal"
+    case "deposit":
+        return "Income"
+    case "transfer":
+        return "Transfer"
+    default:
+        return "Withdrawal"
+    }
+}
+
 // Allows an action after a delay (in seconds)
 // Original function - maintains backward compatibility
 func doThisAfter(_ seconds: CGFloat, callback: @escaping () -> Void) {

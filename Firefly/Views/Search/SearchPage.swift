@@ -96,18 +96,22 @@ struct SearchPage: View {
 struct SearchTransactionsView: View {
     var transactions: Transactions
     @State private var transactionsLoaded = false
+    @State private var shouldRefresh: Bool? = false
 
     var body: some View {
         ScrollView {
             LazyVStack {
                 ForEach(transactions.data ?? [], id: \.id) { transactionData in
-                    TransactionsRow(transaction: transactionData)
-                        .animation(
-                            .easeIn(duration: 0.3).delay(0.05), value: transactionsLoaded
-                        )
-                        .onAppear {
-                            transactionsLoaded = true
-                        }
+                    TransactionsRow(
+                        transaction: transactionData,
+                        shouldRefresh: $shouldRefresh
+                    )
+                    .animation(
+                        .easeIn(duration: 0.3).delay(0.05), value: transactionsLoaded
+                    )
+                    .onAppear {
+                        transactionsLoaded = true
+                    }
                 }
             }
         }

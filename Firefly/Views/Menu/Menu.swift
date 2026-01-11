@@ -33,7 +33,7 @@ struct RootView: View {
         TabView(
             selection: $tabViewLast,
             content: {
-                Tab("Home", systemImage: "house", value: 1) {
+                Tab("Home", systemImage: "chart.bar.yaxis", value: 1) {
                     AboutView()
                 }
                 Tab("Transactions", systemImage: "list.bullet.circle.fill", value: 2) {
@@ -64,11 +64,6 @@ struct RootView: View {
             .sheet(isPresented: $menuViewModel.transactionAddSheetShown) {
                 TransactionAdd()
             }
-            .onContinueUserActivity("addTransaction") { _ in
-                print("Add transactions shortcut")
-                menuViewModel.openTransactionSheet()
-            }
-
             .task {
                 if !hasCheckedToken {
                     do {

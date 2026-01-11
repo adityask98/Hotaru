@@ -4,6 +4,7 @@ import SwiftUI
 enum TimePeriod: String, CaseIterable, Identifiable {
     case currentMonth = "Current Month"
     case last30Days = "Last 30 Days"
+    case custom = "Custom"
 
     var id: String { rawValue }
 }
@@ -15,6 +16,17 @@ struct CategoriesBarChart: View {
     @State private var isLoading = false
     @State private var selectedCategory: String?
     @AppStorage("categoriesBarChartPeriod") private var selectedPeriod: TimePeriod = .currentMonth
+    @State private var customStartDate: Date
+    @State private var customEndDate: Date
+
+    init(refreshTrigger: UUID = UUID()) {
+        self.refreshTrigger = refreshTrigger
+        let calendar = Calendar.current
+        let now = Date()
+        let thirtyDaysAgo = calendar.date(byAdding: .day, value: -30, to: now) ?? now
+        _customStartDate = State(initialValue: thirtyDaysAgo)
+        _customEndDate = State(initialValue: now)
+    }
 
     private var sortedData: CategoriesInsight {
         (chartData ?? []).sorted { abs($0.differenceFloat ?? 0) > abs($1.differenceFloat ?? 0) }
@@ -24,12 +36,21 @@ struct CategoriesBarChart: View {
         chartData?.reduce(0) { $0 + abs($1.differenceFloat ?? 0) } ?? 0
     }
 
+    private var displayedPeriod: String {
+        if selectedPeriod == .custom {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .short
+            return "\(formatter.string(from: customStartDate)) - \(formatter.string(from: customEndDate))"
+        }
+        return selectedPeriod.rawValue
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Spending by Category").font(.title2).fontWeight(.semibold)
-                    Text(selectedPeriod.rawValue).font(.footnote).foregroundStyle(.secondary)
+                    Text(displayedPeriod).font(.footnote).foregroundStyle(.secondary)
                 }
 
                 Spacer()
@@ -41,6 +62,18 @@ struct CategoriesBarChart: View {
                 }
                 .pickerStyle(.menu)
                 .labelsHidden()
+            }
+
+            if selectedPeriod == .custom {
+                VStack(spacing: 12) {
+                    DatePicker("Start Date", selection: $customStartDate, displayedComponents: .date)
+                        .datePickerStyle(.compact)
+                    DatePicker("End Date", selection: $customEndDate, displayedComponents: .date)
+                        .datePickerStyle(.compact)
+                }
+                .padding()
+                .background(.regularMaterial)
+                .cornerRadius(10)
             }
 
             if isLoading {
@@ -102,14 +135,57 @@ struct CategoriesBarChart: View {
                 .padding()
                 .background(.regularMaterial)
                 .cornerRadius(10)
+                .transition(
+                    .asymmetric(
+                        insertion: .opacity.combined(with: .scale(scale: 0.95)),
+                        removal: .opacity.combined(with: .scale(scale: 0.95))
+                    ))
+            }
+
+            // Total spending summary
+            VStack(spacing: 4) {
+                HStack {
+                    Text("Total Spent")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text(formatCurrency(amount: totalSpending, code: chartData?.first?.currencyCode ?? ""))
+                        .font(.title3)
+                        .fontWeight(.bold)
+                }
+                Text("For \(displayedPeriod.lowercased())")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+            .padding()
+            .background(.ultraThinMaterial)
+            .cornerRadius(10)
+        }
+        .onChange(of: selectedCategory) { _, newValue in
+            if newValue != nil {
+                let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                impactFeedback.impactOccurred()
             }
         }
-        .onChange(of: selectedCategory) { _, _ in
-            // Animation handled by SwiftUI
-        }
+        .animation(.easeInOut(duration: 0.3), value: selectedCategory)
         .onChange(of: selectedPeriod) { _, _ in
             Task {
                 try? await getChartData()
+            }
+        }
+        .onChange(of: customStartDate) { _, _ in
+            if selectedPeriod == .custom {
+                Task {
+                    try? await getChartData()
+                }
+            }
+        }
+        .onChange(of: customEndDate) { _, _ in
+            if selectedPeriod == .custom {
+                Task {
+                    try? await getChartData()
+                }
             }
         }
         .onChange(of: refreshTrigger) { _, _ in
@@ -172,6 +248,9 @@ struct CategoriesBarChart: View {
         case .last30Days:
             endDate = now
             startDate = calendar.date(byAdding: .day, value: -30, to: now)!
+        case .custom:
+            startDate = customStartDate
+            endDate = customEndDate
         }
 
         isLoading = true

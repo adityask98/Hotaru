@@ -7,7 +7,7 @@ enum TransactionPostError: Error {
 func postTransaction(
     description: String, amount: String, date: Date, category: String, type: String,
     sourceAccount: (id: String, name: String), destinationAccount: (id: String, name: String),
-    notes: String
+    notes: String, budgetID: String? = nil
 ) async throws {
     let transaction = PostTransaction(
         errorIfDuplicateHash: true, applyRules: true, fireWebhooks: true,
@@ -17,6 +17,7 @@ func postTransaction(
                 date: ISO8601DateFormatter().string(from: date),
                 amount: amount,
                 description: description,
+                budgetID: budgetID,
                 categoryName: category,
                 sourceID: sourceAccount.id,
                 sourceName: sourceAccount.name,

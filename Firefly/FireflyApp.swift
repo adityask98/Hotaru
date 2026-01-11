@@ -1,7 +1,62 @@
 import SwiftUI
 
+class AppDelegate: NSObject, UIApplicationDelegate {
+    var menuViewModel: MenuViewModel?
+
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        updateShortcutItems()
+        return true
+    }
+
+    func application(
+        _ application: UIApplication,
+        configurationForConnecting connectingSceneSession: UISceneSession,
+        options: UIScene.ConnectionOptions
+    ) -> UISceneConfiguration {
+        if let shortcutItem = options.shortcutItem {
+            handleShortcutItem(shortcutItem)
+        }
+
+        let sceneConfiguration = UISceneConfiguration(
+            name: "Default Configuration",
+            sessionRole: connectingSceneSession.role
+        )
+        sceneConfiguration.delegateClass = SceneDelegate.self
+        return sceneConfiguration
+    }
+
+    private func handleShortcutItem(_ shortcutItem: UIApplicationShortcutItem) {
+        if shortcutItem.type == "addTransaction" {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.menuViewModel?.openTransactionSheet()
+            }
+        }
+    }
+}
+
+class SceneDelegate: NSObject, UIWindowSceneDelegate {
+    func windowScene(
+        _ windowScene: UIWindowScene,
+        performActionFor shortcutItem: UIApplicationShortcutItem,
+        completionHandler: @escaping (Bool) -> Void
+    ) {
+        if shortcutItem.type == "addTransaction" {
+            if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+                appDelegate.menuViewModel?.openTransactionSheet()
+                completionHandler(true)
+                return
+            }
+        }
+        completionHandler(false)
+    }
+}
+
 @main
 struct FireflyApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var alertViewModel = AlertViewModel()
     @StateObject private var menuViewModel = MenuViewModel()
     @Environment(\.scenePhase) var scenePhase
@@ -14,10 +69,8 @@ struct FireflyApp: App {
                 .environmentObject(alertViewModel)
                 .environmentObject(menuViewModel)
                 .toast(isPresenting: $alertViewModel.show, alert: { alertViewModel.alertToast })
-                .onOpenURL { url in
-                    if url.scheme == "shortcut" && url.host == "addTransaction" {
-                        menuViewModel.openTransactionSheet()
-                    }
+                .onAppear {
+                    appDelegate.menuViewModel = menuViewModel
                 }
         }.onChange(of: scenePhase) { _, newPhase in
             switch newPhase {

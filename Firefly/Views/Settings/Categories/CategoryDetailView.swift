@@ -4,6 +4,7 @@ struct CategoryDetailView: View {
     @State var category: CategoriesDatum?
     @Environment(\.openURL) var openURL
     @StateObject private var viewModel: CategoryDetailViewModel
+    @State private var shouldRefresh: Bool? = false
 
     init(category: CategoriesDatum? = nil) {
         _category = .init(initialValue: category)
@@ -27,12 +28,14 @@ struct CategoryDetailView: View {
                 } else {
                     TransactionsList(
                         transactions: viewModel.transactions,
-                        hasMorePages: viewModel.hasMorePages
-                    ) {
-                        Task {
-                            await viewModel.fetchTransactions(loadMore: true)
-                        }
-                    }
+                        hasMorePages: viewModel.hasMorePages,
+                        onLoadMore: {
+                            Task {
+                                await viewModel.fetchTransactions(loadMore: true)
+                            }
+                        },
+                        shouldRefresh: $shouldRefresh
+                    )
                 }
             }
         }

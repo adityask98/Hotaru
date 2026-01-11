@@ -17,6 +17,16 @@ struct Settings: View {
                                     Spacer()
                                 }
                             }
+                            NavigationLink {
+                                BudgetsView()
+                            } label: {
+                                HStack {
+                                    Image(systemName: "chart.line.text.clipboard.fill")
+                                    Text("Budgets")
+                                    Spacer()
+                                }
+                            }
+
                             NavigationLink(destination: ThemeView()) {
                                 HStack {
                                     Image(systemName: "paintpalette.fill")

@@ -17,15 +17,15 @@ struct TransactionCreate: View {
     //  @State private var descriptions: AutoTransactions = AutoTransactions()
 
     // Selections
-    @State private var transactionDescription = ""
-    @State private var amount = ""
-    @State private var date = Date()
-    @State private var selectedCategory = ""
-    @State private var selectedBudget = ""
-    @State private var transactionType = "Withdrawal"
-    @State private var sourceAccount: (id: String, name: String) = ("", "")
-    @State private var destinationAccount: (id: String, name: String) = ("", "")
-    @State private var transactionNote = ""
+    @State private var transactionDescription: String
+    @State private var amount: String
+    @State private var date: Date
+    @State private var selectedCategory: String
+    @State private var selectedBudgetID: String?
+    @State private var transactionType: String
+    @State private var sourceAccount: (id: String, name: String)
+    @State private var destinationAccount: (id: String, name: String)
+    @State private var transactionNote: String
 
     // Toasts and controllers
     @State private var showToast = false
@@ -33,6 +33,45 @@ struct TransactionCreate: View {
     @State private var showingNewCategoryToast = false
     @State private var newCategoryName = ""
     @State private var submitIsLoading = false
+
+    // Initializer with optional initial transaction data
+    init(shouldRefresh: Binding<Bool?>, initialTransaction: TransactionsDatum? = nil) {
+        _shouldRefresh = shouldRefresh
+
+        // If initial transaction data is provided, use it to initialize the state
+        if let transaction = initialTransaction?.attributes?.transactions?.first {
+            _transactionDescription = State(initialValue: transaction.description ?? "")
+            _amount = State(initialValue: formatAmountForTextField(
+                transaction.amount ?? "0",
+                decimalPlace: transaction.currencyDecimalPlaces ?? 2
+            ))
+            // Always use current date when cloning
+            _date = State(initialValue: Date())
+            _selectedCategory = State(initialValue: transaction.categoryName ?? "")
+            _selectedBudgetID = State(initialValue: transaction.budgetID)
+            _transactionType = State(initialValue: convertTypeToDisplay(transaction.type ?? "withdrawal"))
+            _sourceAccount = State(initialValue: (
+                id: transaction.sourceID ?? "",
+                name: transaction.sourceName ?? ""
+            ))
+            _destinationAccount = State(initialValue: (
+                id: transaction.destinationID ?? "",
+                name: transaction.destinationName ?? ""
+            ))
+            _transactionNote = State(initialValue: transaction.notes ?? "")
+        } else {
+            // Default values for new transaction
+            _transactionDescription = State(initialValue: "")
+            _amount = State(initialValue: "")
+            _date = State(initialValue: Date())
+            _selectedCategory = State(initialValue: "")
+            _selectedBudgetID = State(initialValue: nil)
+            _transactionType = State(initialValue: "Withdrawal")
+            _sourceAccount = State(initialValue: ("", ""))
+            _destinationAccount = State(initialValue: ("", ""))
+            _transactionNote = State(initialValue: "")
+        }
+    }
 
     var body: some View {
         NavigationView {
@@ -80,12 +119,13 @@ struct TransactionCreate: View {
                             }
                         }
 
-                        //                        AutocompleteSelectionPicker(
-                        //                            title: "Budget", items: budgets,
-                        //                            itemLabel: { $0.name ?? "Unnamed budget" },
-                        //                            onSelection: { id, name in
-                        //                                selectedBudget = (id: id, name: name)
-                        //                            })
+                        Picker("Budget", selection: $selectedBudgetID) {
+                            Text("No Budget").tag(nil as String?)
+                            ForEach(budgets, id: \.id) { budget in
+                                Text(budget.name ?? "Unnamed Budget")
+                                    .tag(budget.id as String?)
+                            }
+                        }
                     }
 
                     Section("Accounts") {
@@ -171,7 +211,8 @@ struct TransactionCreate: View {
                 description: transactionDescription, amount: amount, date: date,
                 category: selectedCategory, type: transactionType,
                 sourceAccount: sourceAccount,
-                destinationAccount: destinationAccount, notes: transactionNote
+                destinationAccount: destinationAccount, notes: transactionNote,
+                budgetID: selectedBudgetID
             )
             let impact = await UINotificationFeedbackGenerator()
 

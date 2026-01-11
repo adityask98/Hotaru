@@ -85,4 +85,8 @@ enum WebviewPaths {
     static func category(_ id: String) -> String {
         "categories/show/\(id)"
     }
+
+    static func budgets() -> String {
+        "budgets/"
+    }
 }

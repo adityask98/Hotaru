@@ -4,6 +4,7 @@ struct TransactionAdd: View {
     @Environment(\.dismiss) var dismiss
 
     @StateObject private var viewModel = TransactionAddViewModel()
+    @State private var showSuggestions = true
 
     var body: some View {
         NavigationView {
@@ -38,7 +39,9 @@ struct TransactionAdd: View {
                                 set: { newValue in
                                     viewModel.updateTransaction { $0.description = newValue }
                                 }
-                            ))
+                            ),
+                            showSuggestions: $showSuggestions
+                        )
                     }
                 }
 

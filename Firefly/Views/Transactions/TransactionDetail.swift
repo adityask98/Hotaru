@@ -24,6 +24,8 @@ struct TransactionDetail: View {
     // @Binding var shouldRefresh: Bool?
 
     @State private var editSheetShown = false
+    @State private var cloneSheetShown = false
+    @State private var cloneLoading = false
     @State private var toastParams = AlertToast(
         displayMode: .hud, type: .error(Color.red)
     )
@@ -57,6 +59,21 @@ struct TransactionDetail: View {
                     Button("Edit", systemImage: "pencil.circle.fill") {
                         editSheetShown = true
                     }.disabled(viewModel.isLoading)
+
+                    Menu {
+                        Button("Clone and Save", systemImage: "document.on.document.fill") {
+                            Task {
+                                await cloneAndSave()
+                            }
+                        }.disabled(viewModel.isLoading)
+
+                        Button("Clone and Edit", systemImage: "long.text.page.and.pencil.fill") {
+                            cloneSheetShown = true
+                        }.disabled(viewModel.isLoading)
+                    } label: {
+                        Label("Clone", systemImage: "document.on.document.fill")
+                    }
+
                     WebviewButton(url: WebviewPaths.transaction(viewModel.transactionId))
                 } label: {
                     Image(systemName: "ellipsis")
@@ -84,6 +101,20 @@ struct TransactionDetail: View {
             },
             content: {
                 TransactionEdit(transactionData: (viewModel.transaction?.data)!)
+            }
+        )
+        .sheet(
+            isPresented: $cloneSheetShown,
+            onDismiss: {
+                Task {
+                    await viewModel.refreshTransaction(transactionID: transactionID)
+                }
+            },
+            content: {
+                if let transaction = viewModel.transaction?.data {
+                    TransactionCreate(shouldRefresh: .constant(nil), initialTransaction: transaction)
+                        .background(.ultraThinMaterial)
+                }
             }
         )
         .toast(isPresenting: $showToast, tapToDismiss: false) {
@@ -125,6 +156,56 @@ struct TransactionDetail: View {
                 showToast = false
             }
         }
+    }
+
+    // Clone and save transaction directly
+    @MainActor
+    private func cloneAndSave() async {
+        guard let trans = viewModel.transaction?.data?.attributes?.transactions?.first else {
+            print("No transaction data to clone")
+            return
+        }
+
+        cloneLoading = true
+        do {
+            try await postTransaction(
+                description: trans.description ?? "",
+                amount: formatAmountForTextField(
+                    trans.amount ?? "0",
+                    decimalPlace: trans.currencyDecimalPlaces ?? 2
+                ),
+                date: Date(), // Use current date and time
+                category: trans.categoryName ?? "",
+                type: convertTypeToDisplay(trans.type ?? "withdrawal"),
+                sourceAccount: (
+                    id: trans.sourceID ?? "",
+                    name: trans.sourceName ?? ""
+                ),
+                destinationAccount: (
+                    id: trans.destinationID ?? "",
+                    name: trans.destinationName ?? ""
+                ),
+                notes: trans.notes ?? "",
+                budgetID: trans.budgetID
+            )
+            toastParams = AlertToast(
+                displayMode: .alert, type: .complete(Color.green),
+                title: "Transaction cloned successfully"
+            )
+            showToast = true
+
+            // Post notification to refresh TransactionsView
+            NotificationCenter.default.post(name: AppNotifications.transactionDeleted, object: nil)
+        } catch {
+            toastParams = AlertToast(
+                displayMode: .alert,
+                type: .systemImage("exclamationmark.triangle.fill", Color.red),
+                title: "Failed to clone transaction"
+            )
+            showToast = true
+            print("Error cloning transaction: \(error)")
+        }
+        cloneLoading = false
     }
 
     private func formatDate(_ dateString: String) -> String? {

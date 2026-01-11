@@ -2,13 +2,16 @@ import SwiftUI
 
 struct TransactionTitleInput: View {
     @Binding var bindingText: String
+    @Binding var showSuggestions: Bool
     var disabled = false
-    @State private var showSuggestions = true
+    var buttonText = "None"
+    var buttonAction: () -> Void = {}
+
     @FocusState private var focused: Bool
     @StateObject private var viewModel = DescriptionInputViewModel()
 
     var body: some View {
-        VStack {
+        VStack(spacing: 12) {
             HStack {
                 Image(systemName: "list.bullet")
                     .resizable()
@@ -22,21 +25,34 @@ struct TransactionTitleInput: View {
                     .font(.body)
                     .foregroundColor(.primary)
                     .frame(minWidth: 70, alignment: .leading)
+
                 Spacer()
-                //      Text("This is title")
+
                 TextField("", text: $bindingText)
                     .multilineTextAlignment(.trailing)
                     .focused($focused)
                     .font(.body)
                     .foregroundStyle(.primary)
                     .disabled(disabled)
+                    .keyboardType(.decimalPad)
+
+                Divider()
+                    .frame(height: 25)
+
+                Button(action: buttonAction) {
+                    Text(buttonText)
+                        .foregroundStyle(.gray)
+                }
             }
+
             if showSuggestions {
-                Spacer()
-                VStack(alignment: .leading) {
-                    Text("Suggestions").font(.caption).fontWeight(.light)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Suggestions")
+                        .font(.caption)
+                        .fontWeight(.light)
+
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack {
+                        HStack(spacing: 8) {
                             SuggestionChip(label: "TEST")
                             SuggestionChip(label: "TESTTESTTEST")
                         }
@@ -50,11 +66,39 @@ struct TransactionTitleInput: View {
 #Preview {
     struct PreviewContainer: View {
         @State var text = "TestValue"
+        @State var showSuggestions = true
+
         var body: some View {
-            VStack {
+            VStack(spacing: 16) {
+                Button {
+                    showSuggestions.toggle()
+                } label: {
+                    Label(
+                        "Toggle Suggestions (\(showSuggestions ? "ON" : "OFF"))",
+                        systemImage: showSuggestions ? "eye.fill" : "eye.slash.fill"
+                    )
+                }
+                .buttonStyle(.bordered)
+                .padding()
+
                 List {
-                    TransactionTitleInput(bindingText: $text)
-                    TransactionTitleInput(bindingText: $text)
+                    TransactionTitleInput(
+                        bindingText: $text,
+                        showSuggestions: $showSuggestions,
+                        buttonText: "JPY (¥)",
+                        buttonAction: {
+                            print("Currency button tapped")
+                        }
+                    )
+
+                    TransactionTitleInput(
+                        bindingText: $text,
+                        showSuggestions: $showSuggestions,
+                        buttonText: "USD ($)",
+                        buttonAction: {
+                            print("USD selected")
+                        }
+                    )
                 }
             }
             .background(.background.secondary)

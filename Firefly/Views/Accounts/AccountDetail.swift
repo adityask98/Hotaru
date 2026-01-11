@@ -4,6 +4,7 @@ struct AccountDetail: View {
     @State var account: AccountsDatum
     @StateObject private var viewModel: AccountDetailViewModel
     @Environment(\.openURL) var openURL
+    @State private var shouldRefresh: Bool? = false
 
     init(account: AccountsDatum) {
         _account = .init(initialValue: account)
@@ -49,12 +50,14 @@ struct AccountDetail: View {
             } else {
                 TransactionsList(
                     transactions: viewModel.transactions,
-                    hasMorePages: viewModel.hasMorePages
-                ) {
-                    Task {
-                        await viewModel.fetchTransactions(loadMore: true)
-                    }
-                }
+                    hasMorePages: viewModel.hasMorePages,
+                    onLoadMore: {
+                        Task {
+                            await viewModel.fetchTransactions(loadMore: true)
+                        }
+                    },
+                    shouldRefresh: $shouldRefresh
+                )
             }
         }.onAppear {
             Task {

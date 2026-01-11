@@ -50,7 +50,8 @@ struct TransactionsView: View {
                                 Task {
                                     await transactions.fetchTransactions(loadMore: true)
                                 }
-                            }
+                            },
+                            shouldRefresh: $shouldRefresh
                         )
                     }
                     // .listRowSpacing(-10)

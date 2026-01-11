@@ -159,6 +159,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		4812A5312EEEDBCB00AC3618 /* Budgets */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Budgets; sourceTree = "<group>"; };
 		48177F6F2DD1673C00358BC8 /* TransactionCreate */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = TransactionCreate; sourceTree = "<group>"; };
 		4836FB282DBC79C500719673 /* Menu */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Menu; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -187,6 +188,7 @@
 		48177F692DD0775F00358BC8 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				4812A5312EEEDBCB00AC3618 /* Budgets */,
 				48C4C47C2EAE2F3500E89619 /* SettingsViewModel.swift */,
 				485B059F2DF1D3CE007D3158 /* Appearence */,
 				485B05992DF1C836007D3158 /* Categories */,
@@ -508,6 +510,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				4812A5312EEEDBCB00AC3618 /* Budgets */,
 				48177F6F2DD1673C00358BC8 /* TransactionCreate */,
 				4836FB282DBC79C500719673 /* Menu */,
 			);
