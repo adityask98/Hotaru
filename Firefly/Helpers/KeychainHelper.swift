@@ -1,34 +1,40 @@
-import AuthenticationServices
 import Foundation
+
+enum KeychainError: Error {
+    case encodingFailed(Error)
+    case unhandledStatus(OSStatus)
+}
 
 final class KeychainHelper {
     static let standard = KeychainHelper()
     private init() {}
 
-    func save<T>(_ item: T, service: String, account: String) where T: Codable {
+    func save<T: Codable>(_ item: T, service: String, account: String) throws {
+        let data: Data
         do {
-            // Encode as JSON data and save in keychain
-            let data = try JSONEncoder().encode(item)
-            save(data, service: service, account: account)
-
+            data = try JSONEncoder().encode(item)
         } catch {
-            assertionFailure("Fail to encode item for keychain: \(error)")
+            throw KeychainError.encodingFailed(error)
         }
+        try save(data, service: service, account: account)
     }
 
-    func save(_ data: Data, service: String, account: String) {
-        // Create query
+    func save(_ data: Data, service: String, account: String) throws {
         let query =
             [
                 kSecValueData: data,
                 kSecClass: kSecClassGenericPassword,
                 kSecAttrService: service,
                 kSecAttrAccount: account,
+                // Readable after first unlock; never synced or restored to another device
+                kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
             ] as CFDictionary
 
-        // Add data in query to keychain
         let status = SecItemAdd(query, nil)
-        if status == errSecDuplicateItem {
+        switch status {
+        case errSecSuccess:
+            return
+        case errSecDuplicateItem:
             let query =
                 [
                     kSecAttrService: service,
@@ -36,28 +42,31 @@ final class KeychainHelper {
                     kSecClass: kSecClassGenericPassword,
                 ] as CFDictionary
 
-            let attributesToUpdate = [kSecValueData: data] as CFDictionary
-            // Update existing item
-            SecItemUpdate(query, attributesToUpdate)
+            // Including accessibility here migrates items saved before it was set explicitly
+            let attributesToUpdate =
+                [
+                    kSecValueData: data,
+                    kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+                ] as CFDictionary
 
-        } else if status != errSecSuccess {
-            // Print out the error
-            print("Error: \(status)")
+            let updateStatus = SecItemUpdate(query, attributesToUpdate)
+            guard updateStatus == errSecSuccess else {
+                throw KeychainError.unhandledStatus(updateStatus)
+            }
+        default:
+            throw KeychainError.unhandledStatus(status)
         }
     }
 
-    func read<T>(service: String, account: String, type: T.Type) -> T? where T: Codable {
-        // Read item data from keychain
+    func read<T: Codable>(service: String, account: String, type: T.Type) -> T? {
         guard let data = read(service: service, account: account) else {
             return nil
         }
 
-        // Decode JSON data to object
         do {
-            let item = try JSONDecoder().decode(type, from: data)
-            return item
+            return try JSONDecoder().decode(type, from: data)
         } catch {
-            assertionFailure("Fail to decode item for keychain: \(error)")
+            AppLog.appError("Failed to decode keychain item", error)
             return nil
         }
     }
@@ -72,9 +81,16 @@ final class KeychainHelper {
             ] as CFDictionary
 
         var result: AnyObject?
-        SecItemCopyMatching(query, &result)
+        let status = SecItemCopyMatching(query, &result)
 
-        return (result as? Data)
+        guard status == errSecSuccess else {
+            if status != errSecItemNotFound {
+                AppLog.app.error("Keychain read failed with status \(status)")
+            }
+            return nil
+        }
+
+        return result as? Data
     }
 
     func delete(service: String, account: String) {
@@ -85,7 +101,9 @@ final class KeychainHelper {
                 kSecClass: kSecClassGenericPassword,
             ] as CFDictionary
 
-        // Delete item from keychain
-        SecItemDelete(query)
+        let status = SecItemDelete(query)
+        if status != errSecSuccess, status != errSecItemNotFound {
+            AppLog.app.error("Keychain delete failed with status \(status)")
+        }
     }
 }

@@ -19,6 +19,7 @@ struct BudgetsView: View {
                 } label: {
                     Image(systemName: "ellipsis")
                 }
+                .accessibilityLabel("More options")
             }
         }
     }

@@ -1,14 +1,16 @@
 import Foundation
 
-let apiToken = "dummy"
-
-let baseURL = "dummy.com"
-
 enum UserDefaultKeys {
     static let apiTokenKey = "APIToken"
     static let baseURLKey = "DefaultURL"
     static let fireWebhooks = "FireWebhooks"
     static let webviewsInline = "WebviewsInline"
+    static let undoTimeoutSeconds = "UndoTimeoutSeconds"
+    static let paginationEnabled = "PaginationEnabled"
+    static let selectedTheme = "selectedTheme"
+    static let showSourceBalanceAfter = "ShowSourceBalanceAfter"
+    static let showDestinationBalanceAfter = "ShowDestinationBalanceAfter"
+    static let attachLocationToTransactions = "AttachLocationToTransactions"
 }
 
 enum ApiPaths {
@@ -25,7 +27,6 @@ enum ApiPaths {
         "api/v1/accounts/\(id)/transactions"
     }
 
-    static let charts = "api/v1/chart/account/overview"
     static func transaction(_ id: String) -> String {
         "api/v1/transactions/\(id)"
     }

@@ -6,17 +6,9 @@
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
-		<key>NSExceptionDomains</key>
-		<dict>
-			<key>100.96.204.49</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-				<key>NSIncludesSubdomains</key>
-				<true/>
-			</dict>
-		</dict>
 	</dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Hotaru records where you are when you add a transaction, so you can see it on a map later. This is optional and can be turned off in Settings.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIImageName</key>

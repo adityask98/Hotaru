@@ -8,6 +8,9 @@ enum AppNotifications {
     static let transactionCreated = Notification.Name("transactionCreated")
     static let transactionUpdated = Notification.Name("transactionUpdated")
 
+    /// Generic failure notification; AlertViewModel shows userInfo["message"] as a warning toast
+    static let operationFailed = Notification.Name("operationFailed")
+
     // Safari notifications (defined in SafariHelper.swift)
     // - SafariErrorNotification
     // - SafariSuccessNotification

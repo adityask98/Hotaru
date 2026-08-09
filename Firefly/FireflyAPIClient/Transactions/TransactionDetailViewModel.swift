@@ -47,7 +47,7 @@ final class TransactionDetailViewModel: ObservableObject {
                 title: errorMessage
             )
             showToast = true
-            print(error)
+            AppLog.networkError("Failed to fetch transaction", error)
         }
         isLoading = false
     }
@@ -66,40 +66,23 @@ final class TransactionDetailViewModel: ObservableObject {
         await fetchTransactionOld(transactionID: transactionID)
     }
 
-    func deleteTransaction(transactionID: String) async throws {
-        let request = try RequestBuilder(
-            apiURL: ApiPaths.transaction(transactionID), httpMethod: "DELETE"
-        )
-        let (data, response) = try await URLSession.shared.data(for: request)
-        // printResponse(data)
-
-        guard let response = response as? HTTPURLResponse, response.statusCode == 204 else {
-            let commonError = try errorDecoder(data)
-            errorMessage = commonError.message ?? "Something went wrong"
-            print(errorMessage as Any)
-            throw TransactionsModelError.invalidResponse
-        }
-        print(response)
-    }
-
     func getTransaction(transactionID: String) async throws -> TransactionDetailDatum {
         let request = try RequestBuilder(apiURL: ApiPaths.transaction(transactionID))
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await AppNetworking.session.data(for: request)
 
         guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            throw TransactionsModelError.invalidResponse
+            throw TransactionsModelError.invalidResponse(statusCode: (response as? HTTPURLResponse)?.statusCode)
         }
 
         do {
             let decoder = JSONDecoder()
-            let result = try decoder.decode(TransactionDetailDatum.self, from: data)
+            return try decoder.decode(TransactionDetailDatum.self, from: data)
             //            if let str = String(data: data, encoding: .utf8) {
             //                print("Successfully decoded: \(str)")
             //            }
             // print(result)
-            return result
         } catch {
-            print(error)
+            AppLog.networkError("Failed to decode transaction", error)
             throw TransactionsModelError.invalidData
         }
     }

@@ -34,7 +34,6 @@ struct TransactionTitleInput: View {
                     .font(.body)
                     .foregroundStyle(.primary)
                     .disabled(disabled)
-                    .keyboardType(.decimalPad)
 
                 Divider()
                     .frame(height: 25)
@@ -87,7 +86,7 @@ struct TransactionTitleInput: View {
                         showSuggestions: $showSuggestions,
                         buttonText: "JPY (¥)",
                         buttonAction: {
-                            print("Currency button tapped")
+                            // TODO: currency selection
                         }
                     )
 
@@ -96,7 +95,7 @@ struct TransactionTitleInput: View {
                         showSuggestions: $showSuggestions,
                         buttonText: "USD ($)",
                         buttonAction: {
-                            print("USD selected")
+                            // TODO: currency selection
                         }
                     )
                 }

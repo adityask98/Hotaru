@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 
+@MainActor
 class SettingsViewModel: ObservableObject {
     @AppStorage(UserDefaultKeys.webviewsInline) var webviewsInline = false
 

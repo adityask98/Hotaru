@@ -3,13 +3,15 @@ import SwiftUI
 
 struct CategoriesDonut: View {
     var refreshTrigger = UUID()
+    let insightStore: CategoriesInsightStore
 
     @State private var chartData: CategoriesInsight?
     @State private var isLoading = false
+    @State private var loadFailed = false
     @State private var selectedAngle: Int?
     @State private var selectedCategory: CategoriesInsightElement?
 
-    private var totalSpending: Int {
+    private var totalSpending: Double {
         chartData?.reduce(0) { $0 + abs($1.differenceFloat ?? 0) } ?? 0
     }
 
@@ -21,6 +23,11 @@ struct CategoriesDonut: View {
             if isLoading {
                 ProgressView()
                     .frame(width: 280, height: 280)
+            } else if loadFailed, chartData == nil {
+                ErrorStateView(message: "Couldn't load category summary.") {
+                    Task { await loadChartData() }
+                }
+                .frame(height: 200)
             } else {
                 ZStack {
                     Chart(chartData ?? [], id: \.id) { item in
@@ -81,13 +88,13 @@ struct CategoriesDonut: View {
         }
         .onChange(of: refreshTrigger) { _, _ in
             Task {
-                try? await getChartData()
+                await loadChartData()
             }
         }
         .onAppear {
             if chartData == nil {
                 Task {
-                    try? await getChartData()
+                    await loadChartData()
                 }
             }
         }
@@ -101,14 +108,14 @@ struct CategoriesDonut: View {
     }
 
     private func findCategory(for angle: Int) -> CategoriesInsightElement? {
-        let total = Double(totalSpending)
+        let total = totalSpending
         guard total > 0 else { return nil }
 
         let normalizedValue = Double(angle) / 360.0 * total
         var cumulativeTotal: Double = 0
 
         for item in chartData ?? [] {
-            let itemValue = abs(Double(item.differenceFloat ?? 0))
+            let itemValue = abs(item.differenceFloat ?? 0)
             cumulativeTotal += itemValue
             if normalizedValue <= cumulativeTotal {
                 return item
@@ -117,7 +124,7 @@ struct CategoriesDonut: View {
         return nil
     }
 
-    private func formatCurrency(amount: Int, code: String) -> String {
+    private func formatCurrency(amount: Double, code: String) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         formatter.currencyCode = code
@@ -125,30 +132,34 @@ struct CategoriesDonut: View {
         return formatter.string(from: NSNumber(value: abs(amount))) ?? "\(abs(amount))"
     }
 
-    private func percentageOfTotal(amount: Int) -> String {
+    private func percentageOfTotal(amount: Double) -> String {
         guard totalSpending > 0 else { return "0%" }
-        let percentage = Double(abs(amount)) / Double(totalSpending) * 100
+        let percentage = abs(amount) / totalSpending * 100
         return String(format: "%.1f%%", percentage)
     }
 
-    private func getChartData() async throws {
+    private func loadChartData() async {
         let calendar = Calendar.current
         let now = Date()
 
         let startOfMonth = calendar.date(
-            from: calendar.dateComponents([.year, .month], from: now))!
+            from: calendar.dateComponents([.year, .month], from: now)
+        )!
         let endOfMonth = calendar.date(
             byAdding: DateComponents(month: 1, day: -1), to: startOfMonth
         )!
 
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-
         isLoading = true
-        chartData = try await fetchCategoriesExpenseInsights(
-            startDate: formatter.string(from: startOfMonth),
-            endDate: formatter.string(from: endOfMonth)
-        )
+        loadFailed = false
+        do {
+            chartData = try await insightStore.insights(
+                startDate: formatDateToYYYYMMDD(startOfMonth),
+                endDate: formatDateToYYYYMMDD(endOfMonth)
+            )
+        } catch {
+            loadFailed = true
+            AppLog.networkError("Failed to load categories donut", error)
+        }
         isLoading = false
     }
 }

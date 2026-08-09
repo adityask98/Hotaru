@@ -5,31 +5,33 @@ struct TransactionsList: View {
     var hasMorePages: Bool
     let onLoadMore: () -> Void
     @State private var opacity = 0.1
-    @Binding var shouldRefresh: Bool?
+    @EnvironmentObject private var pendingDeleteManager: PendingDeleteManager
+
+    private var visibleTransactions: [TransactionsDatum] {
+        (transactions?.data ?? []).filter { datum in
+            guard let id = datum.id else { return true }
+            return !pendingDeleteManager.hiddenIDs.contains(id)
+        }
+    }
 
     var body: some View {
         LazyVStack {
-            ForEach(transactions?.data ?? [], id: \.id) { transactionData in
-                TransactionsRow(
-                    transaction: transactionData,
-                    shouldRefresh: $shouldRefresh,
-                    contextEditAction: {
-                        print("Edit transaction: \(transactionData.id ?? "unknown")")
-                        // Add your edit logic here
-                    },
-                    contextDeleteAction: {
-                        print("Delete transaction: \(transactionData.id ?? "unknown")")
-                        // Add your delete logic here
-                    }
-                )
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
-            }
-            if hasMorePages || (transactions?.data?.isEmpty ?? false) {
-                LoadingSpinner()
-                    .onAppear {
-                        onLoadMore()
-                    }
+            if let data = transactions?.data, data.isEmpty {
+                EmptyStateView(message: "No transactions in this period")
+            } else {
+                ForEach(visibleTransactions, id: \.id) { transactionData in
+                    TransactionsRow(transaction: transactionData)
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                }
+                // Only page while there is loaded, non-empty data — otherwise the
+                // spinner would show forever and refire load-more on empty results
+                if hasMorePages, transactions?.data?.isEmpty == false {
+                    LoadingSpinner()
+                        .onAppear {
+                            onLoadMore()
+                        }
+                }
             }
         }
         .opacity(opacity)
@@ -45,36 +47,28 @@ struct TransactionsList: View {
 
 struct TransactionsRow: View {
     var transaction: TransactionsDatum
-    @Binding var shouldRefresh: Bool?
     @State private var isActiveNav = true
     var showDate = true
     var showAccount = true
     var animate = true
-    let contextEditAction: (() -> Void)?
-    let contextDeleteAction: (() -> Void)?
     var showContextEditAction = true
     var showContextDeleteAction = true
     var showContextWebviewAction = true
+    @EnvironmentObject private var pendingDeleteManager: PendingDeleteManager
 
     init(
         transaction: TransactionsDatum,
-        shouldRefresh: Binding<Bool?>,
         showDate: Bool = true,
         showAccount: Bool = true,
         animate: Bool = true,
-        contextEditAction: (() -> Void)? = nil,
-        contextDeleteAction: (() -> Void)? = nil,
         showContextEditAction: Bool = true,
         showContextDeleteAction: Bool = true,
         showContextWebviewAction: Bool = true
     ) {
         self.transaction = transaction
-        _shouldRefresh = shouldRefresh
         self.showDate = showDate
         self.showAccount = showAccount
         self.animate = animate
-        self.contextEditAction = contextEditAction
-        self.contextDeleteAction = contextDeleteAction
         self.showContextEditAction = showContextEditAction
         self.showContextDeleteAction = showContextDeleteAction
         self.showContextWebviewAction = showContextWebviewAction
@@ -86,6 +80,7 @@ struct TransactionsRow: View {
     @State private var cloneSheetShown = false
     @State private var deleteAlertShown = false
     @State private var cloneLoading = false
+    @ScaledMetric(relativeTo: .title) private var typeIconFrame: CGFloat = 60
 
     var body: some View {
         NavigationLink(
@@ -95,14 +90,16 @@ struct TransactionsRow: View {
                 HStack {
                     Image(
                         systemName: transactionTypeIcon(
-                            transaction.attributes?.transactions?.first?.type ?? "unknown")
+                            transaction.attributes?.transactions?.first?.type ?? "unknown"
+                        )
                     )
                     .foregroundStyle(
                         transactionTypeStyle(
-                            transaction.attributes?.transactions?.first?.type ?? "unknown")
+                            transaction.attributes?.transactions?.first?.type ?? "unknown"
+                        )
                     )
-                    .frame(width: 60, height: 60)
-                    .font(.system(size: 30))
+                    .frame(width: typeIconFrame, height: typeIconFrame)
+                    .font(.title)
 
                     VStack(alignment: .leading) {
                         Text(
@@ -166,16 +163,14 @@ struct TransactionsRow: View {
             }
         }
         .contextMenu {
-            if showContextEditAction, let editAction = contextEditAction {
+            if showContextEditAction {
                 Button("Edit", systemImage: "pencil.circle.fill") {
-                    editAction()
                     editSheetShown = true
                 }
             }
 
-            if showContextDeleteAction, let deleteAction = contextDeleteAction {
+            if showContextDeleteAction {
                 Button("Delete", systemImage: "trash.fill", role: .destructive) {
-                    deleteAction()
                     deleteAlertShown = true
                 }
             }
@@ -207,7 +202,7 @@ struct TransactionsRow: View {
         .sheet(
             isPresented: $cloneSheetShown,
             content: {
-                TransactionCreate(shouldRefresh: $shouldRefresh, initialTransaction: transaction)
+                TransactionCreate(initialTransaction: transaction)
                     .background(.ultraThinMaterial)
             }
         )
@@ -216,15 +211,18 @@ struct TransactionsRow: View {
             isPresented: $deleteAlertShown
         ) {
             Button("Delete", role: .destructive) {
-                print("Deleting...")
+                guard let id = transaction.id else { return }
+                pendingDeleteManager.scheduleDelete(
+                    id: id, title: transaction.transactionTitle
+                )
             }
         }
     }
 
-    // Clone and save transaction directly
+    /// Clone and save transaction directly
     private func cloneAndSave() async {
         guard let trans = transaction.attributes?.transactions?.first else {
-            print("No transaction data to clone")
+            AppLog.app.error("No transaction data to clone")
             return
         }
 
@@ -247,21 +245,22 @@ struct TransactionsRow: View {
                     id: trans.destinationID ?? "",
                     name: trans.destinationName ?? ""
                 ),
-                notes: trans.notes ?? "",
+                // Drop the original's location — see the matching note in TransactionDetail's clone.
+                notes: TransactionLocation.strip(from: trans.notes) ?? "",
                 budgetID: trans.budgetID
             )
             // Trigger refresh on success
-            shouldRefresh = true
+            NotificationCenter.default.post(name: AppNotifications.transactionCreated, object: nil)
         } catch {
-            print("Error cloning transaction: \(error)")
+            AppLog.networkError("Failed to clone transaction", error)
         }
         cloneLoading = false
     }
 
-    // date formatter specific to this View
+    /// date formatter specific to this View
     private func formatDate(_ dateString: String?) -> String {
         guard let dateString = dateString,
-              let date = ISO8601DateFormatter().date(from: dateString) else {
+              let date = CachedFormatters.iso8601.date(from: dateString) else {
             return "Unknown Date"
         }
 
@@ -273,15 +272,9 @@ struct TransactionsRow: View {
         }
 
         if calendar.isDate(date, equalTo: now, toGranularity: .weekOfYear) {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "EEEE" // Full name of the day
-            return formatter.string(from: date)
-        } else {
-            let formatter = DateFormatter()
-            formatter.dateStyle = .medium
-            formatter.timeStyle = .none
-            return formatter.string(from: date)
+            return CachedFormatters.weekdayName.string(from: date)
         }
+        return CachedFormatters.mediumDate.string(from: date)
     }
 }
 

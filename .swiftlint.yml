@@ -118,7 +118,6 @@ type_name:
     - ID
     - URL
     - API
-  severity: warning
 
 cyclomatic_complexity:
   warning: 15

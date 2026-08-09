@@ -13,6 +13,8 @@ public struct FloatingButton: View {
 
     @State private var isTapped = false
     @State private var feedbackTrigger = 0
+    /// Dynamic Type scale factor applied to the fixed icon size
+    @ScaledMetric(relativeTo: .title3) private var typeScale: CGFloat = 1
 
     public init(
         action: @escaping () -> Void,
@@ -42,10 +44,10 @@ public struct FloatingButton: View {
             action()
         }) {
             Image(systemName: imageSystemName)
-                .font(.system(size: fontSize))
+                .font(.system(size: fontSize * typeScale))
                 .fontWeight(fontWeight)
                 .foregroundColor(foregroundColor)
-                .frame(width: fontSize * 1, height: fontSize * 1)
+                .frame(width: fontSize * typeScale, height: fontSize * typeScale)
                 .padding(padding)
                 .background(backgroundColor)
                 .clipShape(Circle())

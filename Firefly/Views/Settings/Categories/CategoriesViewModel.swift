@@ -10,18 +10,18 @@ enum CategoriesModelError: Error {
 class CategoriesViewModel: ObservableObject {
     @Published var categories: Categories?
     @Published var isLoading = false
+    @Published var errorMessage: String?
 
-    func fetchCategories() {
+    func fetchCategories() async {
         isLoading = true
-        Task { @MainActor in
-            do {
-                categories = try await getCategories()
-                isLoading = false
-            } catch {
-                print(error)
-                isLoading = false
-            }
+        errorMessage = nil
+        do {
+            categories = try await getCategories()
+        } catch {
+            errorMessage = "Couldn't load categories."
+            AppLog.networkError("Failed to fetch categories", error)
         }
+        isLoading = false
     }
 
     func getCategories() async throws -> Categories {
@@ -36,7 +36,7 @@ class CategoriesViewModel: ObservableObject {
             ]
         )
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await AppNetworking.session.data(for: request)
 
         guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
             throw CategoriesModelError.invalidResponse
@@ -44,11 +44,9 @@ class CategoriesViewModel: ObservableObject {
 
         do {
             let decoder = JSONDecoder()
-            let result = try decoder.decode(Categories.self, from: data)
-
-            return result
+            return try decoder.decode(Categories.self, from: data)
         } catch {
-            print(error)
+            AppLog.networkError("Failed to decode categories", error)
             throw CategoriesModelError.invalidData
         }
     }

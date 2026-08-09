@@ -28,7 +28,8 @@ extension ShapeStyle where Self == AnyShapeStyle {
                     ml, mc, mr,
                     bl, bc, br,
                 ])
-            ))
+            )
+        )
     }
 }
 
@@ -41,6 +42,7 @@ extension ShapeStyle where Self == AnyShapeStyle {
                 .boundingRect,
                 .color(lightColor),
                 .float(time)
-            ))
+            )
+        )
     }
 }

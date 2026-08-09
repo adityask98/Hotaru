@@ -1,6 +1,39 @@
 import Foundation
 
-// Account-specific transactions API provider
+/// Provider for the main transactions list (date range + type filter)
+class MainTransactionsAPIProvider: TransactionsAPIProvider {
+    private let startDate: String
+    private let endDate: String
+    private let type: String
+    private let limit: Int
+
+    init(
+        startDate: String,
+        endDate: String,
+        type: String = "all",
+        limit: Int = 20
+    ) {
+        self.startDate = startDate
+        self.endDate = endDate
+        self.type = type
+        self.limit = limit
+    }
+
+    func getTransactions(page: Int) async throws -> Transactions {
+        var request = try RequestBuilder(apiURL: ApiPaths.transactions)
+        request.url?.append(queryItems: [
+            URLQueryItem(name: "limit", value: String(limit)),
+            URLQueryItem(name: "page", value: String(page)),
+            URLQueryItem(name: "start", value: startDate),
+            URLQueryItem(name: "end", value: endDate),
+            URLQueryItem(name: "type", value: type),
+        ])
+
+        return try await performRequest(request)
+    }
+}
+
+/// Account-specific transactions API provider
 class AccountTransactionsAPIProvider: TransactionsAPIProvider {
     private let accountId: String
     private let startDate: String?
@@ -40,7 +73,7 @@ class AccountTransactionsAPIProvider: TransactionsAPIProvider {
     }
 }
 
-// Category-specific transactions API provider
+/// Category-specific transactions API provider
 class CategoryTransactionsAPIProvider: TransactionsAPIProvider {
     private let categoryId: String
     private let startDate: String?

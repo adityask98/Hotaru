@@ -256,7 +256,7 @@ extension TransactionStore {
         categoryID: String? = nil,
         categoryName: String? = nil
     ) -> TransactionStore {
-        var split = TransactionSplitStore(
+        let split = TransactionSplitStore(
             type: type,
             date: date,
             amount: amount,

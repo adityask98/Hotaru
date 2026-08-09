@@ -21,7 +21,7 @@ func formatAmount(_ amount: Decimal) -> String {
     return formatter.string(from: amount as NSNumber) ?? "Unknown Amount"
 }
 
-// Check if a transaction is a split transaction by counting the number of attributes.transactions
+/// Check if a transaction is a split transaction by counting the number of attributes.transactions
 func isSplitTransaction(_ transaction: TransactionsDatum) -> Bool {
     transaction.attributes?.transactions?.count ?? 1 > 1
 }
@@ -30,7 +30,7 @@ func isSplitTransaction(_ postTransaction: PostTransaction) -> Bool {
     postTransaction.transactions?.count ?? 1 > 1
 }
 
-// Title for the transaction.
+/// Title for the transaction.
 func transactionMainTitle(_ transaction: TransactionsDatum) -> String {
     if transaction.isSplitTransaction {
         if let groupTitle = transaction.attributes?.groupTitle, !groupTitle.isEmpty {
@@ -46,11 +46,9 @@ func calculateTransactionTotalAmount(_ transaction: TransactionsDatum) -> Decima
         return 0
     }
 
-    let total = transactions.reduce(Decimal.zero) { sum, transaction in
+    return transactions.reduce(Decimal.zero) { sum, transaction in
         sum + (Decimal(string: transaction.amount ?? "0") ?? 0)
     }
-
-    return total
 }
 
 func transactionTypeIcon(_ type: String) -> String {
@@ -104,7 +102,7 @@ func transactionTypeColor(type: String) -> Color {
     }
 }
 
-// Converts API transaction type to display type
+/// Converts API transaction type to display type
 func convertTypeToDisplay(_ apiType: String) -> String {
     switch apiType.lowercased() {
     case "withdrawal":
@@ -118,21 +116,58 @@ func convertTypeToDisplay(_ apiType: String) -> String {
     }
 }
 
-// Allows an action after a delay (in seconds)
-// Original function - maintains backward compatibility
+/// Allows an action after a delay (in seconds)
+/// Original function - maintains backward compatibility
 func doThisAfter(_ seconds: CGFloat, callback: @escaping () -> Void) {
     DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
         callback()
     }
 }
 
-// Async overload - different return type and async keyword makes it distinct
+/// Async overload - different return type and async keyword makes it distinct
 func doThisAfter(_ seconds: CGFloat, callback: @escaping () async -> Void) async {
     try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
     await callback()
 }
 
-// Formats amount number to a string with the appropriate decimal placement
+/// Formats a raw (ungrouped) amount string with thousands separators for display,
+/// preserving in-progress decimal input (e.g. a trailing "." or partial fraction digits).
+func formatAmountForDisplay(_ raw: String) -> String {
+    guard !raw.isEmpty else { return raw }
+
+    let hasTrailingDecimal = raw.hasSuffix(".")
+    let parts = raw.split(separator: ".", maxSplits: 1, omittingEmptySubsequences: false)
+    let integerPart = String(parts[0])
+    let fractionPart = parts.count > 1 ? String(parts[1]) : nil
+
+    let groupedInteger: String
+    if !integerPart.isEmpty, let intValue = Double(integerPart) {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.usesGroupingSeparator = true
+        formatter.groupingSeparator = ","
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 0
+        groupedInteger = formatter.string(from: NSNumber(value: intValue)) ?? integerPart
+    } else {
+        groupedInteger = integerPart
+    }
+
+    if let fractionPart {
+        return groupedInteger + "." + fractionPart
+    } else if hasTrailingDecimal {
+        return groupedInteger + "."
+    } else {
+        return groupedInteger
+    }
+}
+
+/// Strips thousands separators from a displayed amount string back to the raw numeric string.
+func stripAmountGrouping(_ display: String) -> String {
+    display.replacingOccurrences(of: ",", with: "")
+}
+
+/// Formats amount number to a string with the appropriate decimal placement
 func formatAmountForTextField(_ amountString: String, decimalPlace: Int) -> String {
     guard let amount = Double(amountString) else {
         return ""

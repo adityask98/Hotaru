@@ -68,6 +68,9 @@ struct TransactionsTransaction: Codable {
     let budgetID, budgetName: String?
     let categoryID, categoryName: String?
     let billID, billName: String?
+    /// The source/destination account's own balance immediately after this transaction
+    /// (in that account's currency, which may differ from the transaction's currency).
+    let sourceBalanceAfter, destinationBalanceAfter: String?
     let reconciled: Bool?
     let notes: String?
     let tags: [String]?
@@ -80,7 +83,8 @@ struct TransactionsTransaction: Codable {
     let sepaCc, sepaCTOp, sepaCTID, sepaDB: String?
     let sepaCountry, sepaEp, sepaCi, sepaBatchID: String?
     let interestDate, bookDate, processDate, dueDate: String?
-    let paymentDate, invoiceDate, longitude, latitude: String?
+    let paymentDate, invoiceDate: String?
+    let longitude, latitude: Double?
     let zoomLevel: Int?
     let hasAttachments: Bool?
 
@@ -114,6 +118,8 @@ struct TransactionsTransaction: Codable {
         case categoryName = "category_name"
         case billID = "bill_id"
         case billName = "bill_name"
+        case sourceBalanceAfter = "source_balance_after"
+        case destinationBalanceAfter = "destination_balance_after"
         case reconciled, notes, tags
         case internalReference = "internal_reference"
         case externalID = "external_id"
@@ -200,8 +206,8 @@ class JSONNull: Codable, Hashable {
         true
     }
 
-    var hashValue: Int {
-        0
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(0)
     }
 
     init() {}

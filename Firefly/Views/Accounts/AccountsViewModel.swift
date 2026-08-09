@@ -13,9 +13,25 @@ class AccountsViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var currentPage = 1
     @Published var hasMorePages = true
+    @Published var errorMessage: String?
     @AppStorage("amountHidden") var amountHidden = false
+    private var fetchTask: Task<Void, Never>?
 
     func fetchAccounts(loadMore: Bool = false) async {
+        // Pull-to-refresh can invoke this concurrently with the initial onAppear
+        // load (or fire more than once for a single gesture); cancel any prior
+        // in-flight fetch so only the latest one lands.
+        fetchTask?.cancel()
+        let task = Task { [weak self] in
+            guard let self else { return }
+            await self.performFetch(loadMore: loadMore)
+        }
+        fetchTask = task
+        await task.value
+    }
+
+    private func performFetch(loadMore: Bool) async {
+        errorMessage = nil
         if loadMore {
             currentPage += 1
         } else {
@@ -44,7 +60,9 @@ class AccountsViewModel: ObservableObject {
                 hasMorePages = false
             }
         } catch {
-            print("Error fetching accounts: \(error)")
+            if Task.isCancelled { return }
+            errorMessage = "Couldn't load accounts."
+            AppLog.networkError("Failed to fetch accounts", error)
         }
 
         if !loadMore {
@@ -64,7 +82,7 @@ class AccountsViewModel: ObservableObject {
             URLQueryItem(name: "type", value: type),
         ])
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await AppNetworking.session.data(for: request)
 
         guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
             throw AccountsModelError.invalidResponse
@@ -72,11 +90,9 @@ class AccountsViewModel: ObservableObject {
 
         do {
             let decoder = JSONDecoder()
-            let result = try decoder.decode(Accounts.self, from: data)
-
-            return result
+            return try decoder.decode(Accounts.self, from: data)
         } catch {
-            print(error)
+            AppLog.networkError("Failed to decode accounts", error)
             throw AccountsModelError.invalidData
         }
     }
@@ -88,17 +104,16 @@ class AccountsViewModel: ObservableObject {
     }
 
     private func performRequest(_ request: URLRequest) async throws -> Accounts {
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await AppNetworking.session.data(for: request)
         guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
             throw AccountsModelError.invalidResponse
         }
 
         do {
             let decoder = JSONDecoder()
-            let result = try decoder.decode(Accounts.self, from: data)
-            return result
+            return try decoder.decode(Accounts.self, from: data)
         } catch {
-            print(error)
+            AppLog.networkError("Failed to decode accounts", error)
             throw AccountsModelError.invalidData
         }
     }

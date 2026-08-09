@@ -4,7 +4,6 @@ import UIKit
 
 struct TransactionCreate: View {
     @Environment(\.dismiss) var dismiss
-    @Binding var shouldRefresh: Bool?
 
     @State private var transactionData: PostTransaction = defaultTransactionData()
 
@@ -19,6 +18,7 @@ struct TransactionCreate: View {
     // Selections
     @State private var transactionDescription: String
     @State private var amount: String
+    @State private var displayAmount: String
     @State private var date: Date
     @State private var selectedCategory: String
     @State private var selectedBudgetID: String?
@@ -26,6 +26,14 @@ struct TransactionCreate: View {
     @State private var sourceAccount: (id: String, name: String)
     @State private var destinationAccount: (id: String, name: String)
     @State private var transactionNote: String
+    @FocusState private var amountFieldFocused: Bool
+
+    // Location (beta) — see docs/LOCATION_IN_NOTES.md
+    @AppStorage(UserDefaultKeys.attachLocationToTransactions) private var locationFeatureEnabled = true
+    @StateObject private var locationProvider = LocationProvider()
+    @State private var attachLocation = true
+    @State private var capturedLocation: TransactionLocation?
+    @State private var locationStatus: LocationCaptureStatus = .idle
 
     // Toasts and controllers
     @State private var showToast = false
@@ -34,17 +42,17 @@ struct TransactionCreate: View {
     @State private var newCategoryName = ""
     @State private var submitIsLoading = false
 
-    // Initializer with optional initial transaction data
-    init(shouldRefresh: Binding<Bool?>, initialTransaction: TransactionsDatum? = nil) {
-        _shouldRefresh = shouldRefresh
-
+    /// Initializer with optional initial transaction data
+    init(initialTransaction: TransactionsDatum? = nil) {
         // If initial transaction data is provided, use it to initialize the state
         if let transaction = initialTransaction?.attributes?.transactions?.first {
             _transactionDescription = State(initialValue: transaction.description ?? "")
-            _amount = State(initialValue: formatAmountForTextField(
+            let initialAmount = formatAmountForTextField(
                 transaction.amount ?? "0",
                 decimalPlace: transaction.currencyDecimalPlaces ?? 2
-            ))
+            )
+            _amount = State(initialValue: initialAmount)
+            _displayAmount = State(initialValue: formatAmountForDisplay(initialAmount))
             // Always use current date when cloning
             _date = State(initialValue: Date())
             _selectedCategory = State(initialValue: transaction.categoryName ?? "")
@@ -58,11 +66,14 @@ struct TransactionCreate: View {
                 id: transaction.destinationID ?? "",
                 name: transaction.destinationName ?? ""
             ))
-            _transactionNote = State(initialValue: transaction.notes ?? "")
+            // Strip any location marker: a clone happens somewhere else, at some other time, so
+            // inheriting the original's coordinates would be plainly wrong.
+            _transactionNote = State(initialValue: TransactionLocation.strip(from: transaction.notes) ?? "")
         } else {
             // Default values for new transaction
             _transactionDescription = State(initialValue: "")
             _amount = State(initialValue: "")
+            _displayAmount = State(initialValue: "")
             _date = State(initialValue: Date())
             _selectedCategory = State(initialValue: "")
             _selectedBudgetID = State(initialValue: nil)
@@ -74,7 +85,7 @@ struct TransactionCreate: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 Form {
                     VStack {
@@ -86,10 +97,19 @@ struct TransactionCreate: View {
                         .pickerStyle(.segmented)
                         HStack {
                             Spacer()
-                            TextField("Amount", text: $amount)
+                            TextField("Amount", text: $displayAmount)
                                 .font(.largeTitle)
                                 .keyboardType(.decimalPad)
                                 .multilineTextAlignment(.center)
+                                .focused($amountFieldFocused)
+                                .onChange(of: displayAmount) { _, newValue in
+                                    let raw = stripAmountGrouping(newValue)
+                                    amount = raw
+                                    let formatted = formatAmountForDisplay(raw)
+                                    if formatted != newValue {
+                                        displayAmount = formatted
+                                    }
+                                }
                             Spacer()
                         }
                         .padding(.vertical, 20)
@@ -103,7 +123,8 @@ struct TransactionCreate: View {
 
                     Section("Details") {
                         DescriptionInput(
-                            bindingText: $transactionDescription)
+                            bindingText: $transactionDescription
+                        )
 
                         Picker("Category", selection: $selectedCategory) {
                             Text("Uncategorized").tag("")
@@ -150,6 +171,12 @@ struct TransactionCreate: View {
                         TextField("Notes", text: $transactionNote, axis: .vertical)
                             .lineLimit(5)
                     }
+
+                    if locationFeatureEnabled {
+                        Section("Location") {
+                            locationRow
+                        }
+                    }
                 }
                 .safeAreaInset(
                     edge: .bottom,
@@ -162,7 +189,7 @@ struct TransactionCreate: View {
                                     do {
                                         try await submitTransaction()
                                     } catch {
-                                        print("Error submitting transaction: \(error)")
+                                        AppLog.networkError("Failed to submit transaction", error)
                                         // Handle the error appropriately
                                     }
                                 }
@@ -177,7 +204,11 @@ struct TransactionCreate: View {
             .navigationTitle("Add Transaction")
             .allowsHitTesting(!showToast)
             .navigationBarTitleDisplayMode(.inline)
-            .navigationBarItems(trailing: Button("Cancel") { dismiss() })
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
             .toast(isPresenting: $showToast, tapToDismiss: false) {
                 toastParams
             }
@@ -188,7 +219,7 @@ struct TransactionCreate: View {
                         do {
                             try await confirmAddNewCategory()
                         } catch {
-                            print(error)
+                            AppLog.appError("Failed to add category", error)
                         }
                     }
                 }
@@ -201,36 +232,129 @@ struct TransactionCreate: View {
         }
         .onAppear {
             loadAutocomplete()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                amountFieldFocused = true
+            }
         }
+        .task {
+            // Start early so a fix is usually ready by the time the form is filled in. Capture never
+            // gates submission — if nothing has arrived, the transaction posts without a location.
+            await captureLocationIfNeeded()
+        }
+        .onChange(of: attachLocation) { _, isOn in
+            if isOn {
+                Task { await captureLocationIfNeeded() }
+            } else {
+                capturedLocation = nil
+                locationStatus = .idle
+            }
+        }
+    }
+
+    // MARK: - Location (beta)
+
+    @ViewBuilder
+    private var locationRow: some View {
+        Toggle(isOn: $attachLocation) {
+            HStack(spacing: 6) {
+                Text("Attach Location")
+                Image(systemName: "testtube.2")
+                    .foregroundStyle(.orange)
+                    .accessibilityLabel("Beta feature")
+            }
+        }
+        .disabled(locationProvider.isDenied)
+
+        switch locationStatus {
+        case .idle:
+            EmptyView()
+
+        case .locating:
+            Label("Finding your location…", systemImage: "location")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+        case .captured:
+            Label(capturedLocation?.name ?? "Location recorded", systemImage: "location.fill")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+        case .denied:
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Hotaru doesn't have permission to use your location.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Button("Open Settings") {
+                    guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+                    UIApplication.shared.open(url)
+                }
+                .font(.caption)
+            }
+
+        case .unavailable:
+            Label("Couldn't get an accurate location", systemImage: "location.slash")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func captureLocationIfNeeded() async {
+        guard locationFeatureEnabled, attachLocation, capturedLocation == nil else { return }
+
+        locationStatus = .locating
+
+        switch await locationProvider.capture() {
+        case .success(let location):
+            capturedLocation = location
+            locationStatus = .captured
+
+        case .denied:
+            // Only offer the Settings shortcut if permission was actually refused — an
+            // authorization request that resolved to something else shouldn't send the user there.
+            locationStatus = locationProvider.isDenied ? .denied : .unavailable
+
+        case .unavailable:
+            locationStatus = .unavailable
+        }
+    }
+
+    /// The location to send, honouring both the master setting and the per-transaction toggle.
+    private var locationToAttach: TransactionLocation? {
+        guard locationFeatureEnabled, attachLocation else { return nil }
+        return capturedLocation
     }
 
     func submitTransaction() async throws {
         submitIsLoading = true
         do {
+            let location = locationToAttach
             try await postTransaction(
                 description: transactionDescription, amount: amount, date: date,
                 category: selectedCategory, type: transactionType,
                 sourceAccount: sourceAccount,
-                destinationAccount: destinationAccount, notes: transactionNote,
-                budgetID: selectedBudgetID
+                destinationAccount: destinationAccount,
+                notes: location?.appended(to: transactionNote) ?? transactionNote,
+                budgetID: selectedBudgetID,
+                latitude: location?.nativeLatitude,
+                longitude: location?.nativeLongitude
             )
-            let impact = await UINotificationFeedbackGenerator()
+            let impact = UINotificationFeedbackGenerator()
 
             toastParams = AlertToast(
                 displayMode: .alert, type: .complete(Color.green), title: "Saved Successfully"
             )
-            await impact.notificationOccurred(.success)
+            impact.notificationOccurred(.success)
             showToast = true
+            NotificationCenter.default.post(name: AppNotifications.transactionCreated, object: nil)
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                shouldRefresh? = true
                 dismiss()
             }
         } catch {
-            let impact = await UINotificationFeedbackGenerator()
+            let impact = UINotificationFeedbackGenerator()
             toastParams = AlertToast(
                 displayMode: .alert, type: .error(Color.red), title: "Something went wrong"
             )
-            await impact.notificationOccurred(.error)
+            impact.notificationOccurred(.error)
             showToast = true
         }
         submitIsLoading = false
@@ -262,7 +386,7 @@ struct TransactionCreate: View {
                 //        descriptions = try await fetchTransactionAutocomplete()
 
             } catch {
-                print("Error loading categories: \(error)")
+                AppLog.networkError("Failed to load autocomplete data", error)
             }
         }
     }

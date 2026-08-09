@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 
+@MainActor
 class MenuViewModel: ObservableObject {
     @Published var tokenSheetShown = false
     @Published var hasCheckedToken = false

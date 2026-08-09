@@ -4,8 +4,8 @@ import SwiftUI
 
 // MARK: - Settings Access
 
-/// Access app settings via AppSettings.swift
-/// AppSettings uses @AppStorage for automatic UserDefaults persistence
+// Access app settings via AppSettings.swift
+// AppSettings uses @AppStorage for automatic UserDefaults persistence
 
 // MARK: - Notifications
 
@@ -25,7 +25,7 @@ func SafariBuilder(apiURL: String, openURL: OpenURLAction) -> Bool {
         NotificationCenter.default.post(
             name: SafariErrorNotification, object: nil, userInfo: ["message": errorMessage]
         )
-        print(errorMessage)
+        AppLog.app.error("\(errorMessage, privacy: .private)")
         return false
     }
 
@@ -39,7 +39,7 @@ func SafariBuilder(apiURL: String, openURL: OpenURLAction) -> Bool {
         NotificationCenter.default.post(
             name: SafariErrorNotification, object: nil, userInfo: ["message": errorMessage]
         )
-        print(errorMessage)
+        AppLog.app.error("\(errorMessage, privacy: .private)")
         return false
     }
 

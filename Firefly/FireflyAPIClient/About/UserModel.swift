@@ -49,7 +49,7 @@ enum UserModelError: Error {
 func getUser() async throws -> User {
     let request = try RequestBuilder(apiURL: ApiPaths.userAbout)
 
-    let (data, response) = try await URLSession.shared.data(for: request)
+    let (data, response) = try await AppNetworking.session.data(for: request)
 
     guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
         throw UserModelError.invalidResponse
@@ -73,7 +73,7 @@ final class UserModel: ObservableObject {
         isLoading = true
         let request = try RequestBuilder(apiURL: ApiPaths.userAbout)
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await AppNetworking.session.data(for: request)
 
         guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
             throw UserModelError.invalidResponse

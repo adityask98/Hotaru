@@ -6,21 +6,26 @@ enum TimePeriod: String, CaseIterable, Identifiable {
     case last30Days = "Last 30 Days"
     case custom = "Custom"
 
-    var id: String { rawValue }
+    var id: String {
+        rawValue
+    }
 }
 
 struct CategoriesBarChart: View {
     var refreshTrigger = UUID()
+    let insightStore: CategoriesInsightStore
 
     @State private var chartData: CategoriesInsight?
     @State private var isLoading = false
+    @State private var loadFailed = false
     @State private var selectedCategory: String?
     @AppStorage("categoriesBarChartPeriod") private var selectedPeriod: TimePeriod = .currentMonth
     @State private var customStartDate: Date
     @State private var customEndDate: Date
 
-    init(refreshTrigger: UUID = UUID()) {
+    init(refreshTrigger: UUID = UUID(), insightStore: CategoriesInsightStore) {
         self.refreshTrigger = refreshTrigger
+        self.insightStore = insightStore
         let calendar = Calendar.current
         let now = Date()
         let thirtyDaysAgo = calendar.date(byAdding: .day, value: -30, to: now) ?? now
@@ -32,14 +37,13 @@ struct CategoriesBarChart: View {
         (chartData ?? []).sorted { abs($0.differenceFloat ?? 0) > abs($1.differenceFloat ?? 0) }
     }
 
-    private var totalSpending: Int {
+    private var totalSpending: Double {
         chartData?.reduce(0) { $0 + abs($1.differenceFloat ?? 0) } ?? 0
     }
 
     private var displayedPeriod: String {
         if selectedPeriod == .custom {
-            let formatter = DateFormatter()
-            formatter.dateStyle = .short
+            let formatter = CachedFormatters.shortDate
             return "\(formatter.string(from: customStartDate)) - \(formatter.string(from: customEndDate))"
         }
         return selectedPeriod.rawValue
@@ -79,6 +83,11 @@ struct CategoriesBarChart: View {
             if isLoading {
                 ProgressView()
                     .frame(height: 300)
+            } else if loadFailed, chartData == nil {
+                ErrorStateView(message: "Couldn't load spending data.") {
+                    Task { await loadChartData() }
+                }
+                .frame(height: 200)
             } else {
                 Chart(sortedData, id: \.id) { item in
                     BarMark(
@@ -102,8 +111,8 @@ struct CategoriesBarChart: View {
                     AxisMarks(position: .bottom) { value in
                         AxisGridLine()
                         AxisValueLabel {
-                            if let intValue = value.as(Int.self) {
-                                Text(formatAxisValue(intValue))
+                            if let doubleValue = value.as(Double.self) {
+                                Text(formatAxisValue(doubleValue))
                                     .font(.caption2)
                             }
                         }
@@ -139,7 +148,8 @@ struct CategoriesBarChart: View {
                     .asymmetric(
                         insertion: .opacity.combined(with: .scale(scale: 0.95)),
                         removal: .opacity.combined(with: .scale(scale: 0.95))
-                    ))
+                    )
+                )
             }
 
             // Total spending summary
@@ -171,32 +181,32 @@ struct CategoriesBarChart: View {
         .animation(.easeInOut(duration: 0.3), value: selectedCategory)
         .onChange(of: selectedPeriod) { _, _ in
             Task {
-                try? await getChartData()
+                await loadChartData()
             }
         }
         .onChange(of: customStartDate) { _, _ in
             if selectedPeriod == .custom {
                 Task {
-                    try? await getChartData()
+                    await loadChartData()
                 }
             }
         }
         .onChange(of: customEndDate) { _, _ in
             if selectedPeriod == .custom {
                 Task {
-                    try? await getChartData()
+                    await loadChartData()
                 }
             }
         }
         .onChange(of: refreshTrigger) { _, _ in
             Task {
-                try? await getChartData()
+                await loadChartData()
             }
         }
         .onAppear {
             if chartData == nil {
                 Task {
-                    try? await getChartData()
+                    await loadChartData()
                 }
             }
         }
@@ -208,7 +218,7 @@ struct CategoriesBarChart: View {
         .padding()
     }
 
-    private func formatCurrency(amount: Int, code: String) -> String {
+    private func formatCurrency(amount: Double, code: String) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         formatter.currencyCode = code
@@ -216,24 +226,22 @@ struct CategoriesBarChart: View {
         return formatter.string(from: NSNumber(value: abs(amount))) ?? "\(abs(amount))"
     }
 
-    private func formatAxisValue(_ value: Int) -> String {
+    private func formatAxisValue(_ value: Double) -> String {
         if value >= 1_000 {
-            return "\(value / 1_000)K"
+            return String(format: "%.0fK", value / 1_000)
         }
-        return "\(value)"
+        return String(format: "%.0f", value)
     }
 
-    private func percentageOfTotal(amount: Int) -> String {
+    private func percentageOfTotal(amount: Double) -> String {
         guard totalSpending > 0 else { return "0%" }
-        let percentage = Double(abs(amount)) / Double(totalSpending) * 100
+        let percentage = abs(amount) / totalSpending * 100
         return String(format: "%.1f%%", percentage)
     }
 
-    private func getChartData() async throws {
+    private func loadChartData() async {
         let calendar = Calendar.current
         let now = Date()
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
 
         let startDate: Date
         let endDate: Date
@@ -241,7 +249,8 @@ struct CategoriesBarChart: View {
         switch selectedPeriod {
         case .currentMonth:
             startDate = calendar.date(
-                from: calendar.dateComponents([.year, .month], from: now))!
+                from: calendar.dateComponents([.year, .month], from: now)
+            )!
             endDate = calendar.date(
                 byAdding: DateComponents(month: 1, day: -1), to: startDate
             )!
@@ -254,10 +263,16 @@ struct CategoriesBarChart: View {
         }
 
         isLoading = true
-        chartData = try await fetchCategoriesExpenseInsights(
-            startDate: formatter.string(from: startDate),
-            endDate: formatter.string(from: endDate)
-        )
+        loadFailed = false
+        do {
+            chartData = try await insightStore.insights(
+                startDate: formatDateToYYYYMMDD(startDate),
+                endDate: formatDateToYYYYMMDD(endDate)
+            )
+        } catch {
+            loadFailed = true
+            AppLog.networkError("Failed to load categories bar chart", error)
+        }
         isLoading = false
     }
 }

@@ -5,7 +5,9 @@ enum TransactionType: String, CaseIterable, Identifiable {
     case income = "Income"
     case transfer = "Transfer"
 
-    var id: Self { self }
+    var id: Self {
+        self
+    }
 
     var displayName: String {
         switch self {

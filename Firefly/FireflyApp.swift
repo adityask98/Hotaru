@@ -30,7 +30,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
     private func handleShortcutItem(_ shortcutItem: UIApplicationShortcutItem) {
         if shortcutItem.type == "addTransaction" {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(0.5))
                 self.menuViewModel?.openTransactionSheet()
             }
         }
@@ -59,8 +60,9 @@ struct FireflyApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var alertViewModel = AlertViewModel()
     @StateObject private var menuViewModel = MenuViewModel()
+    @StateObject private var pendingDeleteManager = PendingDeleteManager()
     @Environment(\.scenePhase) var scenePhase
-    @AppStorage("selectedTheme") private var selectedTheme: ThemeMode = .system
+    @AppStorage(UserDefaultKeys.selectedTheme) private var selectedTheme: ThemeMode = .system
 
     var body: some Scene {
         WindowGroup {
@@ -68,6 +70,7 @@ struct FireflyApp: App {
                 .preferredColorScheme(colorScheme)
                 .environmentObject(alertViewModel)
                 .environmentObject(menuViewModel)
+                .environmentObject(pendingDeleteManager)
                 .toast(isPresenting: $alertViewModel.show, alert: { alertViewModel.alertToast })
                 .onAppear {
                     appDelegate.menuViewModel = menuViewModel
@@ -79,7 +82,8 @@ struct FireflyApp: App {
             case .inactive:
                 break
             case .background:
-                print("Background phase")
+                // Commit any pending delete so it isn't lost if the app is killed
+                pendingDeleteManager.commitNow()
                 updateShortcutItems()
             @unknown default:
                 break

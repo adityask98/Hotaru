@@ -4,7 +4,6 @@ struct AccountDetail: View {
     @State var account: AccountsDatum
     @StateObject private var viewModel: AccountDetailViewModel
     @Environment(\.openURL) var openURL
-    @State private var shouldRefresh: Bool? = false
 
     init(account: AccountsDatum) {
         _account = .init(initialValue: account)
@@ -47,6 +46,11 @@ struct AccountDetail: View {
             if viewModel.transactionsIsLoading && viewModel.transactions?.data?.isEmpty != false {
                 LoadingSpinner()
                     .padding()
+            } else if viewModel.transactions == nil,
+                      let message = viewModel.transactionsErrorMessage {
+                ErrorStateView(message: message) {
+                    Task { await viewModel.fetchTransactions() }
+                }
             } else {
                 TransactionsList(
                     transactions: viewModel.transactions,
@@ -55,8 +59,7 @@ struct AccountDetail: View {
                         Task {
                             await viewModel.fetchTransactions(loadMore: true)
                         }
-                    },
-                    shouldRefresh: $shouldRefresh
+                    }
                 )
             }
         }.onAppear {
@@ -66,12 +69,29 @@ struct AccountDetail: View {
                 }
             }
         }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppNotifications.transactionDeleted)
+        ) { _ in
+            Task { await viewModel.fetchTransactions() }
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppNotifications.transactionCreated)
+        ) { _ in
+            Task { await viewModel.fetchTransactions() }
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppNotifications.transactionUpdated)
+        ) { _ in
+            Task { await viewModel.fetchTransactions() }
+        }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
                 VStack {
                     Text(account.attributes?.name ?? "Unknown").font(.headline)
-                    Text("Asset Account")
+                    if let type = account.attributes?.type {
+                        Text("\(type.capitalized) Account")
+                    }
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -84,6 +104,7 @@ struct AccountDetail: View {
                 } label: {
                     Image(systemName: "ellipsis")
                 }
+                .accessibilityLabel("More options")
             }
         }
     }
@@ -124,6 +145,7 @@ struct AccountNumberCopiableView: View {
                             .brightness(copied ? 0.2 : 0)
                             .symbolEffect(.bounce, value: bounce)
                     }
+                    .accessibilityLabel("Copy \(label.lowercased())")
                 }
             }
             Text((empty ? "Empty" : value) ?? "Empty").opacity(0.5)

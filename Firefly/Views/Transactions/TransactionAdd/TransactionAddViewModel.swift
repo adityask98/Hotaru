@@ -1,9 +1,10 @@
 import Foundation
 
+@MainActor
 class TransactionAddViewModel: ObservableObject {
     @Published var transactionStore: TransactionStore
 
-    // Direct access to the single transaction
+    /// Direct access to the single transaction
     var transaction: TransactionSplitStore {
         get { transactionStore.transactions[0] }
         set {
@@ -17,7 +18,7 @@ class TransactionAddViewModel: ObservableObject {
         }
     }
 
-    // Access to all transactions (for split transactions)
+    /// Access to all transactions (for split transactions)
     var allTransactions: [TransactionSplitStore] {
         get { transactionStore.transactions }
         set {
@@ -36,7 +37,7 @@ class TransactionAddViewModel: ObservableObject {
     init() {
         let defaultTransaction = TransactionSplitStore(
             type: .withdrawal,
-            date: ISO8601DateFormatter().string(from: Date()),
+            date: CachedFormatters.iso8601.string(from: Date()),
             amount: "",
             description: ""
         )
@@ -44,11 +45,11 @@ class TransactionAddViewModel: ObservableObject {
         transactionStore = TransactionStore(transactions: [defaultTransaction])
     }
 
-    // Initialize with preset category
+    /// Initialize with preset category
     init(categoryID: String? = nil, categoryName: String? = nil) {
         let defaultTransaction = TransactionSplitStore(
             type: .withdrawal,
-            date: ISO8601DateFormatter().string(from: Date()),
+            date: CachedFormatters.iso8601.string(from: Date()),
             amount: "",
             description: "",
             categoryID: categoryID,
@@ -127,7 +128,7 @@ class TransactionAddViewModel: ObservableObject {
             && Double(transaction.amount) != nil && Double(transaction.amount)! > 0
     }
 
-    // Check if this is a split transaction
+    /// Check if this is a split transaction
     var isSplitTransaction: Bool {
         transactionStore.transactions.count > 1
     }

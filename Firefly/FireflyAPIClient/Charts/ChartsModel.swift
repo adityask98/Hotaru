@@ -2,7 +2,6 @@ import Foundation
 
 enum ChartsError: Error {
     case decodeError
-    case categories
     case common
 }
 
@@ -29,21 +28,75 @@ struct ChartOverviewElement: Codable {
 
 typealias ChartOverview = [ChartOverviewElement]
 
-func fetchChartOverview() async throws -> ChartOverview {
-    let request = try RequestBuilder(apiURL: ChartsApiPaths.overview)
+/// Shares account-balance chart fetches so pull-to-refresh and period changes
+/// don't pile up duplicate in-flight requests. Successful results stay cached
+/// until `invalidate()` is called; failures are not cached.
+@MainActor
+final class ChartOverviewStore: ObservableObject {
+    private var inFlight: [String: Task<ChartOverview, Error>] = [:]
 
-    let (data, response) = try await URLSession.shared.data(for: request)
+    func overview(
+        startDate: String,
+        endDate: String,
+        period: String? = nil,
+        preselected: String? = nil
+    ) async throws -> ChartOverview {
+        let key = "\(startDate)|\(endDate)|\(period ?? "")|\(preselected ?? "")"
+        if let task = inFlight[key] {
+            return try await task.value
+        }
+        let task = Task {
+            try await fetchChartOverview(
+                startDate: startDate,
+                endDate: endDate,
+                period: period,
+                preselected: preselected
+            )
+        }
+        inFlight[key] = task
+        do {
+            return try await task.value
+        } catch {
+            inFlight[key] = nil
+            throw error
+        }
+    }
+
+    /// Drops cached results so the next request hits the server
+    func invalidate() {
+        inFlight.removeAll()
+    }
+}
+
+func fetchChartOverview(
+    startDate: String,
+    endDate: String,
+    period: String? = nil,
+    preselected: String? = nil
+) async throws -> ChartOverview {
+    var request = try RequestBuilder(apiURL: ChartsApiPaths.overview)
+    var queryItems = [
+        URLQueryItem(name: "start", value: startDate),
+        URLQueryItem(name: "end", value: endDate),
+    ]
+    if let period {
+        queryItems.append(URLQueryItem(name: "period", value: period))
+    }
+    if let preselected {
+        queryItems.append(URLQueryItem(name: "preselected", value: preselected))
+    }
+    request.url?.append(queryItems: queryItems)
+
+    let (data, response) = try await AppNetworking.session.data(for: request)
     guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-        throw ChartsError.categories
+        throw ChartsError.common
     }
 
     do {
         let decoder = JSONDecoder()
-        let result = try decoder.decode(ChartOverview.self, from: data)
-        print(result)
-        return result
+        return try decoder.decode(ChartOverview.self, from: data)
     } catch {
-        print(error)
+        AppLog.networkError("Failed to decode chart overview", error)
         throw ChartsError.decodeError
     }
 }

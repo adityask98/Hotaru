@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 
+@MainActor
 class SearchViewModel: ObservableObject {
     @Published var searchText = ""
     @Published var searchDebouncedText = ""
@@ -37,25 +38,22 @@ class SearchViewModel: ObservableObject {
                 if Task.isCancelled { return }
             } catch {
                 if Task.isCancelled { return }
-                await MainActor.run {
-                    self.errorMessage = "Search failed: \(error.localizedDescription)"
-                    self.isLoading = false
-                }
+                errorMessage = "Search failed: \(error.localizedDescription)"
+                isLoading = false
             }
         }
     }
 
-    @MainActor
     func performSearch() async throws {
         var request = try RequestBuilder(apiURL: ApiPaths.searchTransactions)
         request.url?.append(queryItems: [
             URLQueryItem(name: "query", value: String(searchDebouncedText)),
         ])
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await AppNetworking.session.data(for: request)
 
         guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            throw TransactionsModelError.invalidResponse
+            throw TransactionsModelError.invalidResponse(statusCode: (response as? HTTPURLResponse)?.statusCode)
         }
 
         do {
@@ -64,9 +62,6 @@ class SearchViewModel: ObservableObject {
 
             searchResults = result
             isLoading = false
-            #if DEBUG
-                print("Search Results: \(String(describing: searchResults))")
-            #endif
         }
     }
 }

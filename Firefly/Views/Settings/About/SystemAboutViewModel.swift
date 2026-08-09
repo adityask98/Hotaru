@@ -19,10 +19,41 @@ struct SystemInfoDataClass: Codable {
     }
 }
 
+enum SystemAboutError: LocalizedError {
+    case invalidResponse
+    case invalidData
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidResponse: "Couldn't reach the Firefly III server."
+        case .invalidData: "Couldn't read the server's response."
+        }
+    }
+}
+
+/// Hotaru's own version/build — read once from the app bundle, not the network.
+struct AppBuildInfo {
+    let version: String
+    let build: String
+
+    static let current = AppBuildInfo(
+        version: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-",
+        build: Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "-"
+    )
+}
+
+@MainActor
 class SystemAboutViewModel: ObservableObject {
     @Published var systemInfo: SystemInfoDataClass?
     @Published var isLoading = true
     @Published var errorMessage: String?
+
+    let appInfo = AppBuildInfo.current
+    /// The resolved server URL saved by `TokenSettings`, shown as-is (already normalized
+    /// there). Reading it directly instead of re-deriving it keeps this in sync with
+    /// whatever the user actually saved, including their chosen http/https scheme.
+    let connectedURL = UserDefaults.standard.string(forKey: UserDefaultKeys.baseURLKey)
+
     private var fetchTask: Task<Void, Never>?
 
     func fetchSystemInfo() {
@@ -35,19 +66,19 @@ class SystemAboutViewModel: ObservableObject {
                 if Task.isCancelled { return }
             } catch {
                 if Task.isCancelled { return }
+                AppLog.networkError("Failed to fetch system info", error)
                 self.errorMessage = error.localizedDescription
                 self.isLoading = false
             }
         }
     }
 
-    @MainActor
     func performFetch() async throws {
-        var request = try RequestBuilder(apiURL: ApiPaths.systemAbout)
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let request = try RequestBuilder(apiURL: ApiPaths.systemAbout)
+        let (data, response) = try await AppNetworking.session.data(for: request)
 
         guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            return
+            throw SystemAboutError.invalidResponse
         }
 
         do {
@@ -55,9 +86,21 @@ class SystemAboutViewModel: ObservableObject {
             let result = try decoder.decode(SystemInfo.self, from: data)
             systemInfo = result.data
             isLoading = false
-            #if DEBUG
-                print("systeminfo: \(String(describing: systemInfo))")
-            #endif
+        } catch {
+            throw SystemAboutError.invalidData
         }
+    }
+
+    /// Plain-text summary for the "Copy Debug Info" button — useful when reporting a bug
+    /// against a self-hosted server whose exact version/PHP/OS combo matters.
+    var debugInfoText: String {
+        """
+        Hotaru \(appInfo.version) (\(appInfo.build))
+        Firefly III \(systemInfo?.version ?? "-")
+        PHP \(systemInfo?.phpVersion ?? "-")
+        OS \(systemInfo?.os ?? "-")
+        Driver \(systemInfo?.driver ?? "-")
+        Server \(connectedURL ?? "-")
+        """
     }
 }

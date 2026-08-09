@@ -22,10 +22,10 @@ struct RootView: View {
     @EnvironmentObject private var alertViewModel: AlertViewModel
     @StateObject private var tokenSettingsValue = TokenSettingsViewModel()
     @EnvironmentObject var menuViewModel: MenuViewModel
+    @EnvironmentObject var pendingDeleteManager: PendingDeleteManager
     //    @ObservedObject var toastHandler: ToastHandlerModel
     @State private var tokenSheetShown = false
     @State private var hasCheckedToken = false
-    @State private var shouldRefresh: Bool? = false // Used to refresh after the create page is dismissed.
     @State private var searchText = ""
     @AppStorage("tabViewLast") var tabViewLast = 1
 
@@ -56,7 +56,7 @@ struct RootView: View {
                 TokenSettings().environmentObject(AlertViewModel())
             }
             .sheet(isPresented: $menuViewModel.transactionSheetShown) {
-                TransactionCreate(shouldRefresh: $shouldRefresh).background(.ultraThinMaterial)
+                TransactionCreate().background(.ultraThinMaterial)
             }
             //    .sheet(isPresented: $menuViewModel.searchSheetShown) {
             //      SearchPage()
@@ -76,6 +76,16 @@ struct RootView: View {
 
             .transition(.opacity)
             .ignoresSafeArea(.all)
+            .overlay(alignment: .bottom) {
+                if let pending = pendingDeleteManager.pending {
+                    UndoSnackbar(title: pending.title) {
+                        pendingDeleteManager.undo()
+                    }
+                    .padding(.bottom, 70) // keep clear of the tab bar
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .animation(.spring(duration: 0.35), value: pendingDeleteManager.pending)
     }
 
     private func checkToken() async throws {

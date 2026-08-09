@@ -1,13 +1,13 @@
 import SwiftUI
 
 struct AboutView: View {
-    @ObservedObject private var user = UserModel()
-    @State private var transactions = TransactionsViewModel()
+    @StateObject private var user = UserModel()
+    @StateObject private var insightStore = CategoriesInsightStore()
     @EnvironmentObject var menuViewModel: MenuViewModel
     @State private var refreshTrigger = UUID()
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 LazyVGrid(
                     columns: [
@@ -28,8 +28,8 @@ struct AboutView: View {
                 }
                 .padding(.horizontal)
                 VStack(alignment: .leading, spacing: 24) {
-                    CategoriesBarChart(refreshTrigger: refreshTrigger)
-                    CategoriesDonut(refreshTrigger: refreshTrigger)
+                    CategoriesBarChart(refreshTrigger: refreshTrigger, insightStore: insightStore)
+                    CategoriesDonut(refreshTrigger: refreshTrigger, insightStore: insightStore)
                 }
             }
             .refreshable {
@@ -41,7 +41,7 @@ struct AboutView: View {
                 do {
                     try await user.getUser()
                 } catch {
-                    print(error)
+                    AppLog.networkError("Failed to fetch user", error)
                 }
             }
 
@@ -68,11 +68,12 @@ struct AboutView: View {
     }
 
     private func refreshAllData() async {
+        insightStore.invalidate()
         refreshTrigger = UUID()
         do {
             try await user.getUser()
         } catch {
-            print(error)
+            AppLog.networkError("Failed to fetch user", error)
         }
     }
 }
@@ -86,7 +87,7 @@ struct ShortcutItem: View {
         NavigationLink(destination: destination) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
-                    .font(.system(size: 20))
+                    .font(.title3)
                     .foregroundStyle(.blue)
                     .symbolRenderingMode(.hierarchical)
 

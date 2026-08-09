@@ -10,7 +10,19 @@ struct CategoriesView: View {
                 VStack {
                     if viewMModel.isLoading {
                         LoadingSpinner()
+                    } else if viewMModel.categories == nil, let message = viewMModel.errorMessage {
+                        ErrorStateView(message: message) {
+                            Task { await viewMModel.fetchCategories() }
+                        }
+                        .padding(.top, 80)
+                    } else if viewMModel.categories?.data?.isEmpty == true {
+                        EmptyStateView(message: "No categories yet")
                     } else if let categories = viewMModel.categories {
+                        Text(formatDateRange(currentMonthFirstDate(), currentMonthLastDate()))
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal)
                         CategoriesBodyView(categories: categories)
                     }
                 }
@@ -19,7 +31,7 @@ struct CategoriesView: View {
         .task {
             guard !didLoadOnce else { return }
             didLoadOnce = true
-            viewMModel.fetchCategories()
+            await viewMModel.fetchCategories()
         }
         .navigationTitle("Categories")
         .navigationBarTitleDisplayMode(.large)
@@ -68,25 +80,18 @@ struct CategoryItem: View {
                     Spacer()
                     Image(systemName: "chevron.right")
                         .foregroundStyle(Color.green)
-                        .font(.system(size: 12))
+                        .font(.caption)
                 }
                 .padding(.bottom, -4)
                 Divider().padding(.horizontal, -16)
                 let (amount, symbol) = totalAmountAndSymbol(for: category.attributes)
-                // Use your formatter helper — you already have: formatAmount(_:symbol:)
                 Text(formatAmount(amount, symbol: symbol))
                     .font(.title)
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .foregroundColor(amount < 0 ? .red : .primary)
-                HStack {
-                    Spacer()
-                    Text(formatDate(category.attributes?.updatedAt))
-                        .lineLimit(1)
-                        .font(.caption2)
-                        .fontWeight(.ultraLight)
-                }
+                    .foregroundColor(amountColor(for: amount))
+                    .padding(.bottom, 4)
             }
             .padding(.horizontal)
             .padding(.vertical, 7)
@@ -98,27 +103,47 @@ struct CategoryItem: View {
             }
         }
         .contextMenu {
-            WebviewButton(url: WebviewPaths.category(category.id!))
+            if let categoryID = category.id {
+                WebviewButton(url: WebviewPaths.category(categoryID))
+            }
         }
     }
 
+    private func amountColor(for amount: Decimal) -> Color {
+        if amount < 0 { return .red }
+        if amount > 0 { return .green }
+        return .secondary
+    }
+
+    /// `spent`/`earned` report one entry per currency actually used, so summing them
+    /// directly mixes currencies together for categories with multi-currency transactions.
+    /// `pc_spent`/`pc_earned` are pre-converted to the administration's primary currency,
+    /// so they're always safe to sum and label with `primaryCurrencySymbol`. Falls back to
+    /// the raw arrays for Firefly instances that don't return the `pc_*` fields.
     private func totalAmountAndSymbol(for attributes: CategoriesAttributes?) -> (Decimal, String?) {
-        // Sum the spent values
-        let spentTotal =
-            attributes?.spent?.compactMap { Decimal(string: $0.sum ?? "0") }.reduce(0, +) ?? 0
-        // Sum the earned values
-        let earnedTotal =
-            attributes?.earned?.compactMap { Decimal(string: $0.sum ?? "0") }.reduce(0, +) ?? 0
-        // Prefer spent if not zero, otherwise earned, otherwise zero.
-        if spentTotal != 0 {
-            let symbol = attributes?.spent?.first?.currencySymbol ?? attributes?.nativeCurrencySymbol
-            return (spentTotal, symbol)
-        } else if earnedTotal != 0 {
-            let symbol = attributes?.earned?.first?.currencySymbol ?? attributes?.nativeCurrencySymbol
-            return (earnedTotal, symbol)
-        } else {
-            return (0, attributes?.nativeCurrencySymbol)
+        func sum(_ entries: [CategoriesEarned]?) -> Decimal {
+            entries?.compactMap { Decimal(string: $0.sum ?? "0") }.reduce(0, +) ?? 0
         }
+
+        let primarySymbol = attributes?.primaryCurrencySymbol
+
+        if attributes?.pcSpent != nil || attributes?.pcEarned != nil {
+            let spentTotal = sum(attributes?.pcSpent)
+            if spentTotal != 0 {
+                return (spentTotal, primarySymbol)
+            }
+            return (sum(attributes?.pcEarned), primarySymbol)
+        }
+
+        let spentTotal = sum(attributes?.spent)
+        if spentTotal != 0 {
+            return (spentTotal, attributes?.spent?.first?.currencySymbol ?? primarySymbol)
+        }
+        let earnedTotal = sum(attributes?.earned)
+        if earnedTotal != 0 {
+            return (earnedTotal, attributes?.earned?.first?.currencySymbol ?? primarySymbol)
+        }
+        return (0, primarySymbol)
     }
 }
 

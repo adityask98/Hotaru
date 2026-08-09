@@ -16,10 +16,8 @@ func addCategory(params: AddCategory) async throws {
     let encoder = JSONEncoder()
     let data = try encoder.encode(params)
     request.httpBody = data
-    // print(request.url?.absoluteString)
 
-    let (_, response) = try await URLSession.shared.data(for: request)
-    print(response)
+    let (_, response) = try await AppNetworking.session.data(for: request)
 
     guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
         throw AddCategoryError.invalidResponse
@@ -48,19 +46,25 @@ struct CategoriesAttributes: Codable {
     let createdAt, updatedAt, name: String?
     let notes: String?
     let spent, earned: [CategoriesEarned]?
-    let nativeCurrencyID: String?
-    let nativeCurrencyCode: String?
-    let nativeCurrencySymbol: String?
-    let nativeCurrencyDecimalPlaces: Int?
+    /// Spent/earned totals already converted to the administration's primary currency —
+    /// safe to sum across entries even when the category has transactions in multiple
+    /// currencies, unlike `spent`/`earned` which report one entry per original currency.
+    let pcSpent, pcEarned: [CategoriesEarned]?
+    let primaryCurrencyID: String?
+    let primaryCurrencyCode: String?
+    let primaryCurrencySymbol: String?
+    let primaryCurrencyDecimalPlaces: Int?
 
     enum CodingKeys: String, CodingKey {
         case createdAt = "created_at"
         case updatedAt = "updated_at"
         case name, notes, spent, earned
-        case nativeCurrencyID = "native_currency_id"
-        case nativeCurrencyCode = "native_currency_code"
-        case nativeCurrencySymbol = "native_currency_symbol"
-        case nativeCurrencyDecimalPlaces = "native_currency_decimal_places"
+        case pcSpent = "pc_spent"
+        case pcEarned = "pc_earned"
+        case primaryCurrencyID = "primary_currency_id"
+        case primaryCurrencyCode = "primary_currency_code"
+        case primaryCurrencySymbol = "primary_currency_symbol"
+        case primaryCurrencyDecimalPlaces = "primary_currency_decimal_places"
     }
 }
 

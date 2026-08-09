@@ -17,6 +17,9 @@ struct PrimaryButton: View {
     var loading = false
     let action: () -> Void
 
+    /// Dynamic Type scale factor applied to the fixed text size
+    @ScaledMetric(relativeTo: .body) private var typeScale: CGFloat = 1
+
     var body: some View {
         HStack {
             if loading {
@@ -32,7 +35,7 @@ struct PrimaryButton: View {
                 }
             }
         }
-        .fontSize(textSize, textWeight, design: textDesign)
+        .fontSize(textSize * typeScale, textWeight, design: textDesign)
         .padding(.horizontal, 10 * 1.5)
         .foregroundStyle(textColor)
         .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: height, alignment: align)

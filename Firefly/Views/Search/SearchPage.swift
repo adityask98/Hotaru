@@ -5,15 +5,33 @@ struct SearchPage: View {
     @StateObject var searchVM = SearchViewModel()
     @State private var searchText = ""
     @FocusState private var isSearchFieldFocused: Bool
+    @ScaledMetric(relativeTo: .largeTitle) private var promptIconSize: CGFloat = 70
 
     var body: some View {
         NavigationStack {
             Group {
-                if searchVM.searchText.isEmpty {
-                    // Show centered search symbol when no search text
+                if searchVM.isLoading {
+                    LoadingSpinner()
+                } else if let errorMessage = searchVM.errorMessage {
+                    ErrorStateView(message: errorMessage) {
+                        searchVM.search()
+                    }
+                } else if let searchResults = searchVM.searchResults {
+                    if searchResults.data?.isEmpty == false {
+                        Text("Results for \"\(searchVM.searchDebouncedText)\"")
+                            .font(.headline)
+                        SearchTransactionsView(transactions: searchResults)
+                    } else {
+                        EmptyStateView(
+                            icon: "magnifyingglass",
+                            message: "No results for \"\(searchVM.searchDebouncedText)\""
+                        )
+                    }
+                } else {
+                    // No search has run yet (empty field, or debounce still pending)
                     VStack {
                         Image(systemName: "magnifyingglass")
-                            .font(.system(size: 70))
+                            .font(.system(size: promptIconSize))
                             .foregroundColor(.gray.opacity(0.7))
                             .padding()
 
@@ -29,46 +47,6 @@ struct SearchPage: View {
                             .padding(.top, 5)
                     }
                     .padding()
-                } else if searchVM.isLoading {
-                    LoadingSpinner()
-                } else if let errorMessage = searchVM.errorMessage {
-                    // Show error state
-                    VStack {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.system(size: 50))
-                            .foregroundColor(.orange)
-                            .padding()
-
-                        Text("Error")
-                            .font(.headline)
-                            .foregroundColor(.primary)
-                            .padding(.bottom, 4)
-
-                        Text(errorMessage)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-
-                        Button("Try Again") {
-                            searchVM.search()
-                        }
-                        .buttonStyle(.bordered)
-                        .padding(.top)
-                    }
-                    .padding()
-                } else {
-                    // Show search results when text is entered
-
-                    if let searchResults = searchVM.searchResults {
-                        Text("Results for \"\(searchVM.searchDebouncedText)\"")
-                            .font(.headline)
-                        SearchTransactionsView(transactions: searchResults)
-                    } else {
-                        Text("No results found")
-                            .foregroundColor(.gray)
-                            .padding()
-                    }
                 }
             }
             .interactiveDismissDisabled(!searchVM.searchText.isEmpty)
@@ -77,7 +55,6 @@ struct SearchPage: View {
             .focused($isSearchFieldFocused)
             .onChange(of: searchVM.searchDebouncedText) { _, _ in
                 searchVM.search()
-                print("Searching")
             }
             .navigationTitle("Search")
             .navigationBarTitleDisplayMode(.inline)
@@ -96,22 +73,18 @@ struct SearchPage: View {
 struct SearchTransactionsView: View {
     var transactions: Transactions
     @State private var transactionsLoaded = false
-    @State private var shouldRefresh: Bool? = false
 
     var body: some View {
         ScrollView {
             LazyVStack {
                 ForEach(transactions.data ?? [], id: \.id) { transactionData in
-                    TransactionsRow(
-                        transaction: transactionData,
-                        shouldRefresh: $shouldRefresh
-                    )
-                    .animation(
-                        .easeIn(duration: 0.3).delay(0.05), value: transactionsLoaded
-                    )
-                    .onAppear {
-                        transactionsLoaded = true
-                    }
+                    TransactionsRow(transaction: transactionData)
+                        .animation(
+                            .easeIn(duration: 0.3).delay(0.05), value: transactionsLoaded
+                        )
+                        .onAppear {
+                            transactionsLoaded = true
+                        }
                 }
             }
         }

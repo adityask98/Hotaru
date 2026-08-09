@@ -4,7 +4,9 @@ import SwiftUI
 struct AccountsView: View {
     @EnvironmentObject var menuViewModel: MenuViewModel
     @StateObject private var accounts = AccountsViewModel()
+    @StateObject private var chartStore = ChartOverviewStore()
     @State private var isLoading = false
+    @AppStorage("accountsBalanceChartExpanded") private var balanceChartExpanded = true
 
     var body: some View {
         NavigationStack {
@@ -12,9 +14,14 @@ struct AccountsView: View {
                 VStack {
                     if isLoading {
                         LoadingSpinner()
+                    } else if accounts.accounts == nil, let message = accounts.errorMessage {
+                        ErrorStateView(message: message) {
+                            Task { await accounts.fetchAccounts() }
+                        }
+                        .padding(.top, 80)
+                    } else if accounts.accounts?.data?.isEmpty == true {
+                        EmptyStateView(icon: "creditcard", message: "No accounts found")
                     } else {
-                        // BalanceCharts()
-
                         LazyVGrid(
                             columns: [
                                 GridItem(.flexible()),
@@ -26,6 +33,15 @@ struct AccountsView: View {
                             }
                         }
                         .padding()
+
+                        balanceChartSection
+                            .padding(.horizontal)
+
+                        // Buffer so the chart's scrub-selection card (which appears
+                        // below the chart) has room to scroll into view — the user's
+                        // finger is locked to the chart's drag gesture while scrubbing,
+                        // so they can't scroll to reveal it after the fact.
+                        Color.clear.frame(height: 200)
                     }
                 }
             }
@@ -44,9 +60,11 @@ struct AccountsView: View {
             )
 
             .background(Color.clear)
+            .scrollBounceBehavior(.always)
             .refreshable {
-                Task {
-                    await accounts.fetchAccounts()
+                await accounts.fetchAccounts()
+                if balanceChartExpanded {
+                    chartStore.invalidate()
                 }
             }
         }
@@ -57,6 +75,43 @@ struct AccountsView: View {
                 }
             }
         }
+    }
+
+    private var balanceChartSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Button(action: {
+                let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                impactFeedback.impactOccurred()
+                withAnimation {
+                    balanceChartExpanded.toggle()
+                }
+            }) {
+                HStack {
+                    Text("Balance over time")
+                        .fontSize(15, .bold, design: .rounded)
+                    Spacer()
+                    ZStack {
+                        Circle()
+                            .fill(Color.gray.opacity(0.15))
+                            .frame(width: 26, height: 26)
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 11, weight: .semibold))
+                            .rotationEffect(Angle.degrees(balanceChartExpanded ? 180 : 0))
+                            .animation(.bouncy, value: balanceChartExpanded)
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(PlainButtonStyle())
+            .foregroundStyle(.primary)
+            .padding(16)
+
+            if balanceChartExpanded {
+                AccountBalanceChart(store: chartStore)
+            }
+        }
+        .background(.ultraThinMaterial)
+        .cornerRadius(10)
     }
 }
 
@@ -74,7 +129,7 @@ struct AccountItem: View {
                     Spacer()
                     Image(systemName: "chevron.right")
                         .foregroundStyle(Color.green)
-                        .font(.system(size: 12))
+                        .font(.caption)
                 }
                 .padding(.bottom, -4)
                 Divider().padding(.horizontal, -16)
@@ -125,18 +180,6 @@ struct AccountItem: View {
         formatter.numberStyle = .currency
         formatter.currencySymbol = symbol ?? "¥"
         return formatter.string(from: NSNumber(value: amount)) ?? "Unknown Amount"
-    }
-
-    private func formatDate(_ dateString: String?) -> String {
-        guard let dateString = dateString,
-              let date = ISO8601DateFormatter().date(from: dateString) else {
-            return "Unknown Date"
-        }
-
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: date)
     }
 }
 

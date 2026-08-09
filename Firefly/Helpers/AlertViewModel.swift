@@ -1,10 +1,14 @@
 import AlertToast
+import Combine
 import Foundation
 import SwiftUI
 
+@MainActor
 class AlertViewModel: ObservableObject {
     @Published var show = false
     @Published var alertToast = AlertToast(type: .regular, title: "SOME TITLE")
+
+    private var cancellables: Set<AnyCancellable> = []
 
     init() {
         setupAllNotificationListeners()
@@ -12,110 +16,48 @@ class AlertViewModel: ObservableObject {
 
     // MARK: - Notification Setup
 
-    /// Sets up all notification listeners for the app
-    /// To add a new listener:
-    /// 1. Create notification constant in your helper file (e.g., let MyFeatureErrorNotification =
-    /// Notification.Name("MyFeatureErrorNotification"))
-    /// 2. Add a new addObserver call below with a unique selector
-    /// 3. Create the corresponding @objc handler method
-    /// 4. Call setupMyFeatureNotificationListeners() from this method
+    /// Sets up all notification listeners for the app.
+    /// To add a new listener, call `listen(for:style:)` below with the
+    /// notification name; the notification's userInfo["message"] is shown as a toast.
     private func setupAllNotificationListeners() {
-        setupSafariNotificationListeners()
-        setupTransactionNotificationListeners()
-        // Add more notification listeners here as features grow:
-        // setupMyFeatureNotificationListeners()
-        // setupAnotherFeatureNotificationListeners()
+        // Safari notifications (defined in Firefly/Helpers/SafariHelper.swift)
+        listen(for: SafariErrorNotification, style: .warning)
+        listen(for: SafariSuccessNotification, style: .success)
+
+        // Transaction notifications (defined in Firefly/Helpers/NotificationConstants.swift)
+        listen(for: AppNotifications.transactionUpdated, style: .success)
+
+        // Generic failures (e.g. a scheduled delete that failed server-side)
+        listen(for: AppNotifications.operationFailed, style: .warning)
     }
 
-    // MARK: - Safari Notifications
-
-    /// Listens for Safari-related errors and success notifications
-    /// Notifications defined in: Firefly/Helpers/SafariHelper.swift
-    private func setupSafariNotificationListeners() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleSafariError(_:)),
-            name: SafariErrorNotification,
-            object: nil
-        )
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleSafariSuccess(_:)),
-            name: SafariSuccessNotification,
-            object: nil
-        )
+    private enum ToastStyle {
+        case success
+        case warning
     }
 
-    private func setupTransactionNotificationListeners() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleTransactionEditSuccess(_:)),
-            name: TransactionEditSuccessNotification,
-            object: nil
-        )
-    }
-
-    @objc
-    private func handleSafariError(_ notification: Notification) {
-        if let message = notification.userInfo?["message"] as? String {
-            showWarning(message: message)
-        }
-    }
-
-    @objc
-    private func handleSafariSuccess(_ notification: Notification) {
-        if let message = notification.userInfo?["message"] as? String {
-            showSuccess(message: message)
-        }
-    }
-
-    @objc
-    private func handleTransactionEditSuccess(_ notification: Notification) {
-        if let message = notification.userInfo?["message"] as? String {
-            showSuccess(message: message)
-        }
-    }
-
-    // MARK: - Example: Adding a New Feature's Notifications
-
-    /// To add notifications from another source, follow this pattern:
-    ///
-    /// 1. In your helper file (e.g., MyFeatureHelper.swift), define:
-    ///    let MyFeatureErrorNotification = Notification.Name("MyFeatureErrorNotification")
-    ///    let MyFeatureSuccessNotification = Notification.Name("MyFeatureSuccessNotification")
-    ///
-    /// 2. Post the notification from your helper:
-    ///    NotificationCenter.default.post(name: MyFeatureErrorNotification, object: nil, userInfo: ["message": "Error
-    /// occurred"])
-    ///
-    /// 3. Add a setup function here:
-    ///    private func setupMyFeatureNotificationListeners() {
-    ///        NotificationCenter.default.addObserver(
-    ///            self,
-    ///            selector: #selector(handleMyFeatureError(_:)),
-    ///            name: MyFeatureErrorNotification,
-    ///            object: nil
-    ///        )
-    ///        // ... more observers
-    ///    }
-    ///
-    /// 4. Add the handler method:
-    ///    @objc private func handleMyFeatureError(_ notification: Notification) {
-    ///        if let message = notification.userInfo?["message"] as? String {
-    ///            showWarning(message: message)
-    ///        }
-    ///    }
-    ///
-    /// 5. Call it from setupAllNotificationListeners()
-
-    deinit {
-        NotificationCenter.default.removeObserver(self)
+    /// Shows a toast whenever `name` is posted with a userInfo["message"] string.
+    /// The message is extracted before hopping to the main actor so the listener
+    /// is safe regardless of which thread posts the notification.
+    private func listen(for name: Notification.Name, style: ToastStyle) {
+        NotificationCenter.default.publisher(for: name)
+            .sink { [weak self] notification in
+                guard let message = notification.userInfo?["message"] as? String else { return }
+                Task { @MainActor [weak self] in
+                    switch style {
+                    case .success:
+                        self?.showSuccess(message: message)
+                    case .warning:
+                        self?.showWarning(message: message)
+                    }
+                }
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Alert Display Methods
 
-    // Show Success Message
+    /// Show Success Message
     func showSuccess(
         message: String,
         displayMode: AlertToast.DisplayMode? = .alert,

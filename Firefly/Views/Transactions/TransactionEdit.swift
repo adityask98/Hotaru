@@ -1,8 +1,6 @@
 import AlertToast
 import SwiftUI
 
-let TransactionEditSuccessNotification = Notification.Name("TransactionEditSuccessNotification")
-
 struct TransactionEdit: View {
     @Environment(\.dismiss) var dismiss
     @State var transactionData: TransactionsDatum
@@ -20,14 +18,26 @@ struct TransactionEdit: View {
     @State private var toastParams = AlertToast(displayMode: .alert, type: .regular)
     @State private var autocompleteLoading = true
 
+    /// The location marker each split arrived with, keyed by split index, held aside while the user
+    /// edits so they never see it in the notes field — and re-applied on save so editing a
+    /// transaction doesn't silently discard where it happened. Splits can't be added or removed here,
+    /// so the indices stay aligned with `postTransactionData.transactions`.
+    @State private var preservedLocations: [TransactionLocation?]
+
     init(transactionData: TransactionsDatum) {
         _transactionData = State(initialValue: transactionData)
+        _preservedLocations = State(
+            initialValue: (transactionData.attributes?.transactions ?? []).map {
+                TransactionLocation.parse(from: $0.notes)
+            }
+        )
         _postTransactionData = State(
             initialValue: PostTransaction(
                 errorIfDuplicateHash: true, applyRules: true, fireWebhooks: true,
                 groupTitle: transactionData.attributes?.groupTitle,
                 transactions: transactionData.attributes?.transactions?.map { transaction in
-                    PostTransactionElement(
+                    let native = TransactionLocation.fromNativeFields(transaction)
+                    return PostTransactionElement(
                         type: transaction.type?.lowercased(),
                         date: transaction.date,
                         amount: formatAmountForTextField(
@@ -41,16 +51,22 @@ struct TransactionEdit: View {
                         sourceName: transaction.sourceName,
                         destinationID: transaction.destinationID,
                         destinationName: transaction.destinationName,
-                        notes: transaction.notes
+                        // Hide our own marker from the notes editor; it's restored on save.
+                        notes: TransactionLocation.strip(from: transaction.notes),
+                        // Echo back whatever the server gave us, so a PUT doesn't clear a native
+                        // location on any server that actually supports these.
+                        latitude: native?.nativeLatitude,
+                        longitude: native?.nativeLongitude
                     )
                 }
-            ))
+            )
+        )
     }
 
     var transactionTypes = ["Expenses", "Income", "Transfer"]
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 if isSplitTransaction(transactionData) {
                     Section("Group Title") {
@@ -77,7 +93,8 @@ struct TransactionEdit: View {
                                     postTransactionData.transactions?[index].description =
                                         newValue
                                 }
-                            ))
+                            )
+                        )
                         TextField(
                             "Amount",
                             text: Binding(
@@ -191,10 +208,8 @@ struct TransactionEdit: View {
                                     formatDateFromJSON(postTransactionData.transactions?[index].date ?? "")
                                 },
                                 set: { newValue in
-                                    let dateFormatter = DateFormatter()
-                                    dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
                                     postTransactionData.transactions?[index].date =
-                                        dateFormatter.string(from: newValue)
+                                        CachedFormatters.jsonDateTime.string(from: newValue)
                                 }
                             )
                         ).datePickerStyle(.compact)
@@ -233,7 +248,7 @@ struct TransactionEdit: View {
                                 do {
                                     try await submitTransaction()
                                 } catch {
-                                    print("ERROR EDITING: \(error)")
+                                    AppLog.networkError("Failed to edit transaction", error)
                                 }
                             }
                         }
@@ -242,7 +257,11 @@ struct TransactionEdit: View {
             )
             .navigationTitle("Edit Transaction")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationBarItems(trailing: Button("Cancel") { dismiss() })
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
             .toast(isPresenting: $showToast, tapToDismiss: false) {
                 toastParams
             }
@@ -267,34 +286,48 @@ struct TransactionEdit: View {
                 budgets = try await fetchBudgetsAutocomplete()
                 autocompleteLoading = false
             } catch {
-                print("Error: \(error)")
+                AppLog.networkError("Failed to load autocomplete data", error)
             }
         }
+    }
+
+    /// Puts each split's location marker back on the end of its notes before saving.
+    ///
+    /// `appended(to:)` strips any existing marker first, so this can't stack duplicates even if the
+    /// user pasted one in by hand.
+    private func payloadWithLocationsRestored() -> PostTransaction {
+        var payload = postTransactionData
+
+        guard var splits = payload.transactions else { return payload }
+
+        for index in splits.indices {
+            guard index < preservedLocations.count,
+                  let location = preservedLocations[index] else { continue }
+
+            splits[index].notes = location.appended(to: splits[index].notes ?? "")
+        }
+
+        payload.transactions = splits
+        return payload
     }
 
     func submitTransaction() async throws {
         submitLoading = true
         do {
             try await editTransaction(
-                transactionData: postTransactionData, transactionID: transactionData.id!
+                transactionData: payloadWithLocationsRestored(), transactionID: transactionData.id!
             )
-            // toastParams = AlertToast(
-            //     displayMode: .alert, type: .complete(Color.green), title: "Saved Successfully"
-            // )
-            // showToast = true
             NotificationCenter.default.post(
-                name: TransactionEditSuccessNotification, object: nil, userInfo: ["message": "Saved from edit screen"]
+                name: AppNotifications.transactionUpdated, object: nil,
+                userInfo: ["message": "Transaction updated"]
             )
-            // DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            //     dismiss()
-            // }
             dismiss()
         } catch {
             toastParams = AlertToast(
                 displayMode: .alert, type: .error(Color.red), title: "Something went wrong"
             )
             showToast = true
-            print(error)
+            AppLog.networkError("Failed to edit transaction", error)
         }
         submitLoading = false
     }

@@ -7,6 +7,7 @@ import Foundation
 //    private var fetchTask: Task<Void, Never>?
 // }
 
+@MainActor
 class DescriptionInputViewModel: ObservableObject {
     @Published var text = ""
     @Published var debouncedText = ""
@@ -43,14 +44,13 @@ class DescriptionInputViewModel: ObservableObject {
         }
     }
 
-    @MainActor
     func performFetch(onlyForInit: Bool = false) async throws {
         var request = try RequestBuilder(apiURL: AutocompleteApiPaths.transactions)
         request.url?.append(queryItems: [
             URLQueryItem(name: "query", value: String(debouncedText)),
         ])
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await AppNetworking.session.data(for: request)
 
         guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
             throw AutocompleteError.common
@@ -64,9 +64,6 @@ class DescriptionInputViewModel: ObservableObject {
                 transactionsAutocompleteEmptyQuery = result
             }
             transactionsAutocomplete = result
-            #if DEBUG
-                print("Search Results: \(String(describing: transactionsAutocomplete))")
-            #endif
         }
     }
 }

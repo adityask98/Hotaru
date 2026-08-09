@@ -2,7 +2,7 @@ import Foundation
 
 enum TransactionsModelError: Error {
     case invalidURL
-    case invalidResponse
+    case invalidResponse(statusCode: Int?)
     case invalidData
 }
 
@@ -20,118 +20,67 @@ enum TransactionTypes: String, CaseIterable, Identifiable {
     case reconciliation
     case special
     case specials
-    // case default = "default"
-    var id: String { rawValue }
+    /// case default = "default"
+    var id: String {
+        rawValue
+    }
+
+    /// Human-readable name for pickers
+    var displayName: String {
+        switch self {
+        case .opening_balance:
+            return "Opening Balance"
+        default:
+            return rawValue.capitalized
+        }
+    }
+
+    /// The curated set shown in the filter UI; the API also accepts plurals and
+    /// aliases (withdrawals/expense/income/…) but they duplicate these.
+    static var filterCases: [TransactionTypes] {
+        [.all, .withdrawal, .deposit, .transfer, .opening_balance, .reconciliation]
+    }
 }
 
 @MainActor
 final class TransactionsViewModel: ObservableObject {
     @Published var transactions: Transactions?
     @Published var isLoading = false
-    @Published var currentPage = 1
     @Published var hasMorePages = true
+    @Published var errorMessage: String?
     @Published var startDate: Date = Calendar.current.date(
         byAdding: .month, value: -1, to: Date.now
     )!
     @Published var endDate = Date.now
     @Published var type: TransactionTypes = .all
 
+    private let paginationManager: TransactionsPaginationManager
+
+    init() {
+        paginationManager = TransactionsPaginationManager(
+            apiProvider: MainTransactionsAPIProvider(
+                startDate: "", endDate: ""
+            )
+        )
+
+        paginationManager.$transactions.assign(to: &$transactions)
+        paginationManager.$isLoading.assign(to: &$isLoading)
+        paginationManager.$hasMorePages.assign(to: &$hasMorePages)
+        paginationManager.$errorMessage.assign(to: &$errorMessage)
+    }
+
     func fetchTransactions(loadMore: Bool = false) async {
-        if loadMore {
-            currentPage += 1
-        } else {
-            currentPage = 1
-        }
         if !loadMore {
-            isLoading = true
-        }
-
-        do {
-            // let newTransactions = try await getTransactions(page: currentPage)
-            let newTransactions: Transactions
-
-            if loadMore {
-                if (transactions?.links?.next) != nil {
-                    newTransactions = try await getTransactionsFromURL(
-                        (transactions?.links?.next)!)
-                    transactions?.data?.append(contentsOf: newTransactions.data ?? [])
-                    transactions?.links = newTransactions.links
-                    transactions?.meta = newTransactions.meta
-                }
-            } else {
-                transactions = try await getTransactions(
-                    type: type.rawValue, startDate: formatDateToYYYYMMDD(startDate),
+            // Rebuild the provider so fresh fetches pick up the current filter
+            paginationManager.updateProvider(
+                MainTransactionsAPIProvider(
+                    startDate: formatDateToYYYYMMDD(startDate),
                     endDate: formatDateToYYYYMMDD(endDate),
-                    page: 1
+                    type: type.rawValue
                 )
-            }
-
-            if transactions?.meta?.pagination?.currentPage
-                == transactions?.meta?.pagination?.totalPages {
-                hasMorePages = false
-            }
-        } catch {
-            print("Error fetching transactions: \(error)")
+            )
         }
-        if !loadMore {
-            isLoading = false
-        }
-    }
-
-    func getTransactions(
-        limit: Int = 20,
-        type: String = "all",
-        startDate: String,
-        endDate: String,
-        page: Int
-    ) async throws -> Transactions {
-        var request = try RequestBuilder(apiURL: ApiPaths.transactions)
-        request.url?.append(queryItems: [
-            // URLQueryItem(name: "type", value: type),
-            URLQueryItem(name: "limit", value: String(limit)),
-            URLQueryItem(name: "page", value: String(page)),
-            URLQueryItem(name: "start", value: startDate),
-            URLQueryItem(name: "end", value: endDate),
-            URLQueryItem(name: "type", value: type),
-        ])
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            throw TransactionsModelError.invalidResponse
-        }
-
-        do {
-            let decoder = JSONDecoder()
-            let result = try decoder.decode(Transactions.self, from: data)
-
-            return result
-        } catch {
-            print(error)
-            throw TransactionsModelError.invalidData
-        }
-    }
-
-    func getTransactionsFromURL(_ urlString: String) async throws -> Transactions {
-        let request = try RequestBuilder(apiURL: urlString, ignoreBaseURL: true)
-
-        return try await performRequest(request)
-    }
-
-    private func performRequest(_ request: URLRequest) async throws -> Transactions {
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            throw TransactionsModelError.invalidResponse
-        }
-
-        do {
-            let decoder = JSONDecoder()
-            let result = try decoder.decode(Transactions.self, from: data)
-            return result
-        } catch {
-            print(error)
-            throw TransactionsModelError.invalidData
-        }
+        await paginationManager.fetchTransactions(loadMore: loadMore)
     }
 
     func resetDates() {
@@ -177,13 +126,14 @@ extension TransactionsViewModel {
                     perPage: 15,
                     currentPage: 1,
                     totalPages: 7
-                )),
+                )
+            ),
             links: TransactionsLinks(
                 linksSelf:
-                "http://100.96.204.49:8888/api/v1/transactions?limit=15&type=default&page=1",
-                first: "http://100.96.204.49:8888/api/v1/transactions?limit=15&type=default&page=1",
-                next: "http://100.96.204.49:8888/api/v1/transactions?limit=15&type=default&page=2",
-                last: "http://100.96.204.49:8888/api/v1/transactions?limit=15&type=default&page=7"
+                "https://demo.firefly-iii.org/api/v1/transactions?limit=15&type=default&page=1",
+                first: "https://demo.firefly-iii.org/api/v1/transactions?limit=15&type=default&page=1",
+                next: "https://demo.firefly-iii.org/api/v1/transactions?limit=15&type=default&page=2",
+                last: "https://demo.firefly-iii.org/api/v1/transactions?limit=15&type=default&page=7"
             )
         )
 
@@ -228,6 +178,8 @@ extension TransactionsViewModel {
             categoryName: category,
             billID: nil,
             billName: nil,
+            sourceBalanceAfter: nil,
+            destinationBalanceAfter: nil,
             reconciled: false,
             notes: nil,
             tags: [],
@@ -272,7 +224,7 @@ extension TransactionsViewModel {
             ),
             links: TransactionsDatumLinks(
                 the0: TransactionsThe0(rel: "self", uri: "/transactions/\(id)"),
-                linksSelf: "http://100.96.204.49:8888/api/v1/transactions/\(id)"
+                linksSelf: "https://demo.firefly-iii.org/api/v1/transactions/\(id)"
             )
         )
     }

@@ -12,8 +12,7 @@ enum CommonErrorThrow: Error {
 func errorDecoder(_ errorData: Data) throws -> CommonError {
     do {
         let decoder = JSONDecoder()
-        let errorResult = try decoder.decode(CommonError.self, from: errorData)
-        return errorResult
+        return try decoder.decode(CommonError.self, from: errorData)
     } catch {
         throw CommonErrorThrow.decodeError
     }

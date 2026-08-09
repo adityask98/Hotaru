@@ -12,7 +12,7 @@ struct SearchOption: View {
             .contentShape(Capsule())
             .onTapGesture {
                 withAnimation(.interactiveSpring()) {
-                    print("tapped")
+                    // TODO: hook up search option action
                 }
             }
     }

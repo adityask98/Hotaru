@@ -7,7 +7,7 @@ struct TransactionAdd: View {
     @State private var showSuggestions = true
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(alignment: .leading) {
                 Picker(
                     "",

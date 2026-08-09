@@ -4,9 +4,9 @@ import SwiftUI
 
 // MARK: - Notifications
 
-/// Posts transaction-related notifications that other views can listen for
-/// Notifications defined in: Firefly/Helpers/NotificationConstants.swift
-/// Example: AppNotifications.transactionDeleted
+// Posts transaction-related notifications that other views can listen for
+// Notifications defined in: Firefly/Helpers/NotificationConstants.swift
+// Example: AppNotifications.transactionDeleted
 
 struct TransactionDetail: View {
     @State var transactionID: String
@@ -19,9 +19,9 @@ struct TransactionDetail: View {
         )
     }
 
-    // Toasts and controllers
+    /// Toasts and controllers
     @Environment(\.dismiss) var dismiss
-    // @Binding var shouldRefresh: Bool?
+    @EnvironmentObject private var pendingDeleteManager: PendingDeleteManager
 
     @State private var editSheetShown = false
     @State private var cloneSheetShown = false
@@ -37,7 +37,7 @@ struct TransactionDetail: View {
             VStack {
                 if viewModel.isLoading {
                     LoadingSpinner()
-                } else if let errorMessage = viewModel.errorMessage {
+                } else if viewModel.errorMessage != nil {
                     Text("Something went wrong")
                 } else if let transaction = viewModel.transaction {
                     TransactionBodyView(
@@ -78,6 +78,7 @@ struct TransactionDetail: View {
                 } label: {
                     Image(systemName: "ellipsis")
                 }
+                .accessibilityLabel("More options")
             }
         }
         .alert(
@@ -85,11 +86,15 @@ struct TransactionDetail: View {
             isPresented: $viewModel.showDeleteAlert
         ) {
             Button("Delete", role: .destructive) {
-                Task {
-                    do {
-                        try await deleteTransaction()
-                    }
+                // Schedule with an undo window; the snackbar in RootView offers Undo
+                if let data = viewModel.transaction?.data {
+                    pendingDeleteManager.scheduleDelete(
+                        id: data.id ?? transactionID, title: data.transactionTitle
+                    )
+                } else {
+                    pendingDeleteManager.scheduleDelete(id: transactionID, title: "Transaction")
                 }
+                dismiss()
             }
         }
         .sheet(
@@ -112,7 +117,7 @@ struct TransactionDetail: View {
             },
             content: {
                 if let transaction = viewModel.transaction?.data {
-                    TransactionCreate(shouldRefresh: .constant(nil), initialTransaction: transaction)
+                    TransactionCreate(initialTransaction: transaction)
                         .background(.ultraThinMaterial)
                 }
             }
@@ -128,41 +133,11 @@ struct TransactionDetail: View {
         .toolbarTitleDisplayMode(.inline)
     }
 
-    @MainActor
-    private func deleteTransaction() async throws {
-        do {
-            try await viewModel.deleteTransaction(
-                transactionID: transactionID)
-            toastParams = AlertToast(
-                displayMode: .alert, type: .complete(Color.green),
-                title: "Transaction deleted successfully"
-            )
-            showToast = true
-
-            // Post notification to refresh TransactionsView
-            NotificationCenter.default.post(name: AppNotifications.transactionDeleted, object: nil)
-
-            dismiss()
-        } catch {
-            toastParams = AlertToast(
-                displayMode: .alert,
-                type: .systemImage("exclamationmark.triangle.fill", Color.red),
-                title: viewModel.errorMessage
-            )
-            withAnimation {
-                showToast = true
-            }
-            doThisAfter(2.0) {
-                showToast = false
-            }
-        }
-    }
-
-    // Clone and save transaction directly
+    /// Clone and save transaction directly
     @MainActor
     private func cloneAndSave() async {
         guard let trans = viewModel.transaction?.data?.attributes?.transactions?.first else {
-            print("No transaction data to clone")
+            AppLog.app.error("No transaction data to clone")
             return
         }
 
@@ -185,7 +160,10 @@ struct TransactionDetail: View {
                     id: trans.destinationID ?? "",
                     name: trans.destinationName ?? ""
                 ),
-                notes: trans.notes ?? "",
+                // Drop the original's location — this clone is happening here and now, not where
+                // the original was made. Quick clones don't capture a fresh fix; that would put a
+                // multi-second wait behind a one-tap action.
+                notes: TransactionLocation.strip(from: trans.notes) ?? "",
                 budgetID: trans.budgetID
             )
             toastParams = AlertToast(
@@ -195,7 +173,7 @@ struct TransactionDetail: View {
             showToast = true
 
             // Post notification to refresh TransactionsView
-            NotificationCenter.default.post(name: AppNotifications.transactionDeleted, object: nil)
+            NotificationCenter.default.post(name: AppNotifications.transactionCreated, object: nil)
         } catch {
             toastParams = AlertToast(
                 displayMode: .alert,
@@ -203,19 +181,9 @@ struct TransactionDetail: View {
                 title: "Failed to clone transaction"
             )
             showToast = true
-            print("Error cloning transaction: \(error)")
+            AppLog.networkError("Failed to clone transaction", error)
         }
         cloneLoading = false
-    }
-
-    private func formatDate(_ dateString: String) -> String? {
-        guard let date = ISO8601DateFormatter().date(from: dateString) else {
-            return "Unknown Date"
-        }
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
     }
 }
 
@@ -247,11 +215,29 @@ struct TransactionBodyView: View {
                     }
                 }
             }
-            if let notes = transaction.data?.attributes?.transactions?.first?.notes {
-                TransactionDetailSectionHeader(title: "Notes")
+            if let tags = transaction.data?.attributes?.transactions?.first?.tags, !tags.isEmpty {
+                TransactionDetailSectionHeader(title: "Tags")
                     .padding(.bottom, -10)
 
+                TagsCard(tags: tags)
+            }
+
+            // Strip the location marker: it's Hotaru's own bookkeeping, not something the user wrote.
+            // A transaction whose notes are *only* a marker has no notes to show at all.
+            if let notes = TransactionLocation.strip(
+                from: transaction.data?.attributes?.transactions?.first?.notes
+            ) {
+                TransactionDetailSectionHeader(title: "Notes")
+
                 NotesCard(notes: notes)
+            }
+
+            if let location = TransactionLocation.resolve(
+                for: transaction.data?.attributes?.transactions?.first
+            ) {
+                TransactionDetailSectionHeader(title: "Location")
+
+                TransactionLocationCard(location: location)
             }
 
             VStack {
@@ -320,26 +306,32 @@ struct TransactionDetailSectionHeader: View {
 
 struct TransactionDetailHeader: View {
     var data: TransactionsDatum
+    @ScaledMetric(relativeTo: .largeTitle) private var iconSize: CGFloat = 60
     var body: some View {
         HStack {
             Image(
                 systemName: transactionTypeIcon(
                     data.attributes?.transactions?
                         .first?
-                        .type ?? "unknown")
+                        .type ?? "unknown"
+                )
             )
             .foregroundStyle(
                 transactionTypeStyle(
-                    data.attributes?.transactions?.first?.type ?? "unknown")
+                    data.attributes?.transactions?.first?.type ?? "unknown"
+                )
             )
-            .frame(width: 80, height: 60)
-            .font(.system(size: 60))
+            .frame(width: iconSize * 1.33, height: iconSize)
+            .font(.system(size: iconSize))
 
             VStack(alignment: .leading) {
                 HStack {
                     Text(transactionMainTitle(data))
                     if data.isSplitTransaction {
                         SplitBadge()
+                    }
+                    if data.attributes?.transactions?.first?.reconciled == true {
+                        SplitBadge(text: "Reconciled", imageName: "checkmark.seal.fill", backgroundColor: .blue)
                     }
                 }
 
@@ -350,12 +342,14 @@ struct TransactionDetailHeader: View {
                     transactionTypeColor(
                         type: data.attributes?.transactions?.first?.type
                             ?? "unknown"
-                    ))
+                    )
+                )
                 Spacer()
                 Text(
                     formatJSONToPrettyStringDate(
                         data.attributes?.transactions?.first?.date
-                            ?? "Unknown")
+                            ?? "Unknown"
+                    )
                         ?? "Unknown"
                 )
                 .font(.footnote)
@@ -377,7 +371,8 @@ struct TransactionDetailMoreInfo: View {
                 Text("More Info")
                 Spacer()
                 Image(systemName: showDetails ? "eye.fill" : "eye.slash.fill").contentTransition(
-                    .symbolEffect(.automatic))
+                    .symbolEffect(.automatic)
+                )
             }.highPriorityGesture(
                 TapGesture().onEnded {
                     withAnimation {
@@ -388,7 +383,17 @@ struct TransactionDetailMoreInfo: View {
 
             if showDetails {
                 Text("Transaction ID: \(transactionID ?? "N/A")")
-                Text("Location: \(transaction?.attributes?.transactions?[0].latitude)")
+                if let latitude = transaction?.attributes?.transactions?.first?.latitude,
+                   let longitude = transaction?.attributes?.transactions?.first?.longitude,
+                   let mapsURL = URL(string: "https://maps.apple.com/?ll=\(latitude),\(longitude)") {
+                    Link(destination: mapsURL) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "map.fill")
+                            Text("Open Location in Maps")
+                        }
+                    }
+                    .foregroundStyle(Color.accentColor)
+                }
                 Spacer()
             }
         }
@@ -407,10 +412,18 @@ struct TransactionInfoCard: View {
             Divider()
             // Source/Destination section
             AccountsSection(transaction: transaction)
-            Divider()
-            // Category/Budget section
-            if transaction.isSplitTransaction {
+            // Category/Budget/Bill — split transactions show these per-split in
+            // SplitTransactionCard instead, since the parent journal doesn't have a single
+            // category/budget/bill of its own.
+            if !transaction.isSplitTransaction {
+                Divider()
                 CategorySection(transaction: transaction)
+
+                if let billName = transaction.attributes?.transactions?.first?.billName,
+                   !billName.isEmpty {
+                    Divider()
+                    BillSection(transaction: transaction)
+                }
             }
         }
         .padding(.horizontal)
@@ -445,6 +458,13 @@ struct AmountSection: View {
                     )
                 )
                 .contentTransition(.numericText(countsDown: true))
+
+                if let foreignAmount = transaction.attributes?.transactions?.first?.foreignAmount,
+                   let foreignSymbol = transaction.attributes?.transactions?.first?.foreignCurrencySymbol {
+                    Text("≈ \(formatAmount(foreignAmount, symbol: foreignSymbol))")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             }
             .padding()
             Spacer()
@@ -455,6 +475,9 @@ struct AmountSection: View {
 struct AccountsSection: View {
     let transaction: TransactionsDatum
 
+    @AppStorage(UserDefaultKeys.showSourceBalanceAfter) private var showSourceBalanceAfter = false
+    @AppStorage(UserDefaultKeys.showDestinationBalanceAfter) private var showDestinationBalanceAfter = false
+
     var body: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading) {
@@ -463,6 +486,14 @@ struct AccountsSection: View {
                     .font(.largeTitle)
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
+                if showSourceBalanceAfter,
+                   let balance = transaction.attributes?.transactions?.first?.sourceBalanceAfter {
+                    Text(
+                        "Balance after: \(formatAmount(balance, symbol: transaction.attributes?.transactions?.first?.currencySymbol))"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
             }
             .padding()
 
@@ -474,6 +505,14 @@ struct AccountsSection: View {
                     .font(.largeTitle)
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
+                if showDestinationBalanceAfter,
+                   let balance = transaction.attributes?.transactions?.first?.destinationBalanceAfter {
+                    Text(
+                        "Balance after: \(formatAmount(balance, symbol: transaction.attributes?.transactions?.first?.currencySymbol))"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
             }
             .padding()
         }
@@ -507,6 +546,22 @@ struct CategorySection: View {
                 .padding()
             }
         }
+    }
+}
+
+struct BillSection: View {
+    let transaction: TransactionsDatum
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("Bill").font(.title3)
+            Text(transaction.attributes?.transactions?.first?.billName ?? "Unknown")
+                .font(.title)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -580,6 +635,25 @@ struct NotesCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 18.0))
+    }
+}
+
+struct TagsCard: View {
+    let tags: [String]
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(tags, id: \.self) { tag in
+                    TagView(tag: tag)
+                }
+            }
+            .padding(.vertical, 14)
+            .padding(.horizontal)
+        }
+        .frame(maxWidth: .infinity)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 18.0))
     }

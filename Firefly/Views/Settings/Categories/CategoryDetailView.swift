@@ -4,7 +4,6 @@ struct CategoryDetailView: View {
     @State var category: CategoriesDatum?
     @Environment(\.openURL) var openURL
     @StateObject private var viewModel: CategoryDetailViewModel
-    @State private var shouldRefresh: Bool? = false
 
     init(category: CategoriesDatum? = nil) {
         _category = .init(initialValue: category)
@@ -25,6 +24,11 @@ struct CategoryDetailView: View {
 
                 if viewModel.transactionsIsLoading && viewModel.transactions?.data?.isEmpty != false {
                     LoadingSpinner()
+                } else if viewModel.transactions == nil,
+                          let message = viewModel.transactionsErrorMessage {
+                    ErrorStateView(message: message) {
+                        Task { await viewModel.fetchTransactions() }
+                    }
                 } else {
                     TransactionsList(
                         transactions: viewModel.transactions,
@@ -33,8 +37,7 @@ struct CategoryDetailView: View {
                             Task {
                                 await viewModel.fetchTransactions(loadMore: true)
                             }
-                        },
-                        shouldRefresh: $shouldRefresh
+                        }
                     )
                 }
             }
@@ -45,6 +48,21 @@ struct CategoryDetailView: View {
                     await viewModel.fetchTransactions()
                 }
             }
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppNotifications.transactionDeleted)
+        ) { _ in
+            Task { await viewModel.fetchTransactions() }
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppNotifications.transactionCreated)
+        ) { _ in
+            Task { await viewModel.fetchTransactions() }
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(for: AppNotifications.transactionUpdated)
+        ) { _ in
+            Task { await viewModel.fetchTransactions() }
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(category?.attributes?.name ?? "Unknown Category")
@@ -59,6 +77,7 @@ struct CategoryDetailView: View {
                 } label: {
                     Image(systemName: "ellipsis")
                 }
+                .accessibilityLabel("More options")
             }
         }
     }
