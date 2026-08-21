@@ -17,8 +17,8 @@ struct CategoriesDonut: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Category Summary").font(.title2).fontWeight(.semibold)
-            Text("Current Month").font(.footnote).foregroundStyle(.secondary)
+            // The screen hosting this already states the period it covers
+            Text("Category Summary").font(.title2).fontWeight(.bold)
 
             if isLoading {
                 ProgressView()

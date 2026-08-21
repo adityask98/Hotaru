@@ -74,6 +74,24 @@ enum ChartsApiPaths {
     static let overview = "api/v1/chart/account/overview"
 }
 
+enum SummaryApiPaths {
+    static let basic = "api/v1/summary/basic"
+}
+
+enum BudgetsApiPaths {
+    static let budgets = "api/v1/budgets"
+    /// All budget limits in a date range, in one call (as opposed to
+    /// `/budgets/{id}/limits`, which would need one call per budget)
+    static let budgetLimits = "api/v1/budget-limits"
+}
+
+enum CurrenciesApiPaths {
+    static let primary = "api/v1/currencies/primary"
+    /// Pre-6.3 name for the same endpoint; used as a fallback when `primary` 404s
+    /// so the dashboard still works against older self-hosted instances.
+    static let legacyDefault = "api/v1/currencies/default"
+}
+
 enum WebviewPaths {
     static func transaction(_ id: String) -> String {
         "transactions/show/\(id)"

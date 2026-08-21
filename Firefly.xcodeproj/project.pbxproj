@@ -12,6 +12,7 @@
 		48177F612DD04BD000358BC8 /* SearchPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48177F602DD04BD000358BC8 /* SearchPage.swift */; };
 		48177F642DD05C1D00358BC8 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48177F632DD05C1D00358BC8 /* SearchViewModel.swift */; };
 		48177F6B2DD0779F00358BC8 /* SystemAbout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48177F6A2DD0779F00358BC8 /* SystemAbout.swift */; };
+		4812B0062F0100000000AA06 /* LoadState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4812B0052F0100000000AA05 /* LoadState.swift */; };
 		48177F6E2DD078FF00358BC8 /* SystemAboutViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48177F6D2DD078FF00358BC8 /* SystemAboutViewModel.swift */; };
 		482139282C10652600D8D1C6 /* TokenSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 482139272C10652600D8D1C6 /* TokenSettings.swift */; };
 		4836BEC12C1AFD2E0039D219 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4836BEC02C1AFD2E0039D219 /* Settings.swift */; };
@@ -75,7 +76,6 @@
 		48FA11C32EEE010100AC3618 /* LocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48FA11C22EEE010100AC3618 /* LocationProvider.swift */; };
 		48FA11C52EEE010100AC3618 /* TransactionLocationCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48FA11C42EEE010100AC3618 /* TransactionLocationCard.swift */; };
 		48DF33FF2AD3E31900F6F215 /* FireflyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF33FE2AD3E31900F6F215 /* FireflyApp.swift */; };
-		48DF34012AD3E31900F6F215 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF34002AD3E31900F6F215 /* AboutView.swift */; };
 		48DF34032AD3E31A00F6F215 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48DF34022AD3E31A00F6F215 /* Assets.xcassets */; };
 		48DF34062AD3E31A00F6F215 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 48DF34052AD3E31A00F6F215 /* Preview Assets.xcassets */; };
 		48DF34102AD3E39B00F6F215 /* UserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF340F2AD3E39B00F6F215 /* UserModel.swift */; };
@@ -91,6 +91,7 @@
 		48177F602DD04BD000358BC8 /* SearchPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchPage.swift; sourceTree = "<group>"; };
 		48177F632DD05C1D00358BC8 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		48177F6A2DD0779F00358BC8 /* SystemAbout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemAbout.swift; sourceTree = "<group>"; };
+		4812B0052F0100000000AA05 /* LoadState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadState.swift; sourceTree = "<group>"; };
 		48177F6D2DD078FF00358BC8 /* SystemAboutViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemAboutViewModel.swift; sourceTree = "<group>"; };
 		482139272C10652600D8D1C6 /* TokenSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenSettings.swift; sourceTree = "<group>"; };
 		4836BEC02C1AFD2E0039D219 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
@@ -154,7 +155,6 @@
 		48FA11C42EEE010100AC3618 /* TransactionLocationCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionLocationCard.swift; sourceTree = "<group>"; };
 		48DF33FB2AD3E31900F6F215 /* Firefly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Firefly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		48DF33FE2AD3E31900F6F215 /* FireflyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FireflyApp.swift; sourceTree = "<group>"; };
-		48DF34002AD3E31900F6F215 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		48DF34022AD3E31A00F6F215 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		48DF34052AD3E31A00F6F215 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		48DF34072AD3E31A00F6F215 /* Firefly.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Firefly.entitlements; sourceTree = "<group>"; };
@@ -209,6 +209,50 @@
 			explicitFolders = (
 			);
 			path = AppIntents;
+			sourceTree = "<group>";
+		};
+		4812B0012F0100000000AA01 /* Home */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		4812B0022F0100000000AA02 /* Summary */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = Summary;
+			sourceTree = "<group>";
+		};
+		4812B0032F0100000000AA03 /* Currencies */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = Currencies;
+			sourceTree = "<group>";
+		};
+		4812B0042F0100000000AA04 /* Budgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = Budgets;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -273,6 +317,7 @@
 				486E1D852C359E450038BB4F /* BackgroundMaterial.swift */,
 				48BB087F2C3FD4F5006D32E3 /* UIHelpers.swift */,
 				4890B2752C4643120032BE86 /* Loading.swift */,
+				4812B0052F0100000000AA05 /* LoadState.swift */,
 				486742542C89CBA600D31B76 /* DebugHelpers.swift */,
 				487DA5D32EA4D218006F279E /* SafariHelper.swift */,
 				FE5F16D29AA570D70F57C756 /* AppNetworking.swift */,
@@ -290,7 +335,7 @@
 				485467AA2C37C89B00C40E92 /* Transactions */,
 				486E1D7E2C354A170038BB4F /* Shared */,
 				4836FB282DBC79C500719673 /* Menu */,
-				48DF34002AD3E31900F6F215 /* AboutView.swift */,
+				4812B0012F0100000000AA01 /* Home */,
 				482139272C10652600D8D1C6 /* TokenSettings.swift */,
 			);
 			path = Views;
@@ -541,6 +586,9 @@
 				48552BA42C1C6B0F002ED3CF /* Transactions */,
 				4861BF7E2ADCE80100FAC64D /* Accounts */,
 				48DF340E2AD3E37D00F6F215 /* About */,
+				4812B0022F0100000000AA02 /* Summary */,
+				4812B0032F0100000000AA03 /* Currencies */,
+				4812B0042F0100000000AA04 /* Budgets */,
 				48E9195A2AE2C1E60074B904 /* Constants.swift */,
 			);
 			path = FireflyAPIClient;
@@ -576,6 +624,10 @@
 				48177F6F2DD1673C00358BC8 /* TransactionCreate */,
 				4836FB282DBC79C500719673 /* Menu */,
 				84B1FC86A36D4B32BD2B487F /* AppIntents */,
+				4812B0012F0100000000AA01 /* Home */,
+				4812B0022F0100000000AA02 /* Summary */,
+				4812B0032F0100000000AA03 /* Currencies */,
+				4812B0042F0100000000AA04 /* Budgets */,
 			);
 			name = Firefly;
 			packageProductDependencies = (
@@ -686,7 +738,6 @@
 				48A66F872DFC71D7007E6F7A /* TransactionStore.swift in Sources */,
 				48B9CE722C3D2A4E00AF7BA8 /* TransactionPost.swift in Sources */,
 				485B059E2DF1CB06007D3158 /* CategoriesView.swift in Sources */,
-				48DF34012AD3E31900F6F215 /* AboutView.swift in Sources */,
 				48C4C4802EAE34D600E89619 /* AppSettings.swift in Sources */,
 				48FA11C12EEE010100AC3618 /* TransactionLocation.swift in Sources */,
 				48FA11C32EEE010100AC3618 /* LocationProvider.swift in Sources */,
@@ -733,6 +784,7 @@
 				48B9CE702C3D182F00AF7BA8 /* AccountsAutocomplete.swift in Sources */,
 				4890B2782C56141F0032BE86 /* TransactionDetailViewModel.swift in Sources */,
 				48177F5F2DD0499C00358BC8 /* FloatingButton.swift in Sources */,
+				4812B0062F0100000000AA06 /* LoadState.swift in Sources */,
 				48177F6E2DD078FF00358BC8 /* SystemAboutViewModel.swift in Sources */,
 				485B05A92DF49A1B007D3158 /* TransactionsAPIProviders.swift in Sources */,
 				4836BEC62C1B29B90039D219 /* KeychainHelper.swift in Sources */,

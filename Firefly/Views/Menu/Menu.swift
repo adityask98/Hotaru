@@ -34,7 +34,7 @@ struct RootView: View {
             selection: $tabViewLast,
             content: {
                 Tab("Home", systemImage: "chart.bar.yaxis", value: 1) {
-                    AboutView()
+                    HomeView()
                 }
                 Tab("Transactions", systemImage: "list.bullet.circle.fill", value: 2) {
                     TransactionsView()

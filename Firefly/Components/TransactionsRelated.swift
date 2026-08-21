@@ -82,9 +82,14 @@ struct TransactionsRow: View {
     @State private var cloneLoading = false
     @ScaledMetric(relativeTo: .title) private var typeIconFrame: CGFloat = 60
 
+    /// Both ends of the zoom transition live in this view's body, so the namespace
+    /// is scoped here rather than threaded down from each of the row's call sites.
+    @Namespace private var zoomTransition
+
     var body: some View {
         NavigationLink(
             destination: TransactionDetail(transactionID: transaction.id!)
+                .navigationTransition(.zoom(sourceID: transaction.id ?? "", in: zoomTransition))
         ) {
             VStack {
                 HStack {
@@ -149,6 +154,11 @@ struct TransactionsRow: View {
             }
             .background(.ultraThinMaterial) // Add a background color if needed
             .cornerRadius(12) // Round the corners
+            // Anchored inside the row's padding so the zoom starts from the card's
+            // visible bounds rather than the full-width tappable area.
+            .matchedTransitionSource(id: transaction.id ?? "", in: zoomTransition) { source in
+                source.clipShape(RoundedRectangle(cornerRadius: 12))
+            }
             .padding(.horizontal) // Add horizontal padding to the entire row
             .padding(.vertical, 2)
         }

@@ -54,6 +54,8 @@ struct TransactionsView: View {
                             }
                         )
                     }
+                    // Keeps the last row clear of the floating add button
+                    .contentMargins(.bottom, 96, for: .scrollContent)
                     // .listRowSpacing(-10)
                     .listStyle(PlainListStyle())
                     .background(Color.clear)

@@ -75,26 +75,7 @@ class AccountsViewModel: ObservableObject {
         page: Int,
         type: String = "asset"
     ) async throws -> Accounts {
-        var request = try RequestBuilder(apiURL: ApiPaths.accounts)
-        request.url?.append(queryItems: [
-            URLQueryItem(name: "page", value: String(page)),
-            URLQueryItem(name: "limit", value: String(limit)),
-            URLQueryItem(name: "type", value: type),
-        ])
-
-        let (data, response) = try await AppNetworking.session.data(for: request)
-
-        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-            throw AccountsModelError.invalidResponse
-        }
-
-        do {
-            let decoder = JSONDecoder()
-            return try decoder.decode(Accounts.self, from: data)
-        } catch {
-            AppLog.networkError("Failed to decode accounts", error)
-            throw AccountsModelError.invalidData
-        }
+        try await fetchAccountsPage(limit: limit, page: page, type: type)
     }
 
     func getAccountsFromURL(_ urlString: String) async throws -> Accounts {

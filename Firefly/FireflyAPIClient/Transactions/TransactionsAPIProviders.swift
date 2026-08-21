@@ -33,6 +33,28 @@ class MainTransactionsAPIProvider: TransactionsAPIProvider {
     }
 }
 
+/// Provider for the Home dashboard's "recent transactions" list.
+///
+/// Deliberately unfiltered by date: unlike the rest of the dashboard, "recent"
+/// means the latest entries overall, not the latest inside the selected period.
+class RecentTransactionsAPIProvider: TransactionsAPIProvider {
+    private let limit: Int
+
+    init(limit: Int = 5) {
+        self.limit = limit
+    }
+
+    func getTransactions(page: Int) async throws -> Transactions {
+        var request = try RequestBuilder(apiURL: ApiPaths.transactions)
+        request.url?.append(queryItems: [
+            URLQueryItem(name: "limit", value: String(limit)),
+            URLQueryItem(name: "page", value: String(page)),
+        ])
+
+        return try await performRequest(request)
+    }
+}
+
 /// Account-specific transactions API provider
 class AccountTransactionsAPIProvider: TransactionsAPIProvider {
     private let accountId: String

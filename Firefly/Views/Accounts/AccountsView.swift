@@ -7,6 +7,7 @@ struct AccountsView: View {
     @StateObject private var chartStore = ChartOverviewStore()
     @State private var isLoading = false
     @AppStorage("accountsBalanceChartExpanded") private var balanceChartExpanded = true
+    @Namespace private var accountTransition
 
     var body: some View {
         NavigationStack {
@@ -29,7 +30,11 @@ struct AccountsView: View {
                             ], alignment: .center, spacing: 10
                         ) {
                             ForEach(accounts.accounts?.data ?? [], id: \.id) { accountData in
-                                AccountItem(account: accountData, amountHidden: $accounts.amountHidden)
+                                AccountItem(
+                                    account: accountData,
+                                    amountHidden: $accounts.amountHidden,
+                                    namespace: accountTransition
+                                )
                             }
                         }
                         .padding()
@@ -118,6 +123,14 @@ struct AccountsView: View {
 struct AccountItem: View {
     var account: AccountsDatum
     @Binding var amountHidden: Bool
+    let namespace: Namespace.ID
+
+    /// Source/destination pairing key for the zoom transition. Falls back to the
+    /// account name so two accounts never share an id if the API omits one.
+    private var transitionID: String {
+        account.id ?? account.attributes?.name ?? "unknown"
+    }
+
     var body: some View {
         ZStack {
             VStack {
@@ -160,7 +173,16 @@ struct AccountItem: View {
             .frame(width: 175)
             .background(.ultraThinMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 18))
-            NavigationLink(destination: AccountDetail(account: account)) {
+            // Applied to the card itself rather than the enclosing ZStack — the
+            // NavigationLink's clear Rectangle stretches to the full grid column,
+            // which would make the zoom start from a rect wider than the card.
+            .matchedTransitionSource(id: transitionID, in: namespace) { source in
+                source.clipShape(RoundedRectangle(cornerRadius: 18))
+            }
+            NavigationLink(
+                destination: AccountDetail(account: account)
+                    .navigationTransition(.zoom(sourceID: transitionID, in: namespace))
+            ) {
                 Rectangle()
                     .fill(Color.clear)
                     .contentShape(Rectangle())

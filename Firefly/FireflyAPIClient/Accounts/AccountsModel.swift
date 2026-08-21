@@ -1,5 +1,34 @@
 import Foundation
 
+/// Fetches a page of accounts, defaulting to the user's own asset accounts.
+/// Shared by the Accounts tab and the Home dashboard's accounts strip.
+func fetchAccountsPage(
+    limit: Int = 20,
+    page: Int = 1,
+    type: String = "asset"
+) async throws -> Accounts {
+    var request = try RequestBuilder(apiURL: ApiPaths.accounts)
+    request.url?.append(queryItems: [
+        URLQueryItem(name: "page", value: String(page)),
+        URLQueryItem(name: "limit", value: String(limit)),
+        URLQueryItem(name: "type", value: type),
+    ])
+
+    let (data, response) = try await AppNetworking.session.data(for: request)
+
+    guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+        throw AccountsModelError.invalidResponse
+    }
+
+    do {
+        let decoder = JSONDecoder()
+        return try decoder.decode(Accounts.self, from: data)
+    } catch {
+        AppLog.networkError("Failed to decode accounts", error)
+        throw AccountsModelError.invalidData
+    }
+}
+
 // MARK: - Accounts
 
 struct Accounts: Codable {

@@ -15,6 +15,21 @@ func formatAmount(_ amount: Decimal, symbol: String?) -> String {
     return formatter.string(from: amount as NSNumber) ?? "Unknown Amount"
 }
 
+/// Formats an amount with an explicit number of fraction digits, as reported
+/// per-currency by the Firefly API (JPY has 0, most others 2). Without this the
+/// formatter falls back to the *device locale's* currency, which shows e.g.
+/// "¥1,234.00" for yen.
+func formatAmount(_ amount: Decimal, symbol: String?, decimalPlaces: Int?) -> String {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .currency
+    formatter.currencySymbol = symbol ?? "¥"
+    if let decimalPlaces {
+        formatter.minimumFractionDigits = decimalPlaces
+        formatter.maximumFractionDigits = decimalPlaces
+    }
+    return formatter.string(from: amount as NSNumber) ?? "Unknown Amount"
+}
+
 func formatAmount(_ amount: Decimal) -> String {
     let formatter = NumberFormatter()
     formatter.numberStyle = .currency

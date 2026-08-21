@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CategoriesView: View {
     @StateObject private var viewMModel = CategoriesViewModel()
+    @StateObject private var insightStore = CategoriesInsightStore()
     @State private var didLoadOnce = false
 
     var body: some View {
@@ -24,6 +25,9 @@ struct CategoriesView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal)
                         CategoriesBodyView(categories: categories)
+                        // Lives here rather than on the dashboard, where it showed
+                        // the same month's category spending as the bar chart
+                        CategoriesDonut(insightStore: insightStore)
                     }
                 }
             }
