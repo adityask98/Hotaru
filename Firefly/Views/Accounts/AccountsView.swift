@@ -5,14 +5,16 @@ struct AccountsView: View {
     @EnvironmentObject var menuViewModel: MenuViewModel
     @StateObject private var accounts = AccountsViewModel()
     @StateObject private var chartStore = ChartOverviewStore()
-    @State private var isLoading = false
+    @AppStorage(UserDefaultKeys.amountHidden) private var amountHidden = false
     @AppStorage("accountsBalanceChartExpanded") private var balanceChartExpanded = true
+    @Namespace private var accountTransition
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack {
-                    if isLoading {
+                VStack(spacing: 16) {
+                    // Only before the first load; pull-to-refresh keeps the grid on screen
+                    if accounts.isLoading, accounts.accounts == nil {
                         LoadingSpinner()
                     } else if accounts.accounts == nil, let message = accounts.errorMessage {
                         ErrorStateView(message: message) {
@@ -22,17 +24,20 @@ struct AccountsView: View {
                     } else if accounts.accounts?.data?.isEmpty == true {
                         EmptyStateView(icon: "creditcard", message: "No accounts found")
                     } else {
+                        // Cards fill their column, so the grid's outer edges line up
+                        // with the balance chart card below
                         LazyVGrid(
                             columns: [
-                                GridItem(.flexible()),
-                                GridItem(.flexible()),
-                            ], alignment: .center, spacing: 10
+                                GridItem(.flexible(), spacing: 12),
+                                GridItem(.flexible(), spacing: 12),
+                            ], spacing: 12
                         ) {
                             ForEach(accounts.accounts?.data ?? [], id: \.id) { accountData in
-                                AccountItem(account: accountData, amountHidden: $accounts.amountHidden)
+                                AccountItem(account: accountData, namespace: accountTransition)
                             }
                         }
-                        .padding()
+                        .padding(.horizontal)
+                        .padding(.top, 8)
 
                         balanceChartSection
                             .padding(.horizontal)
@@ -46,16 +51,17 @@ struct AccountsView: View {
                 }
             }
             .navigationTitle(Text("Accounts"))
+            .transactionNavigationDestination()
             .overlay(
                 alignment: .bottomTrailing,
                 content: {
                     FloatingButton(
                         action: {
-                            accounts.toggleAmountVisibility()
+                            withAnimation(.snappy) { amountHidden.toggle() }
                         },
-                        imageSystemName: accounts.amountHidden ? "eye.slash.fill" : "eye.fill",
-                        accessibilityLabel: accounts.amountHidden ? "Show balances" : "Hide balances"
-                    ).contentTransition(.symbolEffect(.automatic))
+                        imageSystemName: amountHidden ? "eye.slash.fill" : "eye.fill",
+                        accessibilityLabel: amountHidden ? "Show balances" : "Hide balances"
+                    )
                 }
             )
 
@@ -68,6 +74,7 @@ struct AccountsView: View {
                 }
             }
         }
+        .transactionNavigationScope()
         .onAppear {
             if accounts.accounts == nil {
                 Task {
@@ -111,61 +118,77 @@ struct AccountsView: View {
             }
         }
         .background(.ultraThinMaterial)
-        .cornerRadius(10)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 }
 
 struct AccountItem: View {
     var account: AccountsDatum
-    @Binding var amountHidden: Bool
+    let namespace: Namespace.ID
+    /// Fixed card width for horizontal strips (Home). `nil` fills the grid column.
+    var fixedWidth: CGFloat?
+    @AppStorage(UserDefaultKeys.amountHidden) private var amountHidden = false
+
+    /// Source/destination pairing key for the zoom transition. Falls back to the
+    /// account name so two accounts never share an id if the API omits one.
+    private var transitionID: String {
+        account.id ?? account.attributes?.name ?? "unknown"
+    }
+
     var body: some View {
-        ZStack {
-            VStack {
-                // Account Name
-                HStack {
+        // The card itself is the link's label, so VoiceOver reads the account and the
+        // card gets the plain style's press highlight.
+        NavigationLink {
+            AccountDetail(account: account)
+                .navigationTransition(.zoom(sourceID: transitionID, in: namespace))
+        } label: {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 4) {
                     Text(account.attributes?.name ?? "Unknown")
+                        .font(.subheadline)
                         .fontWeight(.semibold)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
-                    Spacer()
+                    Spacer(minLength: 0)
                     Image(systemName: "chevron.right")
-                        .foregroundStyle(Color.green)
                         .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.tertiary)
                 }
-                .padding(.bottom, -4)
-                Divider().padding(.horizontal, -16)
-                // Balance
+
                 Text(
                     formatAmount(
                         account.attributes?.currentBalance,
                         symbol: account.attributes?.currencySymbol
                     )
                 )
+                .font(.title2)
+                .fontWeight(.semibold)
+                .monospacedDigit()
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
                 .redacted(reason: amountHidden ? .placeholder : [])
                 .contentTransition(.numericText())
                 .animation(.default, value: account.attributes?.currentBalance)
-                .font(.title)
-                .minimumScaleFactor(0.5)
-                .lineLimit(1)
-                .frame(maxWidth: .infinity, alignment: .leading)
 
-                HStack {
-                    Spacer()
-                    Text("As of \(formatDate(account.attributes?.currentBalanceDate))")
-                        .font(.caption2)
-                        .fontWeight(.ultraLight)
-                }
+                Text("As of \(formatDate(account.attributes?.currentBalanceDate))")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .lineLimit(1)
             }
-            .padding(.horizontal)
-            .padding(.vertical, 7)
-            .frame(width: 175)
+            .padding(14)
+            .frame(width: fixedWidth, alignment: .leading)
+            .frame(maxWidth: fixedWidth == nil ? .infinity : nil, alignment: .leading)
             .background(.ultraThinMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 18))
-            NavigationLink(destination: AccountDetail(account: account)) {
-                Rectangle()
-                    .fill(Color.clear)
-                    .contentShape(Rectangle())
+            .contentShape(RoundedRectangle(cornerRadius: 18))
+            // Applied to the card rather than the link, so the zoom starts from the
+            // card's clipped bounds.
+            .matchedTransitionSource(id: transitionID, in: namespace) { source in
+                source.clipShape(RoundedRectangle(cornerRadius: 18))
             }
         }
+        .buttonStyle(.plain)
         .contextMenu {
             WebviewButton(url: WebviewPaths.account(account.id!))
         }

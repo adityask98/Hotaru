@@ -30,6 +30,7 @@ struct TransactionCreate: View {
 
     // Location (beta) — see docs/LOCATION_IN_NOTES.md
     @AppStorage(UserDefaultKeys.attachLocationToTransactions) private var locationFeatureEnabled = true
+    @AppStorage(UserDefaultKeys.writeLocationToNotes) private var writeLocationToNotes = false
     @StateObject private var locationProvider = LocationProvider()
     @State private var attachLocation = true
     @State private var capturedLocation: TransactionLocation?
@@ -183,7 +184,7 @@ struct TransactionCreate: View {
                     content: {
                         PrimaryButton(
                             icon: "plus.circle.fill", label: "Add Transaction", fullWidth: true,
-                            disabled: submitIsLoading,
+                            loading: submitIsLoading,
                             action: {
                                 Task {
                                     do {
@@ -333,10 +334,11 @@ struct TransactionCreate: View {
                 category: selectedCategory, type: transactionType,
                 sourceAccount: sourceAccount,
                 destinationAccount: destinationAccount,
-                notes: location?.appended(to: transactionNote) ?? transactionNote,
+                notes: writeLocationToNotes
+                    ? location?.appended(to: transactionNote) ?? transactionNote
+                    : transactionNote,
                 budgetID: selectedBudgetID,
-                latitude: location?.nativeLatitude,
-                longitude: location?.nativeLongitude
+                location: location
             )
             let impact = UINotificationFeedbackGenerator()
 
@@ -406,9 +408,17 @@ struct TransactionCreate: View {
 
     private func accountPicker(title: String, binding: Binding<(id: String, name: String)>)
     -> some View {
-        AccountsSelectionPicker(title: title, accounts: accounts) { id, name in
-            binding.wrappedValue = (id: id, name: name)
-        }
+        AccountSelectorRow(
+            title: title, accounts: accounts,
+            selectedID: Binding(
+                get: { binding.wrappedValue.id },
+                set: { id in
+                    binding.wrappedValue = (
+                        id: id, name: accounts.first { $0.id == id }?.name ?? ""
+                    )
+                }
+            )
+        )
     }
 }
 
@@ -517,34 +527,99 @@ struct SuggestionChip: View {
     }
 }
 
-struct AccountsSelectionPicker: View {
+/// Row showing the selected account; tapping opens a searchable list with balance and account type.
+struct AccountSelectorRow: View {
     let title: String
     let accounts: AutoAccounts
-    let onSelection: (String, String) -> Void // Callback for (id, name)
+    @Binding var selectedID: String
 
-    @State private var selectedAccountID: String?
+    @State private var showingList = false
+    /// Applied in `onDismiss` so the parent's state change doesn't race the sheet closing.
+    @State private var pendingID: String?
 
-    init(
-        title: String = "Account", accounts: AutoAccounts,
-        onSelection: @escaping (String, String) -> Void
-    ) {
-        self.title = title
-        self.accounts = accounts
-        self.onSelection = onSelection
+    private var selected: AutoAccount? {
+        accounts.first { $0.id == selectedID }
     }
 
     var body: some View {
-        Picker(title, selection: $selectedAccountID) {
-            Text("Select an account").tag(nil as String?)
-            ForEach(accounts, id: \.id) { account in
-                Text(account.name ?? "Unnamed Account")
-                    .tag(account.id as String?)
+        Button {
+            showingList = true
+        } label: {
+            HStack {
+                Text(title).foregroundStyle(Color.primary)
+                Spacer()
+                Text(selected?.nameWithBalance ?? selected?.name ?? "Select")
+                    .foregroundStyle(Color.secondary)
+                    .lineLimit(1)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption)
+                    .foregroundStyle(Color(uiColor: .tertiaryLabel))
             }
         }
-        .onChange(of: selectedAccountID) { _, newValue in
-            if let newId = newValue,
-               let selectedAccount = accounts.first(where: { $0.id == newId }) {
-                onSelection(newId, selectedAccount.name ?? "Unnamed Account")
+        .sheet(isPresented: $showingList, onDismiss: {
+            if let id = pendingID {
+                selectedID = id
+                pendingID = nil
+            }
+        }) {
+            AccountSelectorList(title: title, accounts: accounts, selectedID: selectedID) { id in
+                pendingID = id
+            }
+            .presentationDetents([.medium, .large])
+        }
+    }
+}
+
+private struct AccountSelectorList: View {
+    let title: String
+    let accounts: AutoAccounts
+    let selectedID: String
+    let onSelect: (String) -> Void
+
+    @State private var query = ""
+    @Environment(\.dismiss) private var dismiss
+
+    private var filtered: AutoAccounts {
+        let valid = accounts.filter { $0.id != nil }
+        guard !query.isEmpty else { return valid }
+        return valid.filter {
+            ($0.name ?? "").localizedCaseInsensitiveContains(query)
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List(filtered, id: \.id) { account in
+                Button {
+                    if let id = account.id {
+                        onSelect(id)
+                        dismiss()
+                    }
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(account.nameWithBalance ?? account.name ?? "Unnamed Account")
+                                .foregroundStyle(Color.primary)
+                            if let type = account.type {
+                                Text(type)
+                                    .font(.subheadline)
+                                    .foregroundStyle(Color.secondary)
+                            }
+                        }
+                        Spacer()
+                        if account.id == selectedID {
+                            Image(systemName: "checkmark").foregroundStyle(.tint)
+                        }
+                    }
+                }
+            }
+            .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search accounts")
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
             }
         }
     }

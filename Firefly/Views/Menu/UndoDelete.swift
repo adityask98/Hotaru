@@ -39,8 +39,11 @@ final class PendingDeleteManager: ObservableObject {
     func scheduleDelete(id: String, title: String) {
         commitNow()
 
-        pending = PendingDelete(id: id, title: title)
-        hiddenIDs.insert(id)
+        // Animated so the row collapses out of whichever list shows it
+        withAnimation(.snappy) {
+            pending = PendingDelete(id: id, title: title)
+            hiddenIDs.insert(id)
+        }
 
         countdownTask = Task { [weak self] in
             guard let self else { return }
@@ -54,10 +57,12 @@ final class PendingDeleteManager: ObservableObject {
     func undo() {
         countdownTask?.cancel()
         countdownTask = nil
-        if let pending {
-            hiddenIDs.remove(pending.id)
+        withAnimation(.snappy) {
+            if let pending {
+                hiddenIDs.remove(pending.id)
+            }
+            pending = nil
         }
-        pending = nil
     }
 
     /// Commits the pending delete immediately, skipping the remaining timeout.
@@ -77,7 +82,9 @@ final class PendingDeleteManager: ObservableObject {
                 )
             } catch {
                 // Restore the row and surface the failure as a toast.
-                hiddenIDs.remove(item.id)
+                _ = withAnimation(.snappy) {
+                    hiddenIDs.remove(item.id)
+                }
                 NotificationCenter.default.post(
                     name: AppNotifications.operationFailed, object: nil,
                     userInfo: ["message": "Failed to delete \"\(item.title)\""]

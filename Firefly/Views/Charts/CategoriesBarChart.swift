@@ -1,37 +1,19 @@
 import Charts
 import SwiftUI
 
-enum TimePeriod: String, CaseIterable, Identifiable {
-    case currentMonth = "Current Month"
-    case last30Days = "Last 30 Days"
-    case custom = "Custom"
-
-    var id: String {
-        rawValue
-    }
-}
-
+/// Ranked spending per category for a date range. The range is supplied by the
+/// screen (the Home dashboard's page-level period control) rather than owned here,
+/// so every section of that page reports on the same period.
 struct CategoriesBarChart: View {
-    var refreshTrigger = UUID()
+    let startDate: Date
+    let endDate: Date
     let insightStore: CategoriesInsightStore
+    var refreshTrigger = UUID()
 
     @State private var chartData: CategoriesInsight?
     @State private var isLoading = false
     @State private var loadFailed = false
     @State private var selectedCategory: String?
-    @AppStorage("categoriesBarChartPeriod") private var selectedPeriod: TimePeriod = .currentMonth
-    @State private var customStartDate: Date
-    @State private var customEndDate: Date
-
-    init(refreshTrigger: UUID = UUID(), insightStore: CategoriesInsightStore) {
-        self.refreshTrigger = refreshTrigger
-        self.insightStore = insightStore
-        let calendar = Calendar.current
-        let now = Date()
-        let thirtyDaysAgo = calendar.date(byAdding: .day, value: -30, to: now) ?? now
-        _customStartDate = State(initialValue: thirtyDaysAgo)
-        _customEndDate = State(initialValue: now)
-    }
 
     private var sortedData: CategoriesInsight {
         (chartData ?? []).sorted { abs($0.differenceFloat ?? 0) > abs($1.differenceFloat ?? 0) }
@@ -41,53 +23,19 @@ struct CategoriesBarChart: View {
         chartData?.reduce(0) { $0 + abs($1.differenceFloat ?? 0) } ?? 0
     }
 
-    private var displayedPeriod: String {
-        if selectedPeriod == .custom {
-            let formatter = CachedFormatters.shortDate
-            return "\(formatter.string(from: customStartDate)) - \(formatter.string(from: customEndDate))"
-        }
-        return selectedPeriod.rawValue
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Spending by Category").font(.title2).fontWeight(.semibold)
-                    Text(displayedPeriod).font(.footnote).foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                Picker("Period", selection: $selectedPeriod) {
-                    ForEach(TimePeriod.allCases) { period in
-                        Text(period.rawValue).tag(period)
-                    }
-                }
-                .pickerStyle(.menu)
-                .labelsHidden()
-            }
-
-            if selectedPeriod == .custom {
-                VStack(spacing: 12) {
-                    DatePicker("Start Date", selection: $customStartDate, displayedComponents: .date)
-                        .datePickerStyle(.compact)
-                    DatePicker("End Date", selection: $customEndDate, displayedComponents: .date)
-                        .datePickerStyle(.compact)
-                }
-                .padding()
-                .background(.regularMaterial)
-                .cornerRadius(10)
-            }
-
-            if isLoading {
+            if isLoading, chartData == nil {
                 ProgressView()
-                    .frame(height: 300)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 200)
             } else if loadFailed, chartData == nil {
                 ErrorStateView(message: "Couldn't load spending data.") {
                     Task { await loadChartData() }
                 }
                 .frame(height: 200)
+            } else if sortedData.isEmpty {
+                EmptyStateView(icon: "chart.bar", message: "No spending in this period")
             } else {
                 Chart(sortedData, id: \.id) { item in
                     BarMark(
@@ -151,27 +99,11 @@ struct CategoriesBarChart: View {
                     )
                 )
             }
-
-            // Total spending summary
-            VStack(spacing: 4) {
-                HStack {
-                    Text("Total Spent")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Text(formatCurrency(amount: totalSpending, code: chartData?.first?.currencyCode ?? ""))
-                        .font(.title3)
-                        .fontWeight(.bold)
-                }
-                Text("For \(displayedPeriod.lowercased())")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-            }
-            .padding()
-            .background(.ultraThinMaterial)
-            .cornerRadius(10)
         }
+        // Dim rather than blank while a new period loads, so the chart doesn't
+        // present the previous period's bars as if they were the new selection
+        .opacity(isLoading ? 0.4 : 1)
+        .animation(.easeInOut(duration: 0.2), value: isLoading)
         .onChange(of: selectedCategory) { _, newValue in
             if newValue != nil {
                 let impactFeedback = UIImpactFeedbackGenerator(style: .light)
@@ -179,43 +111,25 @@ struct CategoriesBarChart: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: selectedCategory)
-        .onChange(of: selectedPeriod) { _, _ in
-            Task {
-                await loadChartData()
-            }
-        }
-        .onChange(of: customStartDate) { _, _ in
-            if selectedPeriod == .custom {
-                Task {
-                    await loadChartData()
-                }
-            }
-        }
-        .onChange(of: customEndDate) { _, _ in
-            if selectedPeriod == .custom {
-                Task {
-                    await loadChartData()
-                }
-            }
-        }
         .onChange(of: refreshTrigger) { _, _ in
             Task {
                 await loadChartData()
             }
         }
-        .onAppear {
-            if chartData == nil {
-                Task {
-                    await loadChartData()
-                }
-            }
+        .task(id: rangeKey) {
+            await loadChartData()
         }
         .onTapGesture {
             withAnimation(.easeInOut(duration: 0.2)) {
                 selectedCategory = nil
             }
         }
-        .padding()
+    }
+
+    /// Identity of the requested range, so the fetch re-runs when the screen's
+    /// period changes but not on every unrelated redraw.
+    private var rangeKey: String {
+        "\(formatDateToYYYYMMDD(startDate))|\(formatDateToYYYYMMDD(endDate))"
     }
 
     private func formatCurrency(amount: Double, code: String) -> String {
@@ -240,28 +154,6 @@ struct CategoriesBarChart: View {
     }
 
     private func loadChartData() async {
-        let calendar = Calendar.current
-        let now = Date()
-
-        let startDate: Date
-        let endDate: Date
-
-        switch selectedPeriod {
-        case .currentMonth:
-            startDate = calendar.date(
-                from: calendar.dateComponents([.year, .month], from: now)
-            )!
-            endDate = calendar.date(
-                byAdding: DateComponents(month: 1, day: -1), to: startDate
-            )!
-        case .last30Days:
-            endDate = now
-            startDate = calendar.date(byAdding: .day, value: -30, to: now)!
-        case .custom:
-            startDate = customStartDate
-            endDate = customEndDate
-        }
-
         isLoading = true
         loadFailed = false
         do {

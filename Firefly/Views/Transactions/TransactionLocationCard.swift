@@ -3,11 +3,19 @@ import SwiftUI
 
 /// Inline map for a transaction's recorded location.
 ///
-/// The location comes either from Firefly's native `latitude`/`longitude` fields or, far more likely,
-/// from the marker Hotaru writes into the notes — see `TransactionLocation` and
-/// `docs/LOCATION_IN_NOTES.md`.
+/// The location comes from Firefly's native `latitude`/`longitude` fields, falling back to the
+/// marker older Hotaru versions wrote into the notes — see `TransactionLocation.resolve(for:)` and
+/// `docs/LOCATION_IN_NOTES.md`. Accuracy only exists when a marker is present; a missing place name
+/// is looked up when the card appears.
 struct TransactionLocationCard: View {
     let location: TransactionLocation
+
+    /// Place name looked up for a location that arrived without one.
+    @State private var lookedUpName: String?
+
+    private var placeName: String? {
+        location.name ?? lookedUpName
+    }
 
     /// Tight enough to show the street, loose enough that a mediocre fix doesn't look precise.
     private static let span = MKCoordinateSpan(latitudeDelta: 0.004, longitudeDelta: 0.004)
@@ -19,7 +27,7 @@ struct TransactionLocationCard: View {
     private var caption: String? {
         var parts: [String] = []
 
-        if let name = location.name {
+        if let name = placeName {
             parts.append(name)
         }
 
@@ -33,7 +41,7 @@ struct TransactionLocationCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Map(initialPosition: .region(region), interactionModes: []) {
-                Marker(location.name ?? "Transaction", coordinate: location.coordinate)
+                Marker(placeName ?? "Transaction", coordinate: location.coordinate)
 
                 if let accuracy = location.accuracy, accuracy > 0 {
                     MapCircle(center: location.coordinate, radius: accuracy)
@@ -70,12 +78,18 @@ struct TransactionLocationCard: View {
         .accessibilityLabel(caption.map { "Location: \($0)" } ?? "Transaction location")
         .accessibilityAddTraits(.isButton)
         .accessibilityHint("Opens in Maps")
+        .task(id: location) {
+            guard location.name == nil else { return }
+            lookedUpName = await PlaceNameLookup.name(
+                for: CLLocation(latitude: location.latitude, longitude: location.longitude)
+            )
+        }
     }
 
     private func openInMaps() {
         let placemark = MKPlacemark(coordinate: location.coordinate)
         let item = MKMapItem(placemark: placemark)
-        item.name = location.name ?? "Transaction"
+        item.name = placeName ?? "Transaction"
         item.openInMaps()
     }
 }

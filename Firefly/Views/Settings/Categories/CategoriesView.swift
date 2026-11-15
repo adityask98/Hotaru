@@ -2,29 +2,31 @@ import SwiftUI
 
 struct CategoriesView: View {
     @StateObject private var viewMModel = CategoriesViewModel()
+    @StateObject private var insightStore = CategoriesInsightStore()
     @State private var didLoadOnce = false
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack {
-                    if viewMModel.isLoading {
-                        LoadingSpinner()
-                    } else if viewMModel.categories == nil, let message = viewMModel.errorMessage {
-                        ErrorStateView(message: message) {
-                            Task { await viewMModel.fetchCategories() }
-                        }
-                        .padding(.top, 80)
-                    } else if viewMModel.categories?.data?.isEmpty == true {
-                        EmptyStateView(message: "No categories yet")
-                    } else if let categories = viewMModel.categories {
-                        Text(formatDateRange(currentMonthFirstDate(), currentMonthLastDate()))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal)
-                        CategoriesBodyView(categories: categories)
+        ScrollView {
+            VStack {
+                if viewMModel.isLoading {
+                    LoadingSpinner()
+                } else if viewMModel.categories == nil, let message = viewMModel.errorMessage {
+                    ErrorStateView(message: message) {
+                        Task { await viewMModel.fetchCategories() }
                     }
+                    .padding(.top, 80)
+                } else if viewMModel.categories?.data?.isEmpty == true {
+                    EmptyStateView(message: "No categories yet")
+                } else if let categories = viewMModel.categories {
+                    Text(formatDateRange(currentMonthFirstDate(), currentMonthLastDate()))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                    CategoriesBodyView(categories: categories)
+                    // Lives here rather than on the dashboard, where it showed
+                    // the same month's category spending as the bar chart
+                    CategoriesDonut(insightStore: insightStore)
                 }
             }
         }
@@ -44,19 +46,17 @@ struct CategoriesBodyView: View {
     @State private var opacity = 0.1
 
     var body: some View {
-        Group {
-            LazyVGrid(
-                columns: [
-                    GridItem(.flexible()),
-                    GridItem(.flexible()),
-                ], alignment: .center, spacing: 10
-            ) {
-                ForEach(categories.data ?? [], id: \.id) {
-                    category in CategoryItem(category: category)
-                }
+        LazyVGrid(
+            columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible()),
+            ], alignment: .center, spacing: 10
+        ) {
+            ForEach(categories.data ?? [], id: \.id) {
+                category in CategoryItem(category: category)
             }
-            .padding()
         }
+        .padding()
         .opacity(opacity)
         .onAppear {
             withAnimation(.easeInOut(duration: 0.2)) {
@@ -70,7 +70,11 @@ struct CategoryItem: View {
     var category: CategoriesDatum
 
     var body: some View {
-        ZStack {
+        // The card itself is the link's label, so VoiceOver reads the category and
+        // the card gets the plain style's press highlight.
+        NavigationLink {
+            CategoryDetailView(category: category)
+        } label: {
             VStack {
                 HStack {
                     Text(category.attributes?.name ?? "Unknown")
@@ -98,10 +102,9 @@ struct CategoryItem: View {
             .frame(width: 175)
             .background(.ultraThinMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 18))
-            NavigationLink(destination: CategoryDetailView(category: category)) {
-                Rectangle().fill(Color.clear).contentShape(Rectangle())
-            }
+            .contentShape(RoundedRectangle(cornerRadius: 18))
         }
+        .buttonStyle(.plain)
         .contextMenu {
             if let categoryID = category.id {
                 WebviewButton(url: WebviewPaths.category(categoryID))
@@ -110,8 +113,12 @@ struct CategoryItem: View {
     }
 
     private func amountColor(for amount: Decimal) -> Color {
-        if amount < 0 { return .red }
-        if amount > 0 { return .green }
+        if amount < 0 {
+            return .red
+        }
+        if amount > 0 {
+            return .green
+        }
         return .secondary
     }
 

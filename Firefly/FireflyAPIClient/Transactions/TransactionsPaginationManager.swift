@@ -18,7 +18,11 @@ protocol TransactionsAPIProvider {
 @MainActor
 class TransactionsPaginationManager: ObservableObject {
     @Published var transactions: Transactions?
+    /// A page-1 load (initial, refresh, filter change). Screens key their
+    /// full-screen spinner / dimming off this, so it excludes load-more.
     @Published var isLoading = false
+    /// A next-page load, shown only by the spinner row at the bottom of the list.
+    @Published var isLoadingMore = false
     @Published var currentPage = 1
     @Published var hasMorePages = true
     @Published var errorMessage: String?
@@ -43,12 +47,12 @@ class TransactionsPaginationManager: ObservableObject {
                 hasMorePages = false
                 return
             }
-            guard !isLoading else { return }
+            guard !isLoading, !isLoadingMore else { return }
             guard let nextURL = transactions?.links?.next else {
                 hasMorePages = false
                 return
             }
-            isLoading = true
+            isLoadingMore = true
             currentPage += 1
             do {
                 let newTransactions = try await apiProvider.getTransactionsFromURL(nextURL)
@@ -60,7 +64,7 @@ class TransactionsPaginationManager: ObservableObject {
                 errorMessage = "Couldn't load more transactions."
                 AppLog.networkError("Failed to fetch transactions", error)
             }
-            isLoading = false
+            isLoadingMore = false
         } else {
             currentPage = 1
             isLoading = true

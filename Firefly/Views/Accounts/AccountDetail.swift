@@ -4,6 +4,7 @@ struct AccountDetail: View {
     @State var account: AccountsDatum
     @StateObject private var viewModel: AccountDetailViewModel
     @Environment(\.openURL) var openURL
+    @AppStorage(UserDefaultKeys.amountHidden) private var amountHidden = false
 
     init(account: AccountsDatum) {
         _account = .init(initialValue: account)
@@ -23,6 +24,7 @@ struct AccountDetail: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .padding(.top, 1)
+                .redacted(reason: amountHidden ? .placeholder : [])
             }
             .padding(.top, 40)
             .padding(.bottom)

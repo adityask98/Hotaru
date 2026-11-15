@@ -1,10 +1,7 @@
 import SwiftUI
 
 struct SearchPage: View {
-    @Environment(\.dismiss) var dismiss
     @StateObject var searchVM = SearchViewModel()
-    @State private var searchText = ""
-    @FocusState private var isSearchFieldFocused: Bool
     @ScaledMetric(relativeTo: .largeTitle) private var promptIconSize: CGFloat = 70
 
     var body: some View {
@@ -49,35 +46,36 @@ struct SearchPage: View {
                     .padding()
                 }
             }
-            .interactiveDismissDisabled(!searchVM.searchText.isEmpty)
             .scrollDismissesKeyboard(.immediately)
             .searchable(text: $searchVM.searchText, placement: .toolbar, prompt: "Search...")
-            .focused($isSearchFieldFocused)
             .onChange(of: searchVM.searchDebouncedText) { _, _ in
                 searchVM.search()
             }
             .navigationTitle("Search")
+            .transactionNavigationDestination()
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        isSearchFieldFocused = false
-                        dismiss()
-                    }
-                }
-            }
         }
+        .transactionNavigationScope()
     }
 }
 
 struct SearchTransactionsView: View {
     var transactions: Transactions
     @State private var transactionsLoaded = false
+    @EnvironmentObject private var pendingDeleteManager: PendingDeleteManager
+
+    /// Hides rows pending delete (swipe/context-menu delete), matching `TransactionsList`.
+    private var visibleTransactions: [TransactionsDatum] {
+        (transactions.data ?? []).filter { datum in
+            guard let id = datum.id else { return true }
+            return !pendingDeleteManager.hiddenIDs.contains(id)
+        }
+    }
 
     var body: some View {
         ScrollView {
             LazyVStack {
-                ForEach(transactions.data ?? [], id: \.id) { transactionData in
+                ForEach(visibleTransactions, id: \.id) { transactionData in
                     TransactionsRow(transaction: transactionData)
                         .animation(
                             .easeIn(duration: 0.3).delay(0.05), value: transactionsLoaded
@@ -87,6 +85,7 @@ struct SearchTransactionsView: View {
                         }
                 }
             }
+            .transactionSwipeActionsContainer()
         }
     }
 }

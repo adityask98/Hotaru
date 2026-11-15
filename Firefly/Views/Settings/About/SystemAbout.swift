@@ -81,7 +81,9 @@ struct SystemAbout: View {
     }
 
     private var statusText: String {
-        if viewModel.isLoading { return "Checking connection…" }
+        if viewModel.isLoading {
+            return "Checking connection…"
+        }
         return viewModel.systemInfo != nil ? "Connected" : "Couldn’t connect"
     }
 

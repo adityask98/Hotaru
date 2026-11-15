@@ -11,6 +11,15 @@ enum UserDefaultKeys {
     static let showSourceBalanceAfter = "ShowSourceBalanceAfter"
     static let showDestinationBalanceAfter = "ShowDestinationBalanceAfter"
     static let attachLocationToTransactions = "AttachLocationToTransactions"
+    static let writeLocationToNotes = "WriteLocationToNotes"
+    /// "Hide balances" toggle on the Accounts tab; read by every view that shows a balance.
+    static let amountHidden = "amountHidden"
+    /// Tab bar shrinks while scrolling down (iOS 26). Defaults to on.
+    static let minimizeTabBarOnScroll = "MinimizeTabBarOnScroll"
+    /// Tab bar shows icons only. Defaults to on.
+    static let hideTabTitles = "HideTabTitles"
+    /// Swipe-to-edit/delete on transaction rows (iOS 27+). Defaults to off.
+    static let transactionRowSwipeActions = "TransactionRowSwipeActions"
 }
 
 enum ApiPaths {
@@ -72,6 +81,28 @@ enum InsightsApiPaths {
 
 enum ChartsApiPaths {
     static let overview = "api/v1/chart/account/overview"
+}
+
+enum SummaryApiPaths {
+    static let basic = "api/v1/summary/basic"
+}
+
+enum BudgetsApiPaths {
+    static let budgets = "api/v1/budgets"
+    /// All budget limits in a date range, in one call (as opposed to
+    /// `/budgets/{id}/limits`, which would need one call per budget)
+    static let budgetLimits = "api/v1/budget-limits"
+}
+
+enum CurrenciesApiPaths {
+    static let primary = "api/v1/currencies/primary"
+    /// Older name for the same endpoint, used as a fallback when `primary` fails.
+    /// Firefly 6.3 renamed it to `primary`, and 6.7 lists it again as an alias.
+    static let legacyDefault = "api/v1/currencies/default"
+}
+
+enum DataExportApiPaths {
+    static let transactions = "api/v1/data/export/transactions"
 }
 
 enum WebviewPaths {

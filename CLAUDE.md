@@ -8,7 +8,7 @@ Hotaru is an unofficial iOS SwiftUI client for [Firefly III](https://github.com/
 a self-hosted personal finance manager. The app talks to a user's Firefly III instance over its REST
 API (often plain HTTP over a self-hosted/Tailscale connection — see `NSAllowsArbitraryLoads` note below).
 
-**`docs/Firefly III 6.6.6.yaml`** is the full OpenAPI spec for the Firefly III API this app talks to.
+**`docs/Firefly III 6.7.2.yaml`** is the full OpenAPI spec for the Firefly III API this app talks to.
 Always check it when adding or changing anything that touches the API — request/response shapes,
 field names, endpoints, enums (transaction types, etc.) should be verified against this spec rather
 than guessed.

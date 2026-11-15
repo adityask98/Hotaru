@@ -63,9 +63,13 @@ class SystemAboutViewModel: ObservableObject {
         fetchTask = Task {
             do {
                 try await performFetch()
-                if Task.isCancelled { return }
+                if Task.isCancelled {
+                    return
+                }
             } catch {
-                if Task.isCancelled { return }
+                if Task.isCancelled {
+                    return
+                }
                 AppLog.networkError("Failed to fetch system info", error)
                 self.errorMessage = error.localizedDescription
                 self.isLoading = false
