@@ -55,9 +55,15 @@ func fetchBudgetProgress(startDate: String, endDate: String) async throws -> [Bu
         var entry = totals[budgetID] ?? BudgetTotals()
         entry.limit += abs(amount)
         entry.spent += spentTotal(for: attributes)
-        if entry.symbol == nil { entry.symbol = attributes.currencySymbol }
-        if entry.decimals == nil { entry.decimals = attributes.currencyDecimalPlaces }
-        if totals[budgetID] == nil { order.append(budgetID) }
+        if entry.symbol == nil {
+            entry.symbol = attributes.currencySymbol
+        }
+        if entry.decimals == nil {
+            entry.decimals = attributes.currencyDecimalPlaces
+        }
+        if totals[budgetID] == nil {
+            order.append(budgetID)
+        }
         totals[budgetID] = entry
     }
 
@@ -65,7 +71,9 @@ func fetchBudgetProgress(startDate: String, endDate: String) async throws -> [Bu
         guard let entry = totals[budgetID] else { return nil }
         let attributes = budgetsByID[budgetID]?.attributes
         // Inactive budgets still return limits; they aren't worth dashboard space
-        if attributes?.active == false { return nil }
+        if attributes?.active == false {
+            return nil
+        }
         return BudgetProgress(
             id: budgetID,
             name: attributes?.name ?? "Budget",
@@ -78,7 +86,9 @@ func fetchBudgetProgress(startDate: String, endDate: String) async throws -> [Bu
     .sorted { lhs, rhs in
         let lhsOrder = budgetsByID[lhs.id]?.attributes?.order ?? Int.max
         let rhsOrder = budgetsByID[rhs.id]?.attributes?.order ?? Int.max
-        if lhsOrder != rhsOrder { return lhsOrder < rhsOrder }
+        if lhsOrder != rhsOrder {
+            return lhsOrder < rhsOrder
+        }
         return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
     }
 }

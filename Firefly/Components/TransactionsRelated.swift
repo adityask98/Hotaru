@@ -1,5 +1,85 @@
 import SwiftUI
 
+// MARK: - Value-based navigation to TransactionDetail
+
+/// Pushed by `TransactionsRow`. `zoomSourceID` is unique per row instance rather than
+/// the transaction id, because the same transaction can be on screen in two stacked
+/// views (Home's recent list and an account's list pushed above it) and the zoom must
+/// return to the row that was actually tapped.
+struct TransactionRoute: Hashable {
+    let transactionID: String
+    let zoomSourceID: String
+}
+
+extension EnvironmentValues {
+    /// Shared by every row in a stack and its detail destination; `nil` outside a stack
+    /// set up with `transactionNavigationScope()`, in which case rows simply don't zoom.
+    @Entry var transactionZoomNamespace: Namespace.ID?
+}
+
+extension View {
+    /// Apply to the `NavigationStack` itself (not its root content) so views pushed
+    /// later — e.g. `AccountDetail`'s transaction list — inherit the namespace too.
+    func transactionNavigationScope() -> some View {
+        modifier(TransactionZoomScope())
+    }
+
+    /// Apply to a `NavigationStack`'s root content, outside any lazy container.
+    /// Registers the single `TransactionDetail` destination for the whole stack.
+    func transactionNavigationDestination() -> some View {
+        modifier(TransactionDestination())
+    }
+
+    /// Zooms from `id` when a namespace is available; a no-op otherwise.
+    @ViewBuilder
+    func zoomTransition(sourceID id: String, in namespace: Namespace.ID?) -> some View {
+        if let namespace {
+            navigationTransition(.zoom(sourceID: id, in: namespace))
+        } else {
+            self
+        }
+    }
+}
+
+private struct TransactionZoomScope: ViewModifier {
+    @Namespace private var namespace
+
+    func body(content: Content) -> some View {
+        content.environment(\.transactionZoomNamespace, namespace)
+    }
+}
+
+private struct TransactionDestination: ViewModifier {
+    @Environment(\.transactionZoomNamespace) private var namespace
+
+    func body(content: Content) -> some View {
+        content.navigationDestination(for: TransactionRoute.self) { route in
+            TransactionDetail(transactionID: route.transactionID)
+                .zoomTransition(sourceID: route.zoomSourceID, in: namespace)
+        }
+    }
+}
+
+/// Enables `TransactionsRow`'s swipe actions in non-`List` stacks (iOS 27+), when the
+/// "Swipe actions" setting is on.
+private struct TransactionSwipeActionsContainer: ViewModifier {
+    @AppStorage(UserDefaultKeys.transactionRowSwipeActions) private var swipeActionsEnabled = false
+
+    func body(content: Content) -> some View {
+        if #available(iOS 27, *), swipeActionsEnabled {
+            content.swipeActionsContainer()
+        } else {
+            content
+        }
+    }
+}
+
+extension View {
+    func transactionSwipeActionsContainer() -> some View {
+        modifier(TransactionSwipeActionsContainer())
+    }
+}
+
 struct TransactionsList: View {
     var transactions: Transactions?
     var hasMorePages: Bool
@@ -16,7 +96,9 @@ struct TransactionsList: View {
 
     var body: some View {
         LazyVStack {
-            if let data = transactions?.data, data.isEmpty {
+            // Checks the visible rows, so hiding the last one (pending delete) shows
+            // the empty state rather than a blank screen
+            if transactions?.data != nil, visibleTransactions.isEmpty {
                 EmptyStateView(message: "No transactions in this period")
             } else {
                 ForEach(visibleTransactions, id: \.id) { transactionData in
@@ -34,6 +116,7 @@ struct TransactionsList: View {
                 }
             }
         }
+        .transactionSwipeActionsContainer()
         .opacity(opacity)
         .onAppear {
             withAnimation(.easeInOut(duration: 0.1)) {
@@ -80,16 +163,16 @@ struct TransactionsRow: View {
     @State private var cloneSheetShown = false
     @State private var deleteAlertShown = false
     @State private var cloneLoading = false
+    @AppStorage(UserDefaultKeys.transactionRowSwipeActions) private var swipeActionsEnabled = false
     @ScaledMetric(relativeTo: .title) private var typeIconFrame: CGFloat = 60
 
-    /// Both ends of the zoom transition live in this view's body, so the namespace
-    /// is scoped here rather than threaded down from each of the row's call sites.
-    @Namespace private var zoomTransition
+    @Environment(\.transactionZoomNamespace) private var zoomNamespace
+    /// Per-row zoom source — see `TransactionRoute`.
+    @State private var zoomSourceID = UUID().uuidString
 
     var body: some View {
         NavigationLink(
-            destination: TransactionDetail(transactionID: transaction.id!)
-                .navigationTransition(.zoom(sourceID: transaction.id ?? "", in: zoomTransition))
+            value: TransactionRoute(transactionID: transaction.id ?? "", zoomSourceID: zoomSourceID)
         ) {
             VStack {
                 HStack {
@@ -156,9 +239,7 @@ struct TransactionsRow: View {
             .cornerRadius(12) // Round the corners
             // Anchored inside the row's padding so the zoom starts from the card's
             // visible bounds rather than the full-width tappable area.
-            .matchedTransitionSource(id: transaction.id ?? "", in: zoomTransition) { source in
-                source.clipShape(RoundedRectangle(cornerRadius: 12))
-            }
+            .zoomSource(id: zoomSourceID, in: zoomNamespace, cornerRadius: 12)
             .padding(.horizontal) // Add horizontal padding to the entire row
             .padding(.vertical, 2)
         }
@@ -169,6 +250,24 @@ struct TransactionsRow: View {
             if animate {
                 withAnimation(.easeInOut(duration: 0.1)) {
                     opacity = 1.0
+                }
+            }
+        }
+        // Only take effect inside a `transactionSwipeActionsContainer()` (iOS 27+); on
+        // older systems rows outside a `List` ignore them and the context menu remains.
+        .swipeActions(edge: .leading) {
+            if swipeActionsEnabled, showContextEditAction {
+                Button("Edit", systemImage: "pencil") {
+                    editSheetShown = true
+                }
+                .tint(.blue)
+            }
+        }
+        .swipeActions(edge: .trailing) {
+            // No confirmation alert: PendingDeleteManager always offers an undo window.
+            if swipeActionsEnabled, showContextDeleteAction, let id = transaction.id {
+                Button("Delete", systemImage: "trash", role: .destructive) {
+                    pendingDeleteManager.scheduleDelete(id: id, title: transaction.transactionTitle)
                 }
             }
         }
@@ -285,6 +384,19 @@ struct TransactionsRow: View {
             return CachedFormatters.weekdayName.string(from: date)
         }
         return CachedFormatters.mediumDate.string(from: date)
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func zoomSource(id: String, in namespace: Namespace.ID?, cornerRadius: CGFloat) -> some View {
+        if let namespace {
+            matchedTransitionSource(id: id, in: namespace) { source in
+                source.clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+            }
+        } else {
+            self
+        }
     }
 }
 

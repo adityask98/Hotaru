@@ -472,6 +472,13 @@ struct PostTransaction: Codable {
 // MARK: - PostTransactionElement
 
 struct PostTransactionElement: Codable {
+    /// Which existing split this is — PUT only, nil on create.
+    ///
+    /// Required on every split when updating a group with more than one: Firefly matches splits by
+    /// this ID, creates a new split for any entry without one, and deletes every existing split the
+    /// request doesn't name (`GroupUpdateService::update`). Leaving it out silently re-creates the
+    /// splits under new IDs, dropping anything attached to the old ones.
+    var transactionJournalID: String?
     var type, date, amount, description: String?
     var order: Int?
     var currencyID, currencyCode, foreignAmount, foreignCurrencyID: String?
@@ -486,9 +493,18 @@ struct PostTransactionElement: Codable {
     var sepaDB, sepaCountry, sepaEp, sepaCi: String?
     var sepaBatchID, interestDate, bookDate, processDate: String?
     var dueDate, paymentDate, invoiceDate: String?
-    var latitude, longitude: String?
+
+    /// Doubly optional so a PUT can tell "leave the location alone" from "delete it": the outer
+    /// `nil` omits the key (server keeps its location), `.some(nil)` sends an explicit JSON `null`
+    /// (all three null deletes it). Set these via `TransactionLocation.apply(to:)` / `.clear(on:)`.
+    ///
+    /// Firefly only stores a location on POST when all three are present — see
+    /// `TransactionLocation.nativeZoomLevel`.
+    var latitude, longitude: Double??
+    var zoomLevel: Int??
 
     enum CodingKeys: String, CodingKey {
+        case transactionJournalID = "transaction_journal_id"
         case type, date, amount, description, order
         case currencyID = "currency_id"
         case currencyCode = "currency_code"
@@ -527,6 +543,7 @@ struct PostTransactionElement: Codable {
         case paymentDate = "payment_date"
         case invoiceDate = "invoice_date"
         case latitude, longitude
+        case zoomLevel = "zoom_level"
     }
 }
 

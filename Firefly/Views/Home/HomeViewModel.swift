@@ -45,10 +45,18 @@ final class HomeViewModel: ObservableObject {
         // Range-scoped sections show a spinner when the period changes, since the
         // values on screen belong to a different period. A same-range refresh
         // keeps them visible instead of flashing.
-        if rangeChanged || !summary.hasValue { summary = .loading }
-        if rangeChanged || !budgets.hasValue { budgets = .loading }
-        if !accounts.hasValue { accounts = .loading }
-        if !recentTransactions.hasValue { recentTransactions = .loading }
+        if rangeChanged || !summary.hasValue {
+            summary = .loading
+        }
+        if rangeChanged || !budgets.hasValue {
+            budgets = .loading
+        }
+        if !accounts.hasValue {
+            accounts = .loading
+        }
+        if !recentTransactions.hasValue {
+            recentTransactions = .loading
+        }
 
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.loadSummary(range: range) }

@@ -44,12 +44,10 @@ class SceneDelegate: NSObject, UIWindowSceneDelegate {
         performActionFor shortcutItem: UIApplicationShortcutItem,
         completionHandler: @escaping (Bool) -> Void
     ) {
-        if shortcutItem.type == "addTransaction" {
-            if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
-                appDelegate.menuViewModel?.openTransactionSheet()
-                completionHandler(true)
-                return
-            }
+        if shortcutItem.type == "addTransaction", let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            appDelegate.menuViewModel?.openTransactionSheet()
+            completionHandler(true)
+            return
         }
         completionHandler(false)
     }

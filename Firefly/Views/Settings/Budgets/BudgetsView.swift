@@ -4,10 +4,8 @@ struct BudgetsView: View {
     @Environment(\.openURL) var openURL
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack {}
-            }
+        ScrollView {
+            VStack {}
         }
         .navigationTitle("Budgets")
         .toolbar {

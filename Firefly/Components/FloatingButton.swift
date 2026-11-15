@@ -44,14 +44,17 @@ public struct FloatingButton: View {
             action()
         }) {
             Image(systemName: imageSystemName)
-                .font(.system(size: fontSize * typeScale))
-                .fontWeight(fontWeight)
-                .foregroundColor(foregroundColor)
-                .frame(width: fontSize * typeScale, height: fontSize * typeScale)
-                .padding(padding)
-                .background(backgroundColor)
-                .clipShape(Circle())
-                .shadow(radius: shadowRadius)
+                // Morphs between symbols (e.g. the Accounts eye toggle) when the
+                // caller changes `imageSystemName` inside `withAnimation`
+                    .contentTransition(.symbolEffect(.replace))
+                    .font(.system(size: fontSize * typeScale))
+                    .fontWeight(fontWeight)
+                    .foregroundColor(foregroundColor)
+                    .frame(width: fontSize * typeScale, height: fontSize * typeScale)
+                    .padding(padding)
+                    .background(backgroundColor)
+                    .clipShape(Circle())
+                    .shadow(radius: shadowRadius)
         }
         .glassEffect(.regular.interactive())
         .buttonStyle(PlainButtonStyle())

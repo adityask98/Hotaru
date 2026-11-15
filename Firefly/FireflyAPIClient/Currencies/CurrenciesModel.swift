@@ -35,8 +35,9 @@ struct CurrencyAttributes: Codable {
 /// summary's per-currency figures leads the dashboard.
 ///
 /// Firefly III renamed this endpoint from `/currencies/default` to
-/// `/currencies/primary` in 6.3; the older path is tried when the newer one 404s
-/// so the app keeps working against older self-hosted instances. Callers should
+/// `/currencies/primary` in 6.3 (6.7 lists `/default` again as an alias). The
+/// older path is tried when the newer one fails, in case the server predates the
+/// rename. Callers should
 /// treat a failure here as non-fatal — the dashboard falls back to the busiest
 /// currency in the summary.
 func fetchPrimaryCurrency() async throws -> CurrencyAttributes? {

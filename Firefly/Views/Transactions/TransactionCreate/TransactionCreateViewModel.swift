@@ -32,14 +32,20 @@ class DescriptionInputViewModel: ObservableObject {
     func fetch() {
         fetchTask?.cancel()
 
-        if debouncedText.isEmpty { return }
+        if debouncedText.isEmpty {
+            return
+        }
 
         fetchTask = Task {
             do {
                 try await performFetch()
-                if Task.isCancelled { return }
+                if Task.isCancelled {
+                    return
+                }
             } catch {
-                if Task.isCancelled { return }
+                if Task.isCancelled {
+                    return
+                }
             }
         }
     }

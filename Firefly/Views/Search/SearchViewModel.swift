@@ -35,9 +35,13 @@ class SearchViewModel: ObservableObject {
         searchTask = Task {
             do {
                 try await performSearch()
-                if Task.isCancelled { return }
+                if Task.isCancelled {
+                    return
+                }
             } catch {
-                if Task.isCancelled { return }
+                if Task.isCancelled {
+                    return
+                }
                 errorMessage = "Search failed: \(error.localizedDescription)"
                 isLoading = false
             }

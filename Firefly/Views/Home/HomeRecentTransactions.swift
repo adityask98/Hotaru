@@ -40,6 +40,7 @@ struct HomeRecentTransactions: View {
                             TransactionsRow(transaction: transaction)
                         }
                     }
+                    .transactionSwipeActionsContainer()
                 }
             }
         }

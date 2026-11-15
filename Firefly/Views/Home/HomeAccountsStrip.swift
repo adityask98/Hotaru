@@ -28,11 +28,7 @@ struct HomeAccountsStrip: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         LazyHStack(spacing: 12) {
                             ForEach(accounts, id: \.id) { account in
-                                AccountItem(
-                                    account: account,
-                                    amountHidden: .constant(false),
-                                    namespace: accountTransition
-                                )
+                                AccountItem(account: account, namespace: accountTransition, fixedWidth: 175)
                             }
                         }
                         .padding(.horizontal)

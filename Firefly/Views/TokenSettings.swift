@@ -9,6 +9,10 @@ struct TokenSettings: View {
     @State private var showToast = false
     @State private var toastParams = AlertToast(displayMode: .alert, type: .regular)
 
+    /// First-run mode: no token/URL is stored yet, so the app can't do anything without
+    /// them. Hides Cancel and blocks swipe-to-dismiss; a successful save still dismisses.
+    var requiresCredentials = false
+
     var body: some View {
         VStack(spacing: 0) {
             header
@@ -27,6 +31,7 @@ struct TokenSettings: View {
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
         .presentationCornerRadius(24)
+        .interactiveDismissDisabled(requiresCredentials)
         .toast(isPresenting: $showToast, tapToDismiss: false) {
             toastParams
         }
@@ -40,8 +45,10 @@ struct TokenSettings: View {
                 .font(.system(size: 17, weight: .semibold))
 
             HStack {
-                Button("Cancel") { dismiss() }
-                    .foregroundStyle(Color.accentColor)
+                if !requiresCredentials {
+                    Button("Cancel") { dismiss() }
+                        .foregroundStyle(Color.accentColor)
+                }
 
                 Spacer()
 

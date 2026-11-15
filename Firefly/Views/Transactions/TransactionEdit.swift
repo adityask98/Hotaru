@@ -18,17 +18,22 @@ struct TransactionEdit: View {
     @State private var toastParams = AlertToast(displayMode: .alert, type: .regular)
     @State private var autocompleteLoading = true
 
-    /// The location marker each split arrived with, keyed by split index, held aside while the user
-    /// edits so they never see it in the notes field — and re-applied on save so editing a
-    /// transaction doesn't silently discard where it happened. Splits can't be added or removed here,
-    /// so the indices stay aligned with `postTransactionData.transactions`.
-    @State private var preservedLocations: [TransactionLocation?]
+    @AppStorage(UserDefaultKeys.writeLocationToNotes) private var writeLocationToNotes = false
+
+    /// Each split's location as it arrived (native coordinates, else the notes marker), keyed by
+    /// split index. Shown in the editor, and written back as a notes marker on save when
+    /// `writeLocationToNotes` is on. Splits can't be added or removed here, so the indices stay
+    /// aligned with `postTransactionData.transactions`.
+    @State private var locations: [TransactionLocation?]
+
+    /// Split indices whose location the user has asked to delete.
+    @State private var removedLocations: Set<Int> = []
 
     init(transactionData: TransactionsDatum) {
         _transactionData = State(initialValue: transactionData)
-        _preservedLocations = State(
+        _locations = State(
             initialValue: (transactionData.attributes?.transactions ?? []).map {
-                TransactionLocation.parse(from: $0.notes)
+                TransactionLocation.resolve(for: $0)
             }
         )
         _postTransactionData = State(
@@ -36,8 +41,8 @@ struct TransactionEdit: View {
                 errorIfDuplicateHash: true, applyRules: true, fireWebhooks: true,
                 groupTitle: transactionData.attributes?.groupTitle,
                 transactions: transactionData.attributes?.transactions?.map { transaction in
-                    let native = TransactionLocation.fromNativeFields(transaction)
-                    return PostTransactionElement(
+                    var element = PostTransactionElement(
+                        transactionJournalID: transaction.transactionJournalID,
                         type: transaction.type?.lowercased(),
                         date: transaction.date,
                         amount: formatAmountForTextField(
@@ -51,13 +56,21 @@ struct TransactionEdit: View {
                         sourceName: transaction.sourceName,
                         destinationID: transaction.destinationID,
                         destinationName: transaction.destinationName,
-                        // Hide our own marker from the notes editor; it's restored on save.
-                        notes: TransactionLocation.strip(from: transaction.notes),
-                        // Echo back whatever the server gave us, so a PUT doesn't clear a native
-                        // location on any server that actually supports these.
-                        latitude: native?.nativeLatitude,
-                        longitude: native?.nativeLongitude
+                        // Hide our own marker from the notes editor; it's restored on save if
+                        // `writeLocationToNotes` is on.
+                        notes: TransactionLocation.strip(from: transaction.notes)
                     )
+
+                    // Echo back the native location with the server's own zoom. Failing that, send
+                    // the notes marker's location as native fields so an edit upgrades the
+                    // transaction — PUT stores these on Firefly 6.7.0+ and is ignored before that.
+                    if let native = TransactionLocation.fromNativeFields(transaction) {
+                        native.apply(to: &element, zoomLevel: transaction.zoomLevel)
+                    } else {
+                        TransactionLocation.parse(from: transaction.notes)?.apply(to: &element)
+                    }
+
+                    return element
                 }
             )
         )
@@ -226,6 +239,9 @@ struct TransactionEdit: View {
                             ), axis: .vertical
                         ).lineLimit(5)
 
+                        if index < locations.count, let location = locations[index] {
+                            locationRow(location, index: index)
+                        }
                     } header: {
                         HStack {
                             Text("Details")
@@ -242,7 +258,7 @@ struct TransactionEdit: View {
                 content: {
                     PrimaryButton(
                         icon: "square.and.pencil", label: "Edit Transaction", fullWidth: true,
-                        disabled: submitLoading,
+                        loading: submitLoading,
                         action: {
                             Task {
                                 do {
@@ -291,20 +307,68 @@ struct TransactionEdit: View {
         }
     }
 
-    /// Puts each split's location marker back on the end of its notes before saving.
+    // MARK: - Location
+
+    private func locationRow(_ location: TransactionLocation, index: Int) -> some View {
+        let isRemoved = removedLocations.contains(index)
+
+        return HStack {
+            Label {
+                Text(location.name ?? Self.coordinateText(location))
+                    .strikethrough(isRemoved)
+                    .lineLimit(1)
+            } icon: {
+                Image(systemName: isRemoved ? "location.slash" : "location.fill")
+            }
+            .foregroundStyle(isRemoved ? .secondary : .primary)
+
+            Spacer()
+
+            if isRemoved {
+                Button("Undo") { removedLocations.remove(index) }
+            } else {
+                Button("Remove", role: .destructive) { removedLocations.insert(index) }
+            }
+        }
+        .buttonStyle(.borderless)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(isRemoved ? "Location will be removed" : "Location")
+    }
+
+    private static func coordinateText(_ location: TransactionLocation) -> String {
+        String(format: "%.5f, %.5f", location.latitude, location.longitude)
+    }
+
+    /// Applies location removals and, if enabled, the notes marker to each split before saving.
     ///
     /// `appended(to:)` strips any existing marker first, so this can't stack duplicates even if the
     /// user pasted one in by hand.
-    private func payloadWithLocationsRestored() -> PostTransaction {
+    private func payloadWithLocations() -> PostTransaction {
         var payload = postTransactionData
 
         guard var splits = payload.transactions else { return payload }
 
-        for index in splits.indices {
-            guard index < preservedLocations.count,
-                  let location = preservedLocations[index] else { continue }
+        let originals = transactionData.attributes?.transactions ?? []
 
-            splits[index].notes = location.appended(to: splits[index].notes ?? "")
+        for index in splits.indices {
+            let original = index < originals.count ? originals[index] : nil
+            let location = index < locations.count ? locations[index] : nil
+            var notes = splits[index].notes
+
+            if removedLocations.contains(index) {
+                TransactionLocation.clear(on: &splits[index])
+            } else if writeLocationToNotes, let location {
+                notes = location.appended(to: notes ?? "")
+            }
+
+            // The editor shows notes with the marker stripped, and a marker-only note arrives as
+            // nil — which the encoder would omit, leaving the server's marker in place. Send it
+            // explicitly whenever the original had a marker so dropping it actually sticks.
+            if notes == nil, TransactionLocation.parse(from: original?.notes) != nil {
+                notes = ""
+            }
+
+            splits[index].notes = notes
         }
 
         payload.transactions = splits
@@ -315,7 +379,7 @@ struct TransactionEdit: View {
         submitLoading = true
         do {
             try await editTransaction(
-                transactionData: payloadWithLocationsRestored(), transactionID: transactionData.id!
+                transactionData: payloadWithLocations(), transactionID: transactionData.id!
             )
             NotificationCenter.default.post(
                 name: AppNotifications.transactionUpdated, object: nil,
@@ -339,12 +403,6 @@ struct AccountPicker: View {
     @Binding var selectedAccountID: String
 
     var body: some View {
-        Picker(title, selection: $selectedAccountID) {
-            Text("Select an account").tag("")
-            ForEach(accounts, id: \.id) { account in
-                Text(account.name ?? "Unnamed Account")
-                    .tag(account.id ?? "")
-            }
-        }
+        AccountSelectorRow(title: title, accounts: accounts, selectedID: $selectedAccountID)
     }
 }

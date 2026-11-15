@@ -28,32 +28,53 @@ struct RootView: View {
     @State private var hasCheckedToken = false
     @State private var searchText = ""
     @AppStorage("tabViewLast") var tabViewLast = 1
+    @AppStorage(UserDefaultKeys.minimizeTabBarOnScroll) private var minimizeTabBarOnScroll = true
+    @AppStorage(UserDefaultKeys.hideTabTitles) private var hideTabTitles = true
 
     var body: some View {
         TabView(
             selection: $tabViewLast,
             content: {
-                Tab("Home", systemImage: "chart.bar.yaxis", value: 1) {
+                Tab(value: 1) {
                     HomeView()
+                } label: {
+                    tabLabel("Home", systemImage: "chart.bar.yaxis")
                 }
-                Tab("Transactions", systemImage: "list.bullet.circle.fill", value: 2) {
+                Tab(value: 2) {
                     TransactionsView()
+                } label: {
+                    tabLabel("Transactions", systemImage: "list.bullet.circle.fill")
                 }
-                Tab("Accounts", systemImage: "creditcard.fill", value: 3) {
+                Tab(value: 3) {
                     AccountsView()
+                } label: {
+                    tabLabel("Accounts", systemImage: "creditcard.fill")
                 }
-                Tab("Settings", systemImage: "gearshape.fill", value: 4) {
+                Tab(value: 4) {
                     Settings()
+                } label: {
+                    tabLabel("Settings", systemImage: "gearshape.fill")
                 }
                 Tab(value: 5, role: .search) {
                     SearchPage()
+                } label: {
+                    // Explicit label so "Hide tab titles" applies here too; without one
+                    // the system supplies its own "Search" title.
+                    tabLabel("Search", systemImage: "magnifyingglass")
                 }
             }
         )
-        // .searchable(text: $searchText, prompt: "Search transactions")
-        //    .tabBarMinimizeBehavior(.onScrollDown)
-        .sheet(isPresented: $tokenSheetShown) {
-                TokenSettings().environmentObject(AlertViewModel())
+        // Rebuild the tab bar when "Hide tab titles" changes: switching a Tab's label from
+        // Label back to a bare Image doesn't clear the title the bar item already has.
+        // Resets each tab's navigation state; the selected tab persists via `tabViewLast`.
+        .id(hideTabTitles)
+            // .searchable(text: $searchText, prompt: "Search transactions")
+            .tabBarMinimizeBehavior(minimizeTabBarOnScroll ? .onScrollDown : .never)
+            .sheet(isPresented: $tokenSheetShown) {
+                // Only lock the sheet when credentials are genuinely missing — a failed
+                // check against a server that's merely unreachable must stay dismissable.
+                TokenSettings(requiresCredentials: credentialsMissing)
+                    .environmentObject(AlertViewModel())
             }
             .sheet(isPresented: $menuViewModel.transactionSheetShown) {
                 TransactionCreate().background(.ultraThinMaterial)
@@ -86,6 +107,27 @@ struct RootView: View {
                 }
             }
             .animation(.spring(duration: 0.35), value: pendingDeleteManager.pending)
+    }
+
+    /// Icon-only when "Hide tab titles" is on; the title stays as the VoiceOver label.
+    @ViewBuilder
+    private func tabLabel(_ title: String, systemImage: String) -> some View {
+        if hideTabTitles {
+            Image(systemName: systemImage)
+                .accessibilityLabel(title)
+        } else {
+            Label(title, systemImage: systemImage)
+        }
+    }
+
+    private var credentialsMissing: Bool {
+        let token = KeychainHelper.standard.read(
+            service: KeychainConsts.accessToken,
+            account: KeychainConsts.account,
+            type: TokenObject.self
+        )?.accessToken ?? ""
+        let baseURL = UserDefaults.standard.string(forKey: UserDefaultKeys.baseURLKey) ?? ""
+        return token.isEmpty || baseURL.isEmpty
     }
 
     private func checkToken() async throws {

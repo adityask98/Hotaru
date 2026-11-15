@@ -1,13 +1,15 @@
 import CoreLocation
 import Foundation
 
-/// A location attached to a transaction, encoded as a marker line inside the transaction's `notes`.
+/// A location attached to a transaction.
 ///
-/// Firefly III's API returns `latitude`/`longitude`/`zoom_level` on transactions but its POST/PUT
-/// schemas don't define them (see `docs/Firefly III 6.6.6.yaml` — `TransactionSplit` has them,
-/// `TransactionSplitStore`/`TransactionSplitUpdate` do not), so there is no supported way to set a
-/// location when creating a transaction. This type is the stopgap: it round-trips a location through
-/// the notes field instead.
+/// Saved in Firefly's native `latitude`/`longitude`/`zoom_level` fields — the spec only lists them
+/// on the read schema (`TransactionSplit` in `docs/Firefly III 6.7.2.yaml`), but the server accepts
+/// them on POST and PUT too; see "Firefly's native fields" below.
+///
+/// It can also be encoded as a marker line inside the transaction's `notes` — the workaround from
+/// before the native fields were known to work. Writing the marker is opt-in
+/// (`AppSettings.writeLocationToNotes`); reading it is not, so older transactions keep their location.
 ///
 /// The marker is appended as the final line of the notes, separated by a blank line:
 ///
@@ -185,23 +187,36 @@ extension TransactionLocation {
 // MARK: - Firefly's native fields
 
 extension TransactionLocation {
-    /// The value for Firefly's native `latitude`/`longitude` string fields on a transaction POST/PUT.
+    /// The zoom level sent with a location we captured ourselves.
     ///
-    /// The 6.6.6 spec doesn't define these on the write schemas, so the server is expected to drop
-    /// them — we send them anyway because it costs nothing, and any server that does honour them
-    /// gets a real location without needing the notes marker at all.
-    var nativeLatitude: String {
-        Self.format(latitude)
+    /// The spec leaves `latitude`/`longitude`/`zoom_level` off the write schemas, but the server
+    /// accepts them anyway: POST has stored them since before 6.6.6, and PUT since 6.7.0. On create,
+    /// though, `TransactionJournalFactory::storeLocation` saves nothing unless **all three** are
+    /// non-null, and it doesn't return an error. Zoom is only used to frame a map in Firefly's web
+    /// UI (valid range 0–80); 15 is roughly street level there.
+    static let nativeZoomLevel = 15
+
+    /// Copies this location into Firefly's native fields on an outgoing split.
+    ///
+    /// `zoomLevel` defaults to `nativeZoomLevel`; pass the server's own value when echoing back a
+    /// location it already has, so an edit doesn't reframe the web UI's map.
+    func apply(to element: inout PostTransactionElement, zoomLevel: Int? = nil) {
+        element.latitude = latitude
+        element.longitude = longitude
+        element.zoomLevel = zoomLevel ?? Self.nativeZoomLevel
     }
 
-    var nativeLongitude: String {
-        Self.format(longitude)
+    /// Marks an outgoing split's location for deletion: all three fields as explicit JSON `null`,
+    /// which `JournalUpdateService::updateLocation` treats as "delete" (6.7.0+).
+    static func clear(on element: inout PostTransactionElement) {
+        element.latitude = .some(nil)
+        element.longitude = .some(nil)
+        element.zoomLevel = .some(nil)
     }
 
     /// Reads Firefly's native location fields off a fetched transaction, if the server populated them.
     ///
-    /// Preferred over `parse(from:)` at read time so the app upgrades for free if Firefly ever ships
-    /// real write support.
+    /// Carries only coordinates — Firefly doesn't store accuracy or a place name. See `resolve(for:)`.
     static func fromNativeFields(_ transaction: TransactionsTransaction?) -> TransactionLocation? {
         guard let latitude = transaction?.latitude, let longitude = transaction?.longitude else {
             return nil
@@ -212,8 +227,29 @@ extension TransactionLocation {
         )
     }
 
-    /// The location for a fetched transaction: Firefly's own fields if present, else our marker.
+    /// How far apart the native location and the notes marker can be and still count as the same
+    /// place. They normally differ only by the marker's 6-decimal rounding; anything further means
+    /// the location was moved elsewhere (e.g. in the web UI) and the marker's name is stale.
+    private static let sameLocationTolerance: CLLocationDistance = 100
+
+    /// The location for a fetched transaction.
+    ///
+    /// Firefly's own coordinates win when present, falling back to the notes marker. When both exist
+    /// and agree, the marker's accuracy and place name are kept alongside the native coordinates.
     static func resolve(for transaction: TransactionsTransaction?) -> TransactionLocation? {
-        fromNativeFields(transaction) ?? parse(from: transaction?.notes)
+        let marker = parse(from: transaction?.notes)
+
+        guard let native = fromNativeFields(transaction) else { return marker }
+        guard let marker, native.distance(to: marker) <= sameLocationTolerance else { return native }
+
+        return TransactionLocation(
+            latitude: native.latitude, longitude: native.longitude,
+            accuracy: marker.accuracy, name: marker.name
+        )
+    }
+
+    private func distance(to other: TransactionLocation) -> CLLocationDistance {
+        CLLocation(latitude: latitude, longitude: longitude)
+            .distance(from: CLLocation(latitude: other.latitude, longitude: other.longitude))
     }
 }

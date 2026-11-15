@@ -25,6 +25,10 @@ struct TransactionsView: View {
     @State var addSheetShown = false
     @State private var filterExpanded = false
     @State private var dateRangeEditing = false
+    /// Dims the list while an explicitly applied filter loads, so the old results
+    /// don't read as the new ones. Pull-to-refresh, background refreshes and
+    /// load-more leave the list at full opacity.
+    @State private var isApplyingFilter = false
     @EnvironmentObject var menuViewModel: MenuViewModel
 
     var body: some View {
@@ -59,8 +63,8 @@ struct TransactionsView: View {
                     // .listRowSpacing(-10)
                     .listStyle(PlainListStyle())
                     .background(Color.clear)
-                    .opacity(transactions.isLoading ? 0.5 : 1)
-                    .animation(.easeInOut(duration: 0.2), value: transactions.isLoading)
+                    .opacity(isApplyingFilter ? 0.5 : 1)
+                    .animation(.easeInOut(duration: 0.2), value: isApplyingFilter)
                     .refreshable {
                         // Await directly so the system refresh indicator stays up
                         // until the new data has actually arrived
@@ -92,6 +96,7 @@ struct TransactionsView: View {
                 Task { await transactions.fetchTransactions() }
             }
             .navigationTitle("Transactions")
+            .transactionNavigationDestination()
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem {
@@ -109,6 +114,7 @@ struct TransactionsView: View {
                 }
             }
         }
+        .transactionNavigationScope()
         .overlay(alignment: .bottomTrailing) {
             FloatingButton(action: {
                 addSheetShown = true
@@ -281,9 +287,11 @@ struct TransactionsView: View {
         }
     }
 
-    private func applyDateFilter(isRefreshing: Bool = false) {
+    private func applyDateFilter() {
         Task {
+            isApplyingFilter = true
             await transactions.fetchTransactions()
+            isApplyingFilter = false
         }
         withAnimation {
             filterExpanded = false

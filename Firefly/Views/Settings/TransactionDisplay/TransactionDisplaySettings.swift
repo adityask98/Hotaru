@@ -3,6 +3,7 @@ import SwiftUI
 struct TransactionDisplaySettings: View {
     @AppStorage(UserDefaultKeys.showSourceBalanceAfter) private var showSourceBalanceAfter = false
     @AppStorage(UserDefaultKeys.showDestinationBalanceAfter) private var showDestinationBalanceAfter = false
+    @AppStorage(UserDefaultKeys.transactionRowSwipeActions) private var transactionRowSwipeActions = false
 
     var body: some View {
         ScrollView {
@@ -21,6 +22,16 @@ struct TransactionDisplaySettings: View {
                     caption: "Show the destination account's balance right after this transaction",
                     isOn: $showDestinationBalanceAfter
                 )
+                // Swipe actions on non-List rows need iOS 27; hide a toggle that would do nothing.
+                if #available(iOS 27, *) {
+                    toggleRow(
+                        icon: "hand.draw.fill",
+                        tint: .orange,
+                        title: "Swipe Actions",
+                        caption: "Swipe a transaction right to edit it, or left to delete it",
+                        isOn: $transactionRowSwipeActions
+                    )
+                }
             }
             .padding(16)
         }

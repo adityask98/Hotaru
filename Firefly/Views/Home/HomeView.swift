@@ -46,6 +46,7 @@ struct HomeView: View {
                 await refreshAll()
             }
             .navigationTitle("Home")
+            .transactionNavigationDestination()
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink {
@@ -84,6 +85,7 @@ struct HomeView: View {
                 Task { await refreshAll() }
             }
         }
+        .transactionNavigationScope()
         .overlay(alignment: .bottomTrailing) {
             FloatingButton(action: {
                 menuViewModel.openTransactionSheet()

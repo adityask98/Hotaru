@@ -13,7 +13,7 @@ struct BasicSummaryEntry: Codable {
     let currencyID, currencyCode, currencySymbol: String?
     let currencyDecimalPlaces: Int?
     let noAvailableBudgets: Bool?
-    let valueParsed, localIcon, subTitle: String?
+    let valueParsed, subTitle: String?
 
     enum CodingKeys: String, CodingKey {
         case key, title
@@ -24,7 +24,6 @@ struct BasicSummaryEntry: Codable {
         case currencyDecimalPlaces = "currency_decimal_places"
         case noAvailableBudgets = "no_available_budgets"
         case valueParsed = "value_parsed"
-        case localIcon = "local_icon"
         case subTitle = "sub_title"
     }
 
@@ -43,7 +42,6 @@ struct BasicSummaryEntry: Codable {
         currencyDecimalPlaces = try container.decodeFlexibleInt(forKey: .currencyDecimalPlaces)
         noAvailableBudgets = try container.decodeIfPresent(Bool.self, forKey: .noAvailableBudgets)
         valueParsed = try container.decodeIfPresent(String.self, forKey: .valueParsed)
-        localIcon = try container.decodeIfPresent(String.self, forKey: .localIcon)
         subTitle = try container.decodeIfPresent(String.self, forKey: .subTitle)
     }
 }

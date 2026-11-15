@@ -14,7 +14,6 @@ class AccountsViewModel: ObservableObject {
     @Published var currentPage = 1
     @Published var hasMorePages = true
     @Published var errorMessage: String?
-    @AppStorage("amountHidden") var amountHidden = false
     private var fetchTask: Task<Void, Never>?
 
     func fetchAccounts(loadMore: Bool = false) async {
@@ -60,7 +59,9 @@ class AccountsViewModel: ObservableObject {
                 hasMorePages = false
             }
         } catch {
-            if Task.isCancelled { return }
+            if Task.isCancelled {
+                return
+            }
             errorMessage = "Couldn't load accounts."
             AppLog.networkError("Failed to fetch accounts", error)
         }
@@ -97,10 +98,6 @@ class AccountsViewModel: ObservableObject {
             AppLog.networkError("Failed to decode accounts", error)
             throw AccountsModelError.invalidData
         }
-    }
-
-    func toggleAmountVisibility() {
-        amountHidden.toggle()
     }
 }
 

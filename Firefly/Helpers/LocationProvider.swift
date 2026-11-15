@@ -65,7 +65,7 @@ final class LocationProvider: NSObject, ObservableObject, CLLocationManagerDeleg
         }
 
         let accuracy = location.horizontalAccuracy
-        let name = await placeName(for: location)
+        let name = await PlaceNameLookup.name(for: location)
 
         return .success(
             TransactionLocation(
@@ -137,25 +137,6 @@ final class LocationProvider: NSObject, ObservableObject, CLLocationManagerDeleg
         continuation.resume(returning: isUsable ? location : nil)
     }
 
-    // MARK: - Reverse geocoding
-
-    /// Best-effort place name. Failure is expected and fine — the marker simply omits the name.
-    private func placeName(for location: CLLocation) async -> String? {
-        guard let placemark = try? await CLGeocoder().reverseGeocodeLocation(location).first else {
-            return nil
-        }
-
-        // `name` is usually the POI or street address; pairing it with the locality gives something
-        // recognisable without turning into a full postal address.
-        let parts = [placemark.name ?? placemark.thoroughfare, placemark.locality]
-            .compactMap(\.self)
-            .reduce(into: [String]()) { result, part in
-                if !result.contains(part) { result.append(part) }
-            }
-
-        return parts.isEmpty ? nil : parts.joined(separator: ", ")
-    }
-
     // MARK: - CLLocationManagerDelegate
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
@@ -173,5 +154,51 @@ final class LocationProvider: NSObject, ObservableObject, CLLocationManagerDeleg
     func locationManager(_: CLLocationManager, didFailWithError error: Error) {
         AppLog.appError("Failed to get location for transaction", error)
         finishLocation(with: nil)
+    }
+}
+
+/// Reverse-geocodes coordinates into a short, recognisable place name.
+///
+/// Used at capture time (the name goes into the notes marker when that's enabled) and at display time
+/// for locations that arrive with coordinates only — Firefly's native fields have no name.
+///
+/// Apple rate-limits geocoding per app, so successful results are cached in memory for the session;
+/// the detail screen can be reopened without asking again. Failures aren't cached, so a lookup that
+/// failed offline or while throttled is retried next time.
+@MainActor
+enum PlaceNameLookup {
+    private static var cache: [String: String] = [:]
+
+    /// Best-effort place name. Failure is expected and fine — callers simply show no name.
+    static func name(for location: CLLocation) async -> String? {
+        // 5 decimals (~1 m) so re-reads of the same stored coordinate hit the cache even after the
+        // round-trip through Firefly's own formatting.
+        let key = String(
+            format: "%.5f,%.5f", location.coordinate.latitude, location.coordinate.longitude
+        )
+
+        if let cached = cache[key] {
+            return cached
+        }
+
+        guard let placemark = try? await CLGeocoder().reverseGeocodeLocation(location).first else {
+            return nil
+        }
+
+        // `name` is usually the POI or street address; pairing it with the locality gives something
+        // recognisable without turning into a full postal address.
+        let parts = [placemark.name ?? placemark.thoroughfare, placemark.locality]
+            .compactMap(\.self)
+            .reduce(into: [String]()) { result, part in
+                if !result.contains(part) {
+                    result.append(part)
+                }
+            }
+
+        guard !parts.isEmpty else { return nil }
+
+        let name = parts.joined(separator: ", ")
+        cache[key] = name
+        return name
     }
 }
